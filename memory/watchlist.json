@@ -182,5 +182,31 @@
     "recheck_count": 0,
     "status": "watchlist",
     "why_watchlist": "Score 42 \u2014 promising but limited info at launch time"
+  },
+  "substack": {
+    "name": "Substack",
+    "description": "Newsletter and subscription platform. Writers publish and monetise newsletters directly to subscribers. Huge creator economy platform.",
+    "source": "Manual List",
+    "source_url": "https://substack.com",
+    "initial_score": 55,
+    "initial_reason": "Major established newsletter platform with millions of users but lacks affiliate program and takes percentage of creator revenue rather than charging subscription fees, limiting monetization opportunity for affiliate site.",
+    "discovered_date": "2026-03-06",
+    "recheck_date": "2026-03-08",
+    "recheck_count": 0,
+    "status": "watchlist",
+    "why_watchlist": "Score 55 \u2014 promising but limited info at launch time"
+  },
+  "writesonic": {
+    "name": "Writesonic",
+    "description": "AI writing platform for blogs, ads, social media and SEO content. Includes Chatsonic AI assistant. Competing with Jasper at lower price point.",
+    "source": "Manual List",
+    "source_url": "https://writesonic.com",
+    "initial_score": 58,
+    "initial_reason": "Established AI writing SaaS with clear pricing and creator focus, but operates in extremely saturated market with limited differentiation from competitors like Jasper, Copy.ai, and others.",
+    "discovered_date": "2026-03-06",
+    "recheck_date": "2026-03-08",
+    "recheck_count": 0,
+    "status": "watchlist",
+    "why_watchlist": "Score 58 \u2014 promising but limited info at launch time"
   }
 }

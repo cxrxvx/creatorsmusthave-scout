@@ -3,150 +3,150 @@
     "name": "Canva",
     "description": "Online graphic design platform for creators. Make social media graphics, presentations, videos, posters and more. Has a Pro subscription with affiliate program.",
     "website": "canva.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Descript",
     "description": "All-in-one video and podcast editing software. Edit audio and video by editing text. Overdub AI voice cloning, screen recording, and publishing built in.",
     "website": "descript.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Riverside.fm",
     "description": "Professional podcast and video recording studio in the browser. Records separate high-quality tracks per person. Used by major podcasters and YouTubers.",
     "website": "riverside.fm",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "ConvertKit",
-    "description": "Email marketing platform built specifically for creators — bloggers, YouTubers, podcasters. Landing pages, automations, paid newsletters. Strong affiliate program.",
+    "description": "Email marketing platform built specifically for creators \u2014 bloggers, YouTubers, podcasters. Landing pages, automations, paid newsletters. Strong affiliate program.",
     "website": "convertkit.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Beehiiv",
-    "description": "Newsletter platform built for growth. Used by major newsletter creators. Monetization built in — ads, paid subscriptions, boosts. Growing fast.",
+    "description": "Newsletter platform built for growth. Used by major newsletter creators. Monetization built in \u2014 ads, paid subscriptions, boosts. Growing fast.",
     "website": "beehiiv.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Kajabi",
     "description": "All-in-one platform for selling online courses, memberships, coaching and digital products. Used by top course creators. High ticket affiliate commissions.",
     "website": "kajabi.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Teachable",
     "description": "Online course and coaching platform for creators. Sell courses, coaching sessions and digital downloads. Competing with Kajabi at lower price point.",
     "website": "teachable.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Notion",
     "description": "All-in-one workspace for notes, docs, databases and project management. Hugely popular with creators for content planning, second brain and wikis.",
     "website": "notion.so",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Loom",
     "description": "Video messaging tool for async communication. Record screen and camera simultaneously. Used by creators for tutorials, walkthroughs and client communication.",
     "website": "loom.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Jasper AI",
     "description": "AI writing assistant for marketing content. Blog posts, social media, ads, emails. One of the original AI writing tools with a strong affiliate program.",
     "website": "jasper.ai",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Opus Clip",
     "description": "AI video repurposing tool. Takes long YouTube or podcast videos and automatically clips them into viral short-form content for TikTok, Reels and Shorts.",
     "website": "opus.pro",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Pictory",
     "description": "AI video creation tool. Turns blog posts and scripts into videos automatically. Adds stock footage, captions and voiceover. Popular with content marketers.",
     "website": "pictory.ai",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Synthesia",
     "description": "AI video generation platform. Create professional videos with AI avatars reading your script. No camera or studio needed. Used by businesses and creators.",
     "website": "synthesia.io",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "ElevenLabs",
     "description": "AI voice generation and cloning platform. Create realistic voiceovers in any language. Used by podcasters, video creators and audiobook producers.",
     "website": "elevenlabs.io",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Otter.ai",
     "description": "AI meeting transcription and note-taking. Records, transcribes and summarises meetings and interviews automatically. Popular with podcasters and journalists.",
     "website": "otter.ai",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Substack",
     "description": "Newsletter and subscription platform. Writers publish and monetise newsletters directly to subscribers. Huge creator economy platform.",
     "website": "substack.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Buzzsprout",
     "description": "Podcast hosting platform. Upload, distribute and promote podcasts to all major platforms. Analytics, monetisation and affiliate marketplace built in.",
     "website": "buzzsprout.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Podcastle",
     "description": "AI-powered podcast creation studio. Record, edit, transcribe and publish podcasts. AI tools for noise removal, voice enhancement and content repurposing.",
     "website": "podcastle.ai",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Later",
     "description": "Social media scheduling and analytics platform. Plan and schedule Instagram, TikTok, LinkedIn, Pinterest and Twitter content. Visual calendar interface.",
     "website": "later.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Metricool",
     "description": "Social media analytics and scheduling tool. Manage all social accounts in one place. Competitor analysis, best posting times, detailed analytics.",
     "website": "metricool.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Surfer SEO",
     "description": "AI SEO content optimisation tool. Analyses top ranking pages and tells you exactly what to write to rank. Content editor with real-time SEO scoring.",
     "website": "surferseo.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Writesonic",
     "description": "AI writing platform for blogs, ads, social media and SEO content. Includes Chatsonic AI assistant. Competing with Jasper at lower price point.",
     "website": "writesonic.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Typeform",
     "description": "Interactive form and survey builder. Used by creators for audience research, lead generation and waitlists. Beautiful conversational interface.",
     "website": "typeform.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Stan Store",
     "description": "Link-in-bio store for creators. Sell digital products, courses, bookings and memberships directly from social media profiles. Growing fast with Gen Z creators.",
     "website": "stanstore.com",
-    "status": "pending"
+    "status": "processed"
   },
   {
     "name": "Gumroad",
     "description": "Platform for selling digital products directly to audiences. Ebooks, courses, templates, software, music. Simple setup with no monthly fees.",
     "website": "gumroad.com",
-    "status": "pending"
+    "status": "processed"
   }
 ]
