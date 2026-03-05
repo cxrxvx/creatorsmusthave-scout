@@ -708,7 +708,47 @@ if __name__ == "__main__":
     print(f"\n💾 Saved to: {MEMORY_FILE}")
     print(f"👀 Watchlist: {WATCHLIST_FILE}")
 
+
+
+def process_manual_tools():
+    """
+    Processes tools from memory/manual_tools.json through the same
+    scoring pipeline as RSS-discovered tools.
+    Each tool is only processed once — status changes from "pending" to "processed".
+    This lets us write about established tools with affiliate programs,
+    not just brand new launches.
+    """
+    manual_file = "memory/manual_tools.json"
+    if not os.path.exists(manual_file):
+        return
+
+    import json as _json
+    tools = _json.load(open(manual_file))
+    pending = [t for t in tools if t.get("status") == "pending"]
+
+    if not pending:
+        return
+
+    print(f"\n📚 Processing {len(pending)} manual tool(s)...")
+
+    for tool in pending:
+        name = tool.get("name", "")
+        description = tool.get("description", "")
+        website = tool.get("website", "")
+        source_url = f"https://{website}" if website else ""
+
+        print(f"   🔍 Manual tool: {name}")
+        process_entry(name, description, "Manual List", source_url)
+
+        # Mark as processed so it never runs again
+        tool["status"] = "processed"
+
+    # Save updated statuses back to file
+    _json.dump(tools, open(manual_file, "w"), indent=2)
+    print(f"   ✅ Manual tools processed")
+
 def run():
     """Master run function — called by scheduler.py"""
     scan_rss_feeds()
     process_watchlist()
+    process_manual_tools()
