@@ -1,0 +1,9 @@
+config.py
+.env
+credentials/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+drafts/
+media/
