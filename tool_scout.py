@@ -707,3 +707,8 @@ if __name__ == "__main__":
 
     print(f"\n💾 Saved to: {MEMORY_FILE}")
     print(f"👀 Watchlist: {WATCHLIST_FILE}")
+
+def run():
+    """Master run function — called by scheduler.py"""
+    scan_rss_feeds()
+    process_watchlist()

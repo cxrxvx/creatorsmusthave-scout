@@ -106,7 +106,9 @@
     "tool_score": 65,
     "researched_date": "2026-03-05",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "draft_live",
+    "article_written_date": "2026-03-06",
+    "wp_post_id": 12
   },
   "spoke": {
     "primary_keyword": "Spoke voice to text macOS review",
@@ -141,7 +143,9 @@
     "tool_score": 65,
     "researched_date": "2026-03-05",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "draft_live",
+    "article_written_date": "2026-03-06",
+    "wp_post_id": 13
   },
   "trimmr": {
     "primary_keyword": "Trimmr AI review for YouTube creators 2026",

@@ -129,7 +129,7 @@
   },
   "claude-cowork": {
     "name": "Claude Cowork",
-    "description": "AI agent from Anthropic that automates tasks across files and folders on desktop without requiring coding skills.",
+    "description": "An AI agent from Anthropic that automates file-based tasks for non-technical users directly in Claude Desktop.",
     "category": "productivity",
     "score": 65,
     "confidence": "high",
@@ -139,7 +139,7 @@
     "has_affiliate_potential": false,
     "source": "VentureBeat AI",
     "source_url": "https://venturebeat.com/technology/anthropic-launches-cowork-a-claude-desktop-agent-that-works-in-your-files-no",
-    "discovered_date": "2026-03-05",
+    "discovered_date": "2026-03-06",
     "status": "discovered"
   },
   "kodo": {
@@ -201,7 +201,7 @@
   },
   "trimmr": {
     "name": "Trimmr",
-    "description": "AI tool that automatically converts long-form videos into short viral clips for social media",
+    "description": "AI tool that converts long-form videos into short clips for social media platforms",
     "category": "video",
     "score": 62,
     "confidence": "medium",
@@ -211,7 +211,22 @@
     "has_affiliate_potential": true,
     "source": "Hacker News - AI Launches",
     "source_url": "https://www.trimmr.ai",
-    "discovered_date": "2026-03-05",
+    "discovered_date": "2026-03-06",
+    "status": "discovered"
+  },
+  "gpt-5.4": {
+    "name": "GPT-5.4",
+    "description": "OpenAI's latest frontier AI model for professional work including writing, coding, and content creation tasks",
+    "category": "writing",
+    "score": 65,
+    "confidence": "high",
+    "article_type": "authority_article",
+    "fast_growing_category": true,
+    "is_major_platform": true,
+    "has_affiliate_potential": false,
+    "source": "TechCrunch AI",
+    "source_url": "https://techcrunch.com/2026/03/05/openai-launches-gpt-5-4-with-pro-and-thinking-versions/",
+    "discovered_date": "2026-03-06",
     "status": "discovered"
   }
 }
