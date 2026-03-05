@@ -1,0 +1,32 @@
+{
+  "generated": "2026-03-05T22:30:12.529804",
+  "week": {
+    "start": "2026-03-02",
+    "end": "2026-03-08",
+    "label": "Mar 02 \u2013 Mar 08, 2026"
+  },
+  "system_health": {
+    "daily_checks": {
+      "2026-03-05": {
+        "claude_api": "ok",
+        "wordpress": "ok",
+        "errors_today": 0,
+        "estimated_cost_today": 0.3024,
+        "tools_in_database": 16,
+        "pending_articles": 5,
+        "stale_tools": 0,
+        "duplicates_found": 0,
+        "config_issues": 0
+      }
+    },
+    "total_errors_this_week": 0,
+    "apis_down_this_week": [],
+    "estimated_cost_this_week": 0.3024,
+    "stale_tools_flagged": [],
+    "duplicates_detected": [],
+    "config_issues": []
+  },
+  "scout_summary": {},
+  "content": {},
+  "revenue": {}
+}

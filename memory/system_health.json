@@ -1,0 +1,77 @@
+{
+  "timestamp": "2026-03-05T22:30:12.528810",
+  "api_checks": {
+    "claude": {
+      "status": "ok",
+      "message": "Claude API reachable"
+    },
+    "wordpress": {
+      "status": "ok",
+      "message": "WordPress reachable and authenticated"
+    }
+  },
+  "database_stats": {
+    "tools_in_database": 16,
+    "tools_on_watchlist": 12,
+    "tools_with_keywords": 5,
+    "pending_articles": 5,
+    "articles_written": 0
+  },
+  "stale_pipeline": [],
+  "duplicates": [],
+  "config_issues": [],
+  "file_sizes": [
+    {
+      "file": "memory/watchlist.json",
+      "size_kb": 11.2,
+      "status": "ok",
+      "message": "\u2705 11.2KB"
+    },
+    {
+      "file": "memory/tool_database.json",
+      "size_kb": 8.1,
+      "status": "ok",
+      "message": "\u2705 8.1KB"
+    },
+    {
+      "file": "memory/keyword_data.json",
+      "size_kb": 8.0,
+      "status": "ok",
+      "message": "\u2705 8.0KB"
+    },
+    {
+      "file": "memory/keyword_slug_index.json",
+      "size_kb": 0.3,
+      "status": "ok",
+      "message": "\u2705 0.3KB"
+    }
+  ],
+  "agent_activity": {
+    "tool_scout": {
+      "ran_today": false,
+      "log_size_bytes": 0
+    },
+    "publisher_agent": {
+      "ran_today": false,
+      "log_size_bytes": 0
+    },
+    "keyword_agent": {
+      "ran_today": true,
+      "log_size_bytes": 45535
+    },
+    "health_monitor": {
+      "ran_today": true,
+      "log_size_bytes": 295
+    },
+    "editor_agent": {
+      "ran_today": false,
+      "log_size_bytes": 0
+    },
+    "article_writer": {
+      "ran_today": false,
+      "log_size_bytes": 0
+    }
+  },
+  "errors_today": [],
+  "estimated_cost_today": 0.3024
+}
