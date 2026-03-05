@@ -2,7 +2,7 @@ import feedparser
 import json
 import os
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import anthropic
 from config import ANTHROPIC_API_KEY, REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT
 

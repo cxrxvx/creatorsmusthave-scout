@@ -195,16 +195,24 @@ def run():
     # Find articles ready to publish
     # In Phase 1: pending_edit articles go straight to WordPress as drafts
     # In Phase 2+: editor_agent sets status to "ready_to_publish"
-    ready = {
+    all_ready = {
         slug: article for slug, article in handoffs.items()
         if article.get("status") in ("pending_edit", "ready_to_publish")
         and not article.get("wp_post_id")  # skip already published
     }
 
-    if not ready:
+    if not all_ready:
         print("   ℹ️  No articles ready to publish.")
         write_log("No articles ready.")
         return
+
+    # Apply publishing cap — only publish up to the daily limit
+    # Articles over the cap stay as drafts and publish on the next run
+    ready = dict(list(all_ready.items())[:DAILY_PUBLISH_CAP])
+    held_back = len(all_ready) - len(ready)
+    if held_back > 0:
+        print(f"   📋 {held_back} article(s) held in draft — will publish tomorrow")
+        write_log(f"Held {held_back} articles — daily publish cap ({DAILY_PUBLISH_CAP}) reached")
 
     print(f"📋 Found {len(ready)} article(s) to publish as {PUBLISH_MODE}s\n")
     write_log(f"Found {len(ready)} articles. Mode: {PUBLISH_MODE}")

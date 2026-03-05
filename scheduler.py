@@ -68,13 +68,7 @@ def has_pending_articles():
     except: return True
 
 def in_quiet_hours():
-    if QUIET_HOURS_START == QUIET_HOURS_END:
-        return False
-    hour = datetime.now().hour
-    if QUIET_HOURS_START <= hour or hour < QUIET_HOURS_END:
-        print(f"  Quiet hours ({QUIET_HOURS_START}:00-{QUIET_HOURS_END}:00) — skipping")
-        write_scheduler_log(f"Skipped — quiet hours ({hour}:00)")
-        return True
+    # Quiet hours disabled — running 24/7 to catch tool launches in any timezone
     return False
 
 def write_scheduler_log(entry):
@@ -117,7 +111,10 @@ def run_pipeline():
         _run_step("Tool Scout", tool_scout.run)
         _run_step("Keyword Agent", keyword_agent.run)
         if has_pending_articles():
-            article_agent.DAILY_CAP = remaining
+            # Writer has no daily cap — build up draft library freely
+            # Publisher respects the cap — controls what actually goes live
+            article_agent.DAILY_CAP = 10
+            publisher_agent.DAILY_PUBLISH_CAP = remaining
             _run_step("Article Writer", article_agent.run)
             _run_step("Publisher", publisher_agent.run)
             try:
