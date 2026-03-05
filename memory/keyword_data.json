@@ -32,7 +32,9 @@
     "tool_score": 72,
     "researched_date": "2026-03-05",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "draft_live",
+    "article_written_date": "2026-03-05",
+    "wp_post_id": 10
   },
   "krisp-accent-conversion": {
     "primary_keyword": "Krisp accent conversion review for podcasters",
@@ -67,7 +69,9 @@
     "tool_score": 72,
     "researched_date": "2026-03-05",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "draft_live",
+    "article_written_date": "2026-03-05",
+    "wp_post_id": 11
   },
   "willow-voice-for-teams": {
     "primary_keyword": "Willow Voice for Teams review new AI transcription tool 2026",
