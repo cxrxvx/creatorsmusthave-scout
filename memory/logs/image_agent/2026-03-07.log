@@ -33,3 +33,171 @@
 2026-03-07 00:17:14 —   ✅ Image injected into article body
 2026-03-07 00:17:14 —   ✅ COMPLETE — hero + tool image (no logo)
 2026-03-07 00:17:14 — Image Agent complete — Complete: 1 | Partial: 0 | Failed: 0
+2026-03-07 00:19:47 — Image Agent starting
+2026-03-07 00:19:47 — Found 0 articles needing images (including partials)
+2026-03-07 00:19:47 — Nothing to process — exiting
+2026-03-07 00:24:15 — Image Agent starting
+2026-03-07 00:24:15 — Found 20 articles needing images (including partials)
+2026-03-07 00:24:15 — Processing: Coursekit | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:24:19 —   Fetching logo: https://logo.clearbit.com/coursekit.io
+2026-03-07 00:24:19 —   Logo fetch failed for Coursekit: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /coursekit.io (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:24:19 —   ⚠️  Logo not found for Coursekit — article still fine without it
+2026-03-07 00:24:19 —   Screenshotting: https://coursekit.io
+2026-03-07 00:24:24 —   Screenshot failed for Coursekit: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://coursekit.io/
+Call log:
+  - navigating to "https://coursekit.io/", waiting until "domcontentloaded"
+
+2026-03-07 00:24:24 —   Screenshot failed — trying press kit fallback for Coursekit
+2026-03-07 00:24:24 —   No press kit URL for Coursekit — skipping press kit fallback
+2026-03-07 00:24:24 —   ❌ Screenshot + press kit both failed for Coursekit — retrying next run
+2026-03-07 00:24:24 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 00:24:24 — Processing: Krisp Accent Conversion | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:24:26 —   Fetching logo: https://logo.clearbit.com/krisp.ai
+2026-03-07 00:24:26 —   Logo fetch failed for Krisp Accent Conversion: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /krisp.ai (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:24:26 —   ⚠️  Logo not found for Krisp Accent Conversion — article still fine without it
+2026-03-07 00:24:26 —   Screenshotting: https://krisp.ai
+2026-03-07 00:24:43 —   ✅ Screenshot quality: passed (78KB)
+2026-03-07 00:24:47 —   Uploaded → WordPress media ID: 79
+2026-03-07 00:24:47 —   ✅ Tool image uploaded (screenshot) — media ID: 79
+2026-03-07 00:24:49 —   ✅ Image injected into article body
+2026-03-07 00:24:49 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 00:24:49 — Processing: Willow Voice for Teams | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:24:52 —   Fetching logo: https://logo.clearbit.com/willow.app
+2026-03-07 00:24:52 —   Logo fetch failed for Willow Voice for Teams: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /willow.app (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:24:52 —   ⚠️  Logo not found for Willow Voice for Teams — article still fine without it
+2026-03-07 00:24:52 —   Screenshotting: https://willow.app
+2026-03-07 00:25:10 —   ✅ Screenshot quality: passed (81KB)
+2026-03-07 00:25:12 —   Uploaded → WordPress media ID: 81
+2026-03-07 00:25:12 —   ✅ Tool image uploaded (screenshot) — media ID: 81
+2026-03-07 00:25:14 —   ✅ Image injected into article body
+2026-03-07 00:25:14 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 00:25:14 — Processing: Spoke | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:25:17 —   Fetching logo: https://logo.clearbit.com/spoke.app
+2026-03-07 00:25:17 —   Logo fetch failed for Spoke: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /spoke.app (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:25:17 —   ⚠️  Logo not found for Spoke — article still fine without it
+2026-03-07 00:25:17 —   Screenshotting: https://www.spoke.app
+2026-03-07 00:25:19 —   Screenshot failed for Spoke: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.spoke.app/
+Call log:
+  - navigating to "https://www.spoke.app/", waiting until "domcontentloaded"
+
+2026-03-07 00:25:19 —   Screenshot failed — trying press kit fallback for Spoke
+2026-03-07 00:25:19 —   No press kit URL for Spoke — skipping press kit fallback
+2026-03-07 00:25:19 —   ❌ Screenshot + press kit both failed for Spoke — retrying next run
+2026-03-07 00:25:19 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 00:25:19 — Processing: Canva | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:25:22 —   Fetching logo: https://logo.clearbit.com/canva.com
+2026-03-07 00:25:22 —   Logo fetch failed for Canva: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /canva.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:25:22 —   ⚠️  Logo not found for Canva — article still fine without it
+2026-03-07 00:25:22 —   Screenshotting: https://www.canva.com/templates/
+2026-03-07 00:25:40 —   ❌ Screenshot quality failed: too small — likely bot challenge page (28KB) — minimum is 60KB
+2026-03-07 00:25:40 —   Screenshot failed — trying press kit fallback for Canva
+2026-03-07 00:25:40 —   Trying press kit: https://www.canva.com/newsroom/
+2026-03-07 00:25:40 —   Press kit page returned 403
+2026-03-07 00:25:40 —   ❌ Screenshot + press kit both failed for Canva — retrying next run
+2026-03-07 00:25:40 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 00:25:40 — Processing: Descript | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:25:44 —   Fetching logo: https://logo.clearbit.com/descript.com
+2026-03-07 00:25:44 —   Logo fetch failed for Descript: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /descript.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:25:44 —   ⚠️  Logo not found for Descript — article still fine without it
+2026-03-07 00:25:44 —   Screenshotting: https://web.descript.com
+2026-03-07 00:26:04 —   ❌ Screenshot quality failed: too small — likely bot challenge page (32KB) — minimum is 60KB
+2026-03-07 00:26:05 —   Screenshot failed — trying press kit fallback for Descript
+2026-03-07 00:26:05 —   Trying press kit: https://www.descript.com/press
+2026-03-07 00:26:05 —   Press kit page returned 404
+2026-03-07 00:26:05 —   ❌ Screenshot + press kit both failed for Descript — retrying next run
+2026-03-07 00:26:05 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 00:26:05 — Processing: Riverside.fm | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:26:08 —   Fetching logo: https://logo.clearbit.com/riverside.fm
+2026-03-07 00:26:08 —   Logo fetch failed for Riverside.fm: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /riverside.fm (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:26:08 —   ⚠️  Logo not found for Riverside.fm — article still fine without it
+2026-03-07 00:26:08 —   Screenshotting: https://riverside.fm
+2026-03-07 00:26:27 —   ✅ Screenshot quality: passed (141KB)
+2026-03-07 00:26:29 —   Uploaded → WordPress media ID: 83
+2026-03-07 00:26:29 —   ✅ Tool image uploaded (screenshot) — media ID: 83
+2026-03-07 00:26:31 —   ✅ Image injected into article body
+2026-03-07 00:26:31 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 00:26:31 — Processing: ConvertKit | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:26:34 —   Fetching logo: https://logo.clearbit.com/convertkit.com
+2026-03-07 00:26:34 —   Logo fetch failed for ConvertKit: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /convertkit.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:26:34 —   ⚠️  Logo not found for ConvertKit — article still fine without it
+2026-03-07 00:26:34 —   Screenshotting: https://app.convertkit.com
+2026-03-07 00:26:55 —   ✅ Screenshot quality: passed (125KB)
+2026-03-07 00:26:57 —   Uploaded → WordPress media ID: 85
+2026-03-07 00:26:57 —   ✅ Tool image uploaded (screenshot) — media ID: 85
+2026-03-07 00:26:59 —   ✅ Image injected into article body
+2026-03-07 00:26:59 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 00:26:59 — Processing: Beehiiv | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:27:04 —   Fetching logo: https://logo.clearbit.com/beehiiv.com
+2026-03-07 00:27:04 —   Logo fetch failed for Beehiiv: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /beehiiv.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:27:04 —   ⚠️  Logo not found for Beehiiv — article still fine without it
+2026-03-07 00:27:04 —   Screenshotting: https://app.beehiiv.com
+2026-03-07 00:27:24 —   ❌ Screenshot quality failed: too small — likely bot challenge page (31KB) — minimum is 60KB
+2026-03-07 00:27:24 —   Screenshot failed — trying press kit fallback for Beehiiv
+2026-03-07 00:27:24 —   Trying press kit: https://www.beehiiv.com/press
+2026-03-07 00:27:25 —   Press kit page returned 404
+2026-03-07 00:27:25 —   ❌ Screenshot + press kit both failed for Beehiiv — retrying next run
+2026-03-07 00:27:25 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 00:27:25 — Processing: Kajabi | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:27:28 —   Fetching logo: https://logo.clearbit.com/kajabi.com
+2026-03-07 00:27:28 —   Logo fetch failed for Kajabi: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /kajabi.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:27:28 —   ⚠️  Logo not found for Kajabi — article still fine without it
+2026-03-07 00:27:28 —   Screenshotting: https://app.kajabi.com
+2026-03-07 00:27:45 —   ❌ Screenshot quality failed: too small — likely bot challenge page (49KB) — minimum is 60KB
+2026-03-07 00:27:45 —   Screenshot failed — trying press kit fallback for Kajabi
+2026-03-07 00:27:45 —   Trying press kit: https://kajabi.com/press
+2026-03-07 00:27:47 —   Press kit page returned 404
+2026-03-07 00:27:47 —   ❌ Screenshot + press kit both failed for Kajabi — retrying next run
+2026-03-07 00:27:47 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 00:27:47 — Processing: Loom | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:27:50 —   Fetching logo: https://logo.clearbit.com/loom.com
+2026-03-07 00:27:50 —   Logo fetch failed for Loom: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /loom.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:27:50 —   ⚠️  Logo not found for Loom — article still fine without it
+2026-03-07 00:27:50 —   Screenshotting: https://www.loom.com/looms/videos
+2026-03-07 00:28:10 —   ❌ Screenshot quality failed: too small — likely bot challenge page (43KB) — minimum is 60KB
+2026-03-07 00:28:10 —   Screenshot failed — trying press kit fallback for Loom
+2026-03-07 00:28:10 —   Trying press kit: https://www.loom.com/press
+2026-03-07 00:28:11 —   Found 0 candidate image URLs on press kit page
+2026-03-07 00:28:11 —   ❌ No usable images found on press kit page
+2026-03-07 00:28:11 —   ❌ Screenshot + press kit both failed for Loom — retrying next run
+2026-03-07 00:28:11 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 00:28:11 — Processing: Opus Clip | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:28:14 —   Fetching logo: https://logo.clearbit.com/opus.pro
+2026-03-07 00:28:14 —   Logo fetch failed for Opus Clip: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /opus.pro (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:28:14 —   ⚠️  Logo not found for Opus Clip — article still fine without it
+2026-03-07 00:28:14 —   Screenshotting: https://www.opus.pro
+2026-03-07 00:28:30 —   ✅ Screenshot quality: passed (90KB)
+2026-03-07 00:28:33 —   Uploaded → WordPress media ID: 87
+2026-03-07 00:28:33 —   ✅ Tool image uploaded (screenshot) — media ID: 87
+2026-03-07 00:28:33 —   ℹ️  No wp_post_id yet — injection queued for publish time
+2026-03-07 00:28:33 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 00:28:33 — Processing: Pictory | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:28:36 —   Fetching logo: https://logo.clearbit.com/pictory.ai
+2026-03-07 00:28:36 —   Logo fetch failed for Pictory: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /pictory.ai (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:28:36 —   ⚠️  Logo not found for Pictory — article still fine without it
+2026-03-07 00:28:36 —   Screenshotting: https://app.pictory.ai
+2026-03-07 00:28:56 —   ✅ Screenshot quality: passed (65KB)
+2026-03-07 00:28:58 —   Uploaded → WordPress media ID: 88
+2026-03-07 00:28:58 —   ✅ Tool image uploaded (screenshot) — media ID: 88
+2026-03-07 00:28:58 —   ℹ️  No wp_post_id yet — injection queued for publish time
+2026-03-07 00:28:58 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 00:28:58 — Processing: Podcastle | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:29:01 —   Fetching logo: https://logo.clearbit.com/podcastle.ai
+2026-03-07 00:29:01 —   Logo fetch failed for Podcastle: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /podcastle.ai (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:29:01 —   ⚠️  Logo not found for Podcastle — article still fine without it
+2026-03-07 00:29:01 —   Screenshotting: https://podcastle.ai
+2026-03-07 00:29:09 —   ✅ Screenshot quality: passed (86KB)
+2026-03-07 00:29:11 —   Uploaded → WordPress media ID: 89
+2026-03-07 00:29:11 —   ✅ Tool image uploaded (screenshot) — media ID: 89
+2026-03-07 00:29:11 —   ℹ️  No wp_post_id yet — injection queued for publish time
+2026-03-07 00:29:11 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 00:29:11 — Processing: Synthesia | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 00:29:14 —   Fetching logo: https://logo.clearbit.com/synthesia.io
+2026-03-07 00:29:14 —   Logo fetch failed for Synthesia: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /synthesia.io (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:29:14 —   ⚠️  Logo not found for Synthesia — article still fine without it
+2026-03-07 00:29:14 —   Screenshotting: https://www.synthesia.io/features/avatars
+2026-03-07 00:29:24 —   ✅ Screenshot quality: passed (114KB)
+2026-03-07 00:29:26 —   Uploaded → WordPress media ID: 90
+2026-03-07 00:29:26 —   ✅ Tool image uploaded (screenshot) — media ID: 90
+2026-03-07 00:29:26 —   ℹ️  No wp_post_id yet — injection queued for publish time
+2026-03-07 00:29:26 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 00:29:26 — Image Agent complete — Complete: 15 | Partial: 0 | Failed: 0

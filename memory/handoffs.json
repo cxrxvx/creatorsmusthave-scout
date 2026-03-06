@@ -21,7 +21,7 @@
       "hero_media_id": 20,
       "hero_alt_text": "Course creator using laptop for Coursekit review 2026 showcasing AI tools for online education"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "krisp-accent-conversion-review-podcasters": {
     "tool_name": "Krisp Accent Conversion",
@@ -43,9 +43,13 @@
     "images_added": true,
     "image_data": {
       "hero_media_id": 22,
-      "hero_alt_text": "Podcaster recording with professional microphone setup for Krisp accent conversion review"
+      "hero_alt_text": "Podcaster recording with professional microphone setup for Krisp accent conversion review",
+      "screenshot_media_id": 79,
+      "screenshot_alt_text": "Krisp accent conversion interface showing voice enhancement settings for podcasters",
+      "screenshot_source": "screenshot",
+      "screenshot_injected": true
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "willow-voice-for-teams-review-new-ai-transcription-2026": {
     "tool_name": "Willow Voice for Teams",
@@ -67,9 +71,13 @@
     "images_added": true,
     "image_data": {
       "hero_media_id": 24,
-      "hero_alt_text": "Willow Voice for Teams review 2026: AI transcription tool for collaborative meetings"
+      "hero_alt_text": "Willow Voice for Teams review 2026: AI transcription tool for collaborative meetings",
+      "screenshot_media_id": 81,
+      "screenshot_alt_text": "Willow Voice for Teams dashboard interface showing new AI transcription features in 2026",
+      "screenshot_source": "screenshot",
+      "screenshot_injected": true
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "spoke-voice-to-text-macos-review": {
     "tool_name": "Spoke",
@@ -92,10 +100,9 @@
     "image_data": {
       "hero_media_id": 26,
       "hero_alt_text": "Person using Spoke voice to text macOS review - dictating content on MacBook with microphone",
-      "screenshot_media_id": 28,
       "screenshot_alt_text": "Spoke voice-to-text software interface on macOS showing transcription features and controls"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "canva-review-social-media-managers-2026": {
     "tool_name": "Canva",
@@ -119,10 +126,7 @@
       "hero_media_id": 76,
       "hero_alt_text": "Social media manager using Canva review interface to create engaging content in 2026",
       "hero_source": "Pexels \u2014 'social media manager designing'",
-      "screenshot_media_id": 77,
-      "screenshot_alt_text": "Canva dashboard interface showing design tools for social media managers",
-      "screenshot_source": "press_kit",
-      "screenshot_injected": true
+      "screenshot_alt_text": "Canva dashboard interface showing design tools for social media managers"
     },
     "images_date": "2026-03-07"
   },
@@ -147,10 +151,9 @@
     "image_data": {
       "hero_media_id": 32,
       "hero_alt_text": "Content creator editing video for Descript review for YouTube creators 2026",
-      "screenshot_media_id": 34,
       "screenshot_alt_text": "Descript interface showing video editing features for YouTube creators in 2026"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "elevenlabs-review-podcast-voiceovers": {
     "tool_name": "ElevenLabs",
@@ -196,9 +199,13 @@
     "images_added": true,
     "image_data": {
       "hero_media_id": 36,
-      "hero_alt_text": "Podcaster recording episode for Riverside.fm review 2026 with professional microphone setup"
+      "hero_alt_text": "Podcaster recording episode for Riverside.fm review 2026 with professional microphone setup",
+      "screenshot_media_id": 83,
+      "screenshot_alt_text": "Riverside.fm dashboard interface showing podcast recording and editing features",
+      "screenshot_source": "screenshot",
+      "screenshot_injected": true
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "convertkit-review-small-creators-2026": {
     "tool_name": "ConvertKit",
@@ -221,10 +228,12 @@
     "image_data": {
       "hero_media_id": 38,
       "hero_alt_text": "Small creator writing email newsletter for ConvertKit review 2026",
-      "screenshot_media_id": 40,
-      "screenshot_alt_text": "ConvertKit dashboard interface showing email marketing features for small creators"
+      "screenshot_alt_text": "ConvertKit dashboard interface showing email marketing features for small creators",
+      "screenshot_media_id": 85,
+      "screenshot_source": "screenshot",
+      "screenshot_injected": true
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "beehiiv-review-newsletter-creators": {
     "tool_name": "Beehiiv",
@@ -247,10 +256,9 @@
     "image_data": {
       "hero_media_id": 41,
       "hero_alt_text": "Newsletter creator working on Beehiiv review 2026 at desk with laptop and coffee",
-      "screenshot_media_id": 43,
       "screenshot_alt_text": "Beehiiv platform dashboard interface showing newsletter creation tools for creators"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "kajabi-review-course-creators-2026": {
     "tool_name": "Kajabi",
@@ -281,10 +289,9 @@
     "image_data": {
       "hero_media_id": 44,
       "hero_alt_text": "Course creator working on laptop for Kajabi review 2026 article",
-      "screenshot_media_id": 45,
       "screenshot_alt_text": "Kajabi dashboard interface showing course creation tools and features"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "notion-review-content-creators-2026": {
     "tool_name": "Notion",
@@ -347,10 +354,9 @@
     "image_data": {
       "hero_media_id": 47,
       "hero_alt_text": "Content creator recording video tutorial for Loom review for content creators 2026",
-      "screenshot_media_id": 48,
       "screenshot_alt_text": "Loom dashboard interface showing video recording features and content creator tools"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "opus-clip-review-youtube-shorts-creators": {
     "tool_name": "Opus Clip",
@@ -381,10 +387,11 @@
     "image_data": {
       "hero_media_id": 49,
       "hero_alt_text": "Content creator editing short-form videos for Opus Clip review on YouTube Shorts creation",
-      "screenshot_media_id": 50,
-      "screenshot_alt_text": "Opus Clip dashboard interface showing AI video editing tools for YouTube Shorts creators"
+      "screenshot_alt_text": "Opus Clip interface showing AI-powered YouTube Shorts editing features and timeline",
+      "screenshot_media_id": 87,
+      "screenshot_source": "screenshot"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "pictory-ai-review-youtube-creators": {
     "tool_name": "Pictory",
@@ -415,10 +422,11 @@
     "image_data": {
       "hero_media_id": 51,
       "hero_alt_text": "YouTube creator editing videos on laptop - Pictory AI review for YouTube creators 2026",
-      "screenshot_media_id": 52,
-      "screenshot_alt_text": "Pictory AI dashboard interface showing video editing features for YouTube creators"
+      "screenshot_alt_text": "Pictory AI dashboard interface showing video editing features for YouTube content creation",
+      "screenshot_media_id": 88,
+      "screenshot_source": "screenshot"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "buzzsprout-review-beginner-podcasters": {
     "tool_name": "Buzzsprout",
@@ -513,10 +521,11 @@
     "image_data": {
       "hero_media_id": 55,
       "hero_alt_text": "Podcaster recording episode with professional microphone for Podcastle AI podcast editor review 2026",
-      "screenshot_media_id": 56,
-      "screenshot_alt_text": "Podcastle AI podcast editor interface showing audio editing and recording features dashboard"
+      "screenshot_alt_text": "Podcastle AI interface showing podcast editing features and audio waveform controls",
+      "screenshot_media_id": 89,
+      "screenshot_source": "screenshot"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "synthesia-review-content-creators-2026": {
     "tool_name": "Synthesia",
@@ -547,10 +556,11 @@
     "image_data": {
       "hero_media_id": 57,
       "hero_alt_text": "Content creator using Synthesia AI video generator review setup with laptop and camera in 2026",
-      "screenshot_media_id": 58,
-      "screenshot_alt_text": "Synthesia AI video generator dashboard interface showing content creation tools for creators"
+      "screenshot_alt_text": "Synthesia AI video generator dashboard interface showing content creation features",
+      "screenshot_media_id": 90,
+      "screenshot_source": "screenshot"
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "teachable-review-content-creators": {
     "tool_name": "Teachable",
@@ -577,11 +587,10 @@
       "editor_summary": "This is a high-quality, comprehensive review that hits all major SEO and content requirements. The article provides genuine value with specific pricing breakdowns, real fee calculations, and honest limitations. The migration guide adds unique value beyond typical reviews. Minor improvement: break up a couple of 5-6 sentence paragraphs in the migration section for even better scannability. Approved for publication."
     },
     "editor_reviewed": "2026-03-06",
-    "images_added": true,
+    "images_added": false,
     "image_data": {
       "hero_media_id": 59,
       "hero_alt_text": "Content creator building online course for Teachable review 2026",
-      "screenshot_media_id": 60,
       "screenshot_alt_text": "Teachable platform dashboard interface showing course creation tools"
     },
     "images_date": "2026-03-06"
@@ -611,7 +620,7 @@
       "editor_summary": "This is an excellent review article that meets all SEO, readability, and completeness standards. The opening hook with the 90-minute interview scenario immediately engages the reader, the pricing table is detailed and accurate, and the cons are specific and honest. The article avoids AI fluff language and provides genuinely useful information for the target audience. Approved for publication."
     },
     "editor_reviewed": "2026-03-06",
-    "images_added": true,
+    "images_added": false,
     "image_data": {
       "hero_media_id": 61,
       "hero_alt_text": "Podcaster recording episode for Otter.ai review for podcasters 2026 article"
@@ -643,11 +652,10 @@
       "editor_summary": "Strong article that exceeds the approval threshold with practical testing insights and honest limitations. The writing is refreshingly direct with real workflow scenarios instead of generic marketing speak. Only minor improvement needed: work the exact primary keyword into one more H2 heading to strengthen on-page SEO signals."
     },
     "editor_reviewed": "2026-03-06",
-    "images_added": true,
+    "images_added": false,
     "image_data": {
       "hero_media_id": 62,
       "hero_alt_text": "Content creator using Later social media scheduler review 2026 on laptop and phone",
-      "screenshot_media_id": 63,
       "screenshot_alt_text": "Later social media scheduler dashboard interface showing content calendar for creators"
     },
     "images_date": "2026-03-06"
@@ -741,11 +749,10 @@
       "editor_summary": "Excellent review article that hits all mandatory elements with strong execution. The piece provides specific, actionable information with real workflows, avoids generic AI language, and maintains creator-focused practical advice throughout. Minor improvement opportunity: a few sections could trim 1-2 sentences for tighter pacing, but overall this is publication-ready."
     },
     "editor_reviewed": "2026-03-06",
-    "images_added": true,
+    "images_added": false,
     "image_data": {
       "hero_media_id": 66,
       "hero_alt_text": "Content creator reviewing Typeform survey builder on laptop for 2026 affiliate review",
-      "screenshot_media_id": 67,
       "screenshot_alt_text": "Typeform dashboard interface showing survey creation tools for content creators"
     },
     "images_date": "2026-03-06"
@@ -775,11 +782,10 @@
       "editor_summary": "Excellent review article that meets all mandatory requirements with strong execution across SEO, readability, and completeness dimensions. The article provides specific, actionable information with exact pricing, real limitations, and clear recommendations. The hook is engaging, the structure is logical, and it avoids AI fluff while maintaining professional quality. No significant issues found - approved for publication."
     },
     "editor_reviewed": "2026-03-06",
-    "images_added": true,
+    "images_added": false,
     "image_data": {
       "hero_media_id": 68,
       "hero_alt_text": "Content creator reviewing social media analytics for Metricool review 2026",
-      "screenshot_media_id": 69,
       "screenshot_alt_text": "Metricool dashboard interface showing analytics and scheduling features for content creators"
     },
     "images_date": "2026-03-06"
