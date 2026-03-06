@@ -283,6 +283,18 @@ What is missing from articles currently ranking?
 Outdated info? No pricing table? No creator workflow? No free trial info?
 This is our content advantage.
 
+STEP 7 — TOPIC CLUSTER (supporting articles)
+For every main review or alert article, identify 3 supporting articles that:
+- Target related long-tail keywords the main article cannot rank for alone
+- Answer specific questions people search AFTER discovering the main tool
+- Build topical authority so Google sees us as the expert on this tool/category
+Examples for a Descript review:
+  → "descript vs adobe audition for podcasters" (comparison)
+  → "how to remove filler words automatically in descript" (tutorial)
+  → "descript free plan limitations 2026" (problem/question)
+These supporting articles link back to the main review — building a content cluster
+that ranks the whole group faster than isolated articles.
+
 Respond ONLY with a valid JSON object, nothing else:
 {{
   "primary_keyword": "specific long-tail keyword to target",
@@ -307,12 +319,29 @@ Respond ONLY with a valid JSON object, nothing else:
   "url_slug": "keyword-friendly-url-slug",
   "serp_gap": "What is missing from current page 1 results that we can do better",
   "reasoning": "One sentence explaining why this keyword was chosen",
-  "urgency": "high|medium|low"
+  "urgency": "high|medium|low",
+  "supporting_articles": [
+    {{
+      "title": "Supporting article title 1",
+      "slug": "url-slug-1",
+      "angle": "Why this supports the main article and builds topical authority"
+    }},
+    {{
+      "title": "Supporting article title 2",
+      "slug": "url-slug-2",
+      "angle": "Why this supports the main article and builds topical authority"
+    }},
+    {{
+      "title": "Supporting article title 3",
+      "slug": "url-slug-3",
+      "angle": "Why this supports the main article and builds topical authority"
+    }}
+  ]
 }}"""
 
     response = client.messages.create(
         model=CLAUDE_MODEL,
-        max_tokens=900,
+        max_tokens=1200,
         messages=[{"role": "user", "content": prompt}]
     )
 
@@ -344,6 +373,11 @@ Respond ONLY with a valid JSON object, nothing else:
     result["researched_date"] = datetime.now().strftime("%Y-%m-%d")
     result["days_since_launch"] = days_since_launch
     result["status"] = "pending_article"
+
+    # Log supporting articles if generated
+    if result.get("supporting_articles"):
+        for sa in result["supporting_articles"]:
+            print(f"   📎 Cluster: {sa.get('title', '')}")
 
     return result
 
