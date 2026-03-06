@@ -113,22 +113,41 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
    <thead><tr><th>Plan</th><th>Price</th><th>Best For</th></tr></thead>
    <tbody>...</tbody>
    </table>
-   If exact pricing unknown: "Pricing starts at approximately $X/month —
+   Use EXACT plan names and prices from the tool's website (e.g. "Creator — $29/month").
+   Never write vague ranges like "starts at around $X" — use real numbers.
+   If exact pricing is unavailable: "Pricing starts at approximately $X/month —
    verify current pricing at [TOOL_WEBSITE] as plans may have changed."
    Always mention if there is a free trial or free tier.
+   Always note if annual billing gives a significant discount.
 
 10. PROS AND CONS (H2, id="pros-cons")
     Two HTML lists:
     <div class="pros"><h3>✅ Pros</h3><ul>...</ul></div>
     <div class="cons"><h3>❌ Cons</h3><ul>...</ul></div>
-    Be honest. At least 3 pros and 2 real cons. Vague cons like "learning curve"
-    are not acceptable — be specific.
+    Be honest. At least 3 pros and 3 real cons.
+    Cons must be specific and documented — not vague:
+    BAD: "Learning curve for new users"
+    GOOD: "No native mobile app — desktop only"
+    BAD: "Can be expensive"
+    GOOD: "Free plan limited to 3 projects — most creators need the $29/month tier"
+    BAD: "Some features missing"
+    GOOD: "Cannot export to .mp4 on the basic plan — requires Pro tier"
+    Each con must reflect a real, verifiable limitation of the tool.
 
 11. WHO IS [TOOL] FOR? (H2, id="who-is-it-for")
     Concrete creator types. Not "content creators" — name them specifically:
     "YouTubers who upload 2+ times per week", "podcast editors working with
     non-native English speakers", "solo course creators on a budget".
-    Also state clearly who it is NOT for.
+
+    Structure this section as TWO clear parts:
+    Part 1 — WHO IT IS FOR: 3-4 specific creator types with specific reasons
+    Part 2 — WHO IT IS NOT FOR: 2-3 specific creator types with specific reasons
+    Example of good "NOT for":
+    - Creators on a tight budget who only need basic trimming (free tools do this)
+    - Teams needing real-time collaboration (no multi-user editing)
+    - Creators who primarily work on mobile (desktop-only workflow)
+    This honesty builds trust and actually improves conversions — readers who
+    stay are the right buyers.
 
 12. HOW IT COMPARES (H2, id="alternatives")
     1-2 paragraphs. Compare to 1-2 real alternatives by name.
@@ -430,6 +449,10 @@ Before returning the article, silently verify:
 ✓ Maximum 3 CTAs in the entire article
 ✓ 2-3 internal link placeholders included
 ✓ Verdict answers: who should buy, who should skip, one reason to choose it
+✓ Pricing table has EXACT plan names and prices — not vague ranges
+✓ At least 3 cons — each one specific and verifiable, not generic
+✓ "Who it is NOT for" section has at least 2 specific creator types with reasons
+✓ No section sounds like a brochure — every claim is grounded in specifics
 
 If any check fails, fix it before returning.
 
