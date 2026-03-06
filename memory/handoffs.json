@@ -116,11 +116,12 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 70,
-      "hero_alt_text": "Social media manager using Canva review 2026 to create engaging content on laptop",
-      "hero_source": "Pexels \u2014 'social media manager creating content'",
-      "screenshot_media_id": 71,
-      "screenshot_alt_text": "Canva dashboard interface showing design templates and social media management tools"
+      "hero_media_id": 72,
+      "hero_alt_text": "Social media manager using Canva review tool for creating engaging content in 2026",
+      "hero_source": "Pexels \u2014 'social media manager designing'",
+      "screenshot_media_id": 73,
+      "screenshot_alt_text": "Canva interface screenshot showing design tools and templates for social media managers",
+      "screenshot_injected": true
     },
     "images_date": "2026-03-06"
   },

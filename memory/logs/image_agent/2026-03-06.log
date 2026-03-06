@@ -361,3 +361,18 @@ Call log:
 2026-03-06 23:19:46 —   ✅ Screenshot uploaded — media ID: 71
 2026-03-06 23:19:46 —   ✅ COMPLETE — hero + screenshot ready
 2026-03-06 23:19:46 — Image Agent complete — Complete: 1 | Partial: 0 | Failed: 0
+2026-03-06 23:33:50 — Image Agent starting
+2026-03-06 23:33:50 — Found 1 articles needing images (including partials)
+2026-03-06 23:33:50 — Processing: Canva | hero: ❌ | screenshot: ❌
+2026-03-06 23:33:53 —   Trying Pexels: 'social media manager designing'
+2026-03-06 23:33:55 —   Pexels: got image (208KB) for 'social media manager designing'
+2026-03-06 23:33:55 —   ✅ Hero quality check: passed (208KB from Pexels)
+2026-03-06 23:34:00 —   Uploaded → WordPress media ID: 72
+2026-03-06 23:34:01 —   ✅ Featured image set on post 14
+2026-03-06 23:34:01 —   Screenshotting: https://www.canva.com/design/
+2026-03-06 23:34:18 —   ✅ Screenshot quality: passed (28KB)
+2026-03-06 23:34:20 —   Uploaded → WordPress media ID: 73
+2026-03-06 23:34:20 —   ✅ Screenshot uploaded — media ID: 73
+2026-03-06 23:34:22 —   ✅ Screenshot injected into article body
+2026-03-06 23:34:22 —   ✅ COMPLETE — hero + screenshot ready
+2026-03-06 23:34:22 — Image Agent complete — Complete: 1 | Partial: 0 | Failed: 0

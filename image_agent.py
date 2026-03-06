@@ -108,6 +108,65 @@ def check_screenshot_quality(image_bytes: bytes) -> tuple[bool, str]:
         return False, f"low quality screenshot ({size // 1024}KB)"
     return True, f"passed ({size // 1024}KB)"
 
+# ── Screenshot HTML injection ─────────────────────────────────────────────────
+def build_screenshot_html(image_url: str, alt_text: str, tool_name: str) -> str:
+    """Build a styled screenshot block to inject after the first paragraph."""
+    return f"""
+<figure style="margin: 2em 0; text-align: center;">
+  <img
+    src="{image_url}"
+    alt="{alt_text}"
+    style="width: 100%; max-width: 900px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 12px rgba(0,0,0,0.10);"
+    loading="lazy"
+  />
+  <figcaption style="margin-top: 0.6em; font-size: 0.92em; color: #666; font-style: italic;">
+    {tool_name} — what you see when you log in
+  </figcaption>
+</figure>"""
+
+def inject_screenshot_into_article(article_html: str, screenshot_html: str) -> str:
+    """
+    Inject screenshot block after the first closing </p> tag.
+    This puts it right after the intro paragraph — the ideal position.
+    Falls back to prepending if no </p> found.
+    """
+    first_p_end = article_html.find("</p>")
+    if first_p_end == -1:
+        log("  Could not find </p> — prepending screenshot")
+        return screenshot_html + article_html
+
+    insert_pos = first_p_end + len("</p>")
+    return article_html[:insert_pos] + "\n" + screenshot_html + article_html[insert_pos:]
+
+def update_wp_post_content(wp_post_id: int, new_html: str) -> bool:
+    """Update the post content in WordPress with the injected screenshot."""
+    try:
+        response = requests.post(
+            f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
+            json={"content": new_html},
+            auth=wp_auth(),
+            timeout=15
+        )
+        return response.status_code in (200, 201)
+    except Exception as e:
+        log(f"  WordPress content update failed: {e}")
+        return False
+
+def get_media_url(media_id: int) -> str | None:
+    """Get the full URL of an uploaded media item."""
+    try:
+        response = requests.get(
+            f"{WP_URL}/wp-json/wp/v2/media/{media_id}",
+            auth=wp_auth(),
+            timeout=10
+        )
+        if response.status_code == 200:
+            return response.json().get("source_url")
+        return None
+    except Exception as e:
+        log(f"  Could not get media URL: {e}")
+        return None
+
 # ── Step 1: Claude generates smart search queries ─────────────────────────────
 def get_image_search_query(tool_name: str, article_title: str, keyword: str) -> dict:
     prompt = f"""You are helping find the perfect hero image for an affiliate review article.
@@ -154,7 +213,6 @@ RESPOND IN THIS EXACT JSON FORMAT only — no explanation outside the JSON:
 
 # ── Step 2: Fetch hero image ──────────────────────────────────────────────────
 def fetch_pexels_image(query: str) -> bytes | None:
-    """Fetch image via official Pexels API."""
     try:
         headers  = {"Authorization": PEXELS_API_KEY}
         params   = {"query": query, "per_page": 5,
@@ -166,36 +224,30 @@ def fetch_pexels_image(query: str) -> bytes | None:
         if response.status_code != 200:
             log(f"  Pexels API error: {response.status_code}")
             return None
-
         photos = response.json().get("photos", [])
         if not photos:
             log(f"  Pexels: no results for '{query}'")
             return None
-
-        # Pick first photo, grab large2x size
-        photo_url = photos[0]["src"]["large2x"]
-        img       = requests.get(photo_url, timeout=15)
+        img = requests.get(photos[0]["src"]["large2x"], timeout=15)
         if img.status_code == 200:
             log(f"  Pexels: got image ({len(img.content) // 1024}KB) for '{query}'")
             return img.content
         return None
-
     except Exception as e:
         log(f"  Pexels fetch failed: {e}")
         return None
 
 def fetch_pixabay_image(query: str) -> bytes | None:
-    """Fetch image via official Pixabay API."""
     try:
         params = {
-            "key":          PIXABAY_API_KEY,
-            "q":            query,
-            "image_type":   "photo",
-            "orientation":  "horizontal",
-            "category":     "people,technology,business",
-            "min_width":    1200,
-            "per_page":     5,
-            "safesearch":   "true"
+            "key":         PIXABAY_API_KEY,
+            "q":           query,
+            "image_type":  "photo",
+            "orientation": "horizontal",
+            "category":    "people,technology,business",
+            "min_width":   1200,
+            "per_page":    5,
+            "safesearch":  "true"
         }
         response = requests.get(
             "https://pixabay.com/api/",
@@ -204,39 +256,28 @@ def fetch_pixabay_image(query: str) -> bytes | None:
         if response.status_code != 200:
             log(f"  Pixabay API error: {response.status_code}")
             return None
-
         hits = response.json().get("hits", [])
         if not hits:
             log(f"  Pixabay: no results for '{query}'")
             return None
-
-        # Pick first hit, grab largeImageURL
-        img_url  = hits[0]["largeImageURL"]
-        img      = requests.get(img_url, timeout=15)
+        img = requests.get(hits[0]["largeImageURL"], timeout=15)
         if img.status_code == 200:
             log(f"  Pixabay: got image ({len(img.content) // 1024}KB) for '{query}'")
             return img.content
         return None
-
     except Exception as e:
         log(f"  Pixabay fetch failed: {e}")
         return None
 
 def get_hero_image(queries: dict) -> tuple[bytes | None, str]:
-    """
-    Try Pexels then Pixabay across three queries.
-    Quality checked at every step.
-    Returns (image_bytes, source_description) or (None, reason).
-    """
     attempts = [
-        ("Pexels",   fetch_pexels_image,   queries["primary_query"]),
-        ("Pexels",   fetch_pexels_image,   queries["fallback_query"]),
-        ("Pixabay",  fetch_pixabay_image,  queries["primary_query"]),
-        ("Pixabay",  fetch_pixabay_image,  queries["fallback_query"]),
-        ("Pexels",   fetch_pexels_image,   queries["last_resort_query"]),
-        ("Pixabay",  fetch_pixabay_image,  queries["last_resort_query"]),
+        ("Pexels",  fetch_pexels_image,  queries["primary_query"]),
+        ("Pexels",  fetch_pexels_image,  queries["fallback_query"]),
+        ("Pixabay", fetch_pixabay_image, queries["primary_query"]),
+        ("Pixabay", fetch_pixabay_image, queries["fallback_query"]),
+        ("Pexels",  fetch_pexels_image,  queries["last_resort_query"]),
+        ("Pixabay", fetch_pixabay_image, queries["last_resort_query"]),
     ]
-
     for source, fetcher, query in attempts:
         log(f"  Trying {source}: '{query}'")
         image_bytes = fetcher(query)
@@ -247,12 +288,10 @@ def get_hero_image(queries: dict) -> tuple[bytes | None, str]:
                 return image_bytes, f"{source} — '{query}'"
             else:
                 log(f"  ❌ Hero rejected: {reason} — trying next")
-
     return None, "all sources exhausted"
 
 # ── Step 3: Screenshot tool website ──────────────────────────────────────────
 def screenshot_tool(tool_name: str) -> bytes | None:
-    """Take a screenshot of the tool's app/feature page."""
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
@@ -261,23 +300,18 @@ def screenshot_tool(tool_name: str) -> bytes | None:
 
     tool_key = tool_name.lower()
     url      = TOOL_URLS.get(tool_key)
-
     if not url:
         slug = re.sub(r"[^a-z0-9]", "", tool_key)
         url  = f"https://www.{slug}.com"
         log(f"  No specific URL for {tool_name} — trying {url}")
 
     log(f"  Screenshotting: {url}")
-
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page    = browser.new_page(viewport={"width": 1280, "height": 800})
-
             page.goto(url, wait_until="domcontentloaded", timeout=20000)
             time.sleep(2)
-
-            # Dismiss cookie banners
             for selector in [
                 "[id*='cookie'] button", "[class*='cookie'] button",
                 "button:has-text('Accept')", "button:has-text('Got it')",
@@ -288,18 +322,14 @@ def screenshot_tool(tool_name: str) -> bytes | None:
                     break
                 except Exception:
                     pass
-
             screenshot_bytes = page.screenshot(type="jpeg", quality=85)
             browser.close()
-
             passed, reason = check_screenshot_quality(screenshot_bytes)
             if not passed:
                 log(f"  ❌ Screenshot quality failed: {reason}")
                 return None
-
             log(f"  ✅ Screenshot quality: {reason}")
             return screenshot_bytes
-
     except Exception as e:
         log(f"  Screenshot failed for {tool_name}: {e}")
         return None
@@ -396,7 +426,6 @@ def run():
                     images_data["hero_media_id"] = hero_id
                     images_data["hero_alt_text"]  = queries["hero_alt_text"]
                     images_data["hero_source"]    = source
-
                     if wp_post_id:
                         if set_featured_image(wp_post_id, hero_id):
                             log(f"  ✅ Featured image set on post {wp_post_id}")
@@ -420,6 +449,42 @@ def run():
                     images_data["screenshot_media_id"] = shot_id
                     images_data["screenshot_alt_text"]  = queries["screenshot_alt_text"]
                     log(f"  ✅ Screenshot uploaded — media ID: {shot_id}")
+
+                    # ── Inject screenshot into article body ──
+                    if wp_post_id:
+                        media_url = get_media_url(shot_id)
+                        if media_url:
+                            # Get current post content
+                            post_response = requests.get(
+                                f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
+                                auth=wp_auth(), timeout=10
+                            )
+                            if post_response.status_code == 200:
+                                current_html = post_response.json().get("content", {}).get("raw", "")
+                                if not current_html:
+                                    # Try rendered if raw is empty
+                                    current_html = post_response.json().get("content", {}).get("rendered", "")
+
+                                if current_html:
+                                    screenshot_block = build_screenshot_html(
+                                        media_url,
+                                        queries["screenshot_alt_text"],
+                                        tool_name
+                                    )
+                                    updated_html = inject_screenshot_into_article(
+                                        current_html, screenshot_block
+                                    )
+                                    if update_wp_post_content(wp_post_id, updated_html):
+                                        log(f"  ✅ Screenshot injected into article body")
+                                        images_data["screenshot_injected"] = True
+                                    else:
+                                        log(f"  ⚠️  Could not inject screenshot into article")
+                                else:
+                                    log(f"  ⚠️  Could not retrieve article content for injection")
+                        else:
+                            log(f"  ⚠️  Could not get media URL for injection")
+                    else:
+                        log(f"  ℹ️  No wp_post_id yet — screenshot injection queued for publish time")
             else:
                 log(f"  ❌ Screenshot failed — will retry next run")
 
