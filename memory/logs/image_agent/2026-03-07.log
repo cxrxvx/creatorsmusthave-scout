@@ -1,0 +1,35 @@
+2026-03-07 00:01:11 — Image Agent starting
+2026-03-07 00:01:11 — Found 1 articles needing images (including partials)
+2026-03-07 00:01:11 — Processing: Canva | hero: ❌ | screenshot: ❌
+2026-03-07 00:01:14 —   Trying Pexels: 'designer creating social media'
+2026-03-07 00:01:17 —   Pexels: got image (117KB) for 'designer creating social media'
+2026-03-07 00:01:17 —   ✅ Hero quality check: passed (117KB from Pexels)
+2026-03-07 00:01:21 —   Uploaded → WordPress media ID: 75
+2026-03-07 00:01:22 —   ✅ Featured image set on post 14
+2026-03-07 00:01:22 —   Screenshotting: https://www.canva.com/templates/
+2026-03-07 00:01:42 —   ❌ Screenshot quality failed: too small — likely bot challenge page or near-empty (28KB) — minimum is 60KB
+2026-03-07 00:01:42 —   ❌ Screenshot failed — will retry next run
+2026-03-07 00:01:42 —   ⚠️  PARTIAL — hero only — retrying next run
+2026-03-07 00:01:42 — Image Agent complete — Complete: 0 | Partial: 1 | Failed: 0
+2026-03-07 00:16:39 — Image Agent starting
+2026-03-07 00:16:39 — Found 1 articles needing images (including partials)
+2026-03-07 00:16:39 — Processing: Canva | hero: ❌ | screenshot: ❌ | logo: ❌
+2026-03-07 00:16:42 —   Trying Pexels: 'social media manager designing'
+2026-03-07 00:16:43 —   Pexels: got image (208KB) for 'social media manager designing'
+2026-03-07 00:16:43 —   ✅ Hero quality check: passed (208KB from Pexels)
+2026-03-07 00:16:47 —   Uploaded → WordPress media ID: 76
+2026-03-07 00:16:48 —   ✅ Featured image set on post 14
+2026-03-07 00:16:48 —   Fetching logo: https://logo.clearbit.com/canva.com
+2026-03-07 00:16:48 —   Logo fetch failed for Canva: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /canva.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 00:16:48 —   ⚠️  Logo not found for Canva — article still fine without it
+2026-03-07 00:16:48 —   Screenshotting: https://www.canva.com/templates/
+2026-03-07 00:17:06 —   ❌ Screenshot quality failed: too small — likely bot challenge page (28KB) — minimum is 60KB
+2026-03-07 00:17:06 —   Screenshot failed — trying press kit fallback for Canva
+2026-03-07 00:17:06 —   Trying press kit: https://www.canva.com/newsroom/
+2026-03-07 00:17:08 —   Found 32 candidate image URLs on press kit page
+2026-03-07 00:17:09 —   ✅ Press kit image found: passed (137KB) — https://content-management-files.canva.com/4df337f7-4cee-4b6...
+2026-03-07 00:17:12 —   Uploaded → WordPress media ID: 77
+2026-03-07 00:17:12 —   ✅ Tool image uploaded (press_kit) — media ID: 77
+2026-03-07 00:17:14 —   ✅ Image injected into article body
+2026-03-07 00:17:14 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 00:17:14 — Image Agent complete — Complete: 1 | Partial: 0 | Failed: 0

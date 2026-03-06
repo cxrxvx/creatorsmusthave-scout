@@ -116,14 +116,15 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 72,
-      "hero_alt_text": "Social media manager using Canva review tool for creating engaging content in 2026",
+      "hero_media_id": 76,
+      "hero_alt_text": "Social media manager using Canva review interface to create engaging content in 2026",
       "hero_source": "Pexels \u2014 'social media manager designing'",
-      "screenshot_media_id": 73,
-      "screenshot_alt_text": "Canva interface screenshot showing design tools and templates for social media managers",
+      "screenshot_media_id": 77,
+      "screenshot_alt_text": "Canva dashboard interface showing design tools for social media managers",
+      "screenshot_source": "press_kit",
       "screenshot_injected": true
     },
-    "images_date": "2026-03-06"
+    "images_date": "2026-03-07"
   },
   "descript-review-youtube-creators": {
     "tool_name": "Descript",

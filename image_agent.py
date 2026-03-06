@@ -5,6 +5,7 @@ import time
 import requests
 from datetime import datetime
 from anthropic import Anthropic
+from bs4 import BeautifulSoup
 
 # ── Config ────────────────────────────────────────────────────────────────────
 try:
@@ -28,16 +29,18 @@ LOGS_DIR    = os.path.join(MEMORY_DIR, "logs", "image_agent")
 DAILY_CAP   = 15
 
 # ── Quality thresholds ────────────────────────────────────────────────────────
-MIN_HERO_BYTES       = 50 * 1024
-MIN_HERO_REJECTS     = 20 * 1024
-MIN_SCREENSHOT_BYTES = 25 * 1024
-LOGIN_WALL_BYTES     = 15 * 1024
+MIN_HERO_BYTES       = 50 * 1024   # Hero image minimum: 50KB
+MIN_HERO_REJECTS     = 20 * 1024   # Hero hard reject below 20KB
+MIN_SCREENSHOT_BYTES = 60 * 1024   # Raised from 25KB — catches Cloudflare/login walls
+LOGIN_WALL_BYTES     = 15 * 1024   # Blank/login wall hard reject below 15KB
+MIN_PRESSKIT_BYTES   = 30 * 1024   # Press kit images can be smaller but still real
+MIN_LOGO_BYTES       =  2 * 1024   # Logos are small by nature — just reject blank/broken
 
 os.makedirs(LOGS_DIR, exist_ok=True)
 
 # ── Tool URL map ──────────────────────────────────────────────────────────────
 TOOL_URLS = {
-    "canva":                    "https://www.canva.com/design/",
+    "canva":                    "https://www.canva.com/templates/",
     "descript":                 "https://web.descript.com",
     "elevenlabs":               "https://elevenlabs.io/app/speech-synthesis",
     "riverside":                "https://riverside.fm",
@@ -70,6 +73,63 @@ TOOL_URLS = {
     "spoke":                    "https://www.spoke.app",
 }
 
+# ── Press kit / media page URLs ───────────────────────────────────────────────
+# Used as fallback when Playwright screenshot is blocked by bot protection.
+# These pages contain official product images — often better than screenshots.
+PRESS_KIT_URLS = {
+    "canva":        "https://www.canva.com/newsroom/",
+    "notion":       "https://www.notion.so/about",
+    "kajabi":       "https://kajabi.com/press",
+    "beehiiv":      "https://www.beehiiv.com/press",
+    "convertkit":   "https://convertkit.com/press",
+    "loom":         "https://www.loom.com/press",
+    "typeform":     "https://www.typeform.com/press/",
+    "surfer seo":   "https://surferseo.com/press/",
+    "surfer":       "https://surferseo.com/press/",
+    "descript":     "https://www.descript.com/press",
+    "synthesia":    "https://www.synthesia.io/press",
+    "buzzsprout":   "https://www.buzzsprout.com/press",
+    "later":        "https://later.com/press/",
+    "teachable":    "https://teachable.com/press",
+    "jasper ai":    "https://www.jasper.ai/press",
+    "elevenlabs":   "https://elevenlabs.io/press",
+}
+
+# ── Human-readable page labels for screenshot captions ───────────────────────
+TOOL_PAGE_LABELS = {
+    "canva":                    "template gallery",
+    "descript":                 "editor dashboard",
+    "elevenlabs":               "speech synthesis studio",
+    "riverside":                "recording studio",
+    "riverside.fm":             "recording studio",
+    "convertkit":               "creator dashboard",
+    "beehiiv":                  "newsletter dashboard",
+    "kajabi":                   "course builder",
+    "notion":                   "template gallery",
+    "loom":                     "video library",
+    "opus clip":                "AI clip creator",
+    "pictory":                  "video editor",
+    "buzzsprout":               "podcast dashboard",
+    "surfer seo":               "content editor",
+    "surfer":                   "content editor",
+    "podcastle":                "recording studio",
+    "synthesia":                "AI avatar creator",
+    "otter.ai":                 "transcription dashboard",
+    "later":                    "social media scheduler",
+    "stan store":               "creator storefront",
+    "gumroad":                  "creator dashboard",
+    "typeform":                 "form template gallery",
+    "metricool":                "analytics dashboard",
+    "teachable":                "course examples",
+    "jasper ai":                "AI writing dashboard",
+    "krisp":                    "noise cancellation settings",
+    "krisp accent conversion":  "accent conversion settings",
+    "coursekit":                "course platform",
+    "willow":                   "voice assistant dashboard",
+    "willow voice for teams":   "team dashboard",
+    "spoke":                    "meeting intelligence dashboard",
+}
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def load_json(path, default):
     if os.path.exists(path):
@@ -91,6 +151,97 @@ def log(msg):
 def wp_auth():
     return (WP_USERNAME, WP_APP_PASSWORD)
 
+def get_screenshot_caption(tool_name: str) -> str:
+    """Returns a smart caption based on what page was actually screenshotted."""
+    tool_key = tool_name.lower()
+    page_label = TOOL_PAGE_LABELS.get(tool_key, "interface")
+    return f"{tool_name} — {page_label}"
+
+# ── Logo fetcher (Clearbit) ───────────────────────────────────────────────────
+# Clearbit returns any company logo as a clean PNG just from the domain.
+# Free, no API key, completely legitimate. Perfect for bot-blocking tools.
+TOOL_DOMAINS = {
+    "canva":                    "canva.com",
+    "descript":                 "descript.com",
+    "elevenlabs":               "elevenlabs.io",
+    "riverside":                "riverside.fm",
+    "riverside.fm":             "riverside.fm",
+    "convertkit":               "convertkit.com",
+    "beehiiv":                  "beehiiv.com",
+    "kajabi":                   "kajabi.com",
+    "notion":                   "notion.so",
+    "loom":                     "loom.com",
+    "opus clip":                "opus.pro",
+    "pictory":                  "pictory.ai",
+    "buzzsprout":               "buzzsprout.com",
+    "surfer seo":               "surferseo.com",
+    "surfer":                   "surferseo.com",
+    "podcastle":                "podcastle.ai",
+    "synthesia":                "synthesia.io",
+    "otter.ai":                 "otter.ai",
+    "later":                    "later.com",
+    "stan store":               "stanwith.me",
+    "gumroad":                  "gumroad.com",
+    "typeform":                 "typeform.com",
+    "metricool":                "metricool.com",
+    "teachable":                "teachable.com",
+    "jasper ai":                "jasper.ai",
+    "krisp":                    "krisp.ai",
+    "krisp accent conversion":  "krisp.ai",
+    "coursekit":                "coursekit.io",
+    "willow":                   "willow.app",
+    "willow voice for teams":   "willow.app",
+    "spoke":                    "spoke.app",
+}
+
+def fetch_logo(tool_name: str) -> bytes | None:
+    """
+    Fetch tool logo via Clearbit Logo API.
+    Returns a clean PNG logo for any tool just from its domain.
+    Free, no API key required, completely legitimate.
+    Example: https://logo.clearbit.com/canva.com → Canva logo PNG
+    """
+    tool_key = tool_name.lower()
+    domain   = TOOL_DOMAINS.get(tool_key)
+
+    if not domain:
+        # Try to guess domain from tool name as fallback
+        slug   = re.sub(r"[^a-z0-9]", "", tool_key)
+        domain = f"{slug}.com"
+        log(f"  No domain mapping for {tool_name} — guessing {domain}")
+
+    url = f"https://logo.clearbit.com/{domain}"
+    log(f"  Fetching logo: {url}")
+
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            size = len(response.content)
+            if size >= MIN_LOGO_BYTES:
+                log(f"  ✅ Logo fetched ({size // 1024}KB) for {tool_name}")
+                return response.content
+            else:
+                log(f"  ❌ Logo too small ({size}B) — likely placeholder")
+                return None
+        else:
+            log(f"  ❌ Clearbit returned {response.status_code} for {domain}")
+            return None
+    except Exception as e:
+        log(f"  Logo fetch failed for {tool_name}: {e}")
+        return None
+
+def build_logo_html(image_url: str, tool_name: str) -> str:
+    """Build a small centred logo block to inject at the very top of the article."""
+    return f"""
+<div style="text-align: center; margin: 1em 0 2em 0;">
+  <img
+    src="{image_url}"
+    alt="{tool_name} logo"
+    style="height: 48px; width: auto; object-fit: contain;"
+    loading="lazy"
+  />
+</div>"""
+
 # ── Quality checks ────────────────────────────────────────────────────────────
 def check_hero_quality(image_bytes: bytes, source: str) -> tuple[bool, str]:
     size = len(image_bytes)
@@ -105,12 +256,19 @@ def check_screenshot_quality(image_bytes: bytes) -> tuple[bool, str]:
     if size < LOGIN_WALL_BYTES:
         return False, f"likely login wall or blank page ({size // 1024}KB)"
     if size < MIN_SCREENSHOT_BYTES:
-        return False, f"low quality screenshot ({size // 1024}KB)"
+        return False, f"too small — likely bot challenge page ({size // 1024}KB) — minimum is 60KB"
+    return True, f"passed ({size // 1024}KB)"
+
+def check_presskit_quality(image_bytes: bytes) -> tuple[bool, str]:
+    size = len(image_bytes)
+    if size < MIN_PRESSKIT_BYTES:
+        return False, f"too small for press kit image ({size // 1024}KB)"
     return True, f"passed ({size // 1024}KB)"
 
 # ── Screenshot HTML injection ─────────────────────────────────────────────────
 def build_screenshot_html(image_url: str, alt_text: str, tool_name: str) -> str:
-    """Build a styled screenshot block to inject after the first paragraph."""
+    """Build a styled image block to inject after the first paragraph."""
+    caption = get_screenshot_caption(tool_name)
     return f"""
 <figure style="margin: 2em 0; text-align: center;">
   <img
@@ -120,26 +278,20 @@ def build_screenshot_html(image_url: str, alt_text: str, tool_name: str) -> str:
     loading="lazy"
   />
   <figcaption style="margin-top: 0.6em; font-size: 0.92em; color: #666; font-style: italic;">
-    {tool_name} — what you see when you log in
+    {caption}
   </figcaption>
 </figure>"""
 
 def inject_screenshot_into_article(article_html: str, screenshot_html: str) -> str:
-    """
-    Inject screenshot block after the first closing </p> tag.
-    This puts it right after the intro paragraph — the ideal position.
-    Falls back to prepending if no </p> found.
-    """
+    """Inject image block after the first closing </p> tag."""
     first_p_end = article_html.find("</p>")
     if first_p_end == -1:
         log("  Could not find </p> — prepending screenshot")
         return screenshot_html + article_html
-
     insert_pos = first_p_end + len("</p>")
     return article_html[:insert_pos] + "\n" + screenshot_html + article_html[insert_pos:]
 
 def update_wp_post_content(wp_post_id: int, new_html: str) -> bool:
-    """Update the post content in WordPress with the injected screenshot."""
     try:
         response = requests.post(
             f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
@@ -153,7 +305,6 @@ def update_wp_post_content(wp_post_id: int, new_html: str) -> bool:
         return False
 
 def get_media_url(media_id: int) -> str | None:
-    """Get the full URL of an uploaded media item."""
     try:
         response = requests.get(
             f"{WP_URL}/wp-json/wp/v2/media/{media_id}",
@@ -290,7 +441,7 @@ def get_hero_image(queries: dict) -> tuple[bytes | None, str]:
                 log(f"  ❌ Hero rejected: {reason} — trying next")
     return None, "all sources exhausted"
 
-# ── Step 3: Screenshot tool website ──────────────────────────────────────────
+# ── Step 3a: Screenshot tool website ─────────────────────────────────────────
 def screenshot_tool(tool_name: str) -> bytes | None:
     try:
         from playwright.sync_api import sync_playwright
@@ -333,6 +484,98 @@ def screenshot_tool(tool_name: str) -> bytes | None:
     except Exception as e:
         log(f"  Screenshot failed for {tool_name}: {e}")
         return None
+
+# ── Step 3b: Press kit fallback ───────────────────────────────────────────────
+def fetch_presskit_image(tool_name: str) -> bytes | None:
+    """
+    Fallback for tools that block Playwright (Canva, Notion, etc.)
+    Fetches their press/newsroom page and finds the best product image.
+    Looks for large .png/.jpg/.webp images that are likely product shots.
+    """
+    tool_key     = tool_name.lower()
+    presskit_url = PRESS_KIT_URLS.get(tool_key)
+
+    if not presskit_url:
+        log(f"  No press kit URL for {tool_name} — skipping press kit fallback")
+        return None
+
+    log(f"  Trying press kit: {presskit_url}")
+
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/120.0.0.0 Safari/537.36"
+        }
+        page_response = requests.get(presskit_url, headers=headers, timeout=15)
+        if page_response.status_code != 200:
+            log(f"  Press kit page returned {page_response.status_code}")
+            return None
+
+        soup = BeautifulSoup(page_response.text, "html.parser")
+        candidate_urls = []
+
+        # Check <img> tags
+        for img in soup.find_all("img"):
+            src = img.get("src") or img.get("data-src") or ""
+            if src and any(ext in src.lower() for ext in [".jpg", ".jpeg", ".png", ".webp"]):
+                if src.startswith("//"):
+                    src = "https:" + src
+                elif src.startswith("/"):
+                    from urllib.parse import urlparse
+                    base = urlparse(presskit_url)
+                    src = f"{base.scheme}://{base.netloc}{src}"
+                candidate_urls.append(src)
+
+        # Also check <a> tags linking directly to images
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if any(ext in href.lower() for ext in [".jpg", ".jpeg", ".png", ".webp"]):
+                if href.startswith("//"):
+                    href = "https:" + href
+                candidate_urls.append(href)
+
+        log(f"  Found {len(candidate_urls)} candidate image URLs on press kit page")
+
+        # Try each candidate — return first one that passes quality check
+        for img_url in candidate_urls[:15]:
+            try:
+                img_response = requests.get(img_url, headers=headers, timeout=10)
+                if img_response.status_code == 200:
+                    image_bytes = img_response.content
+                    passed, reason = check_presskit_quality(image_bytes)
+                    if passed:
+                        log(f"  ✅ Press kit image found: {reason} — {img_url[:60]}...")
+                        return image_bytes
+                    else:
+                        log(f"  ↩️  Skipping small image: {reason}")
+            except Exception:
+                continue
+
+        log(f"  ❌ No usable images found on press kit page")
+        return None
+
+    except Exception as e:
+        log(f"  Press kit fetch failed for {tool_name}: {e}")
+        return None
+
+# ── Step 3: Get best available tool image ─────────────────────────────────────
+def get_tool_image(tool_name: str) -> tuple[bytes | None, str]:
+    """
+    Try Playwright screenshot first.
+    If blocked or low quality, fall back to press kit page.
+    Returns (image_bytes, source_label).
+    """
+    shot_bytes = screenshot_tool(tool_name)
+    if shot_bytes:
+        return shot_bytes, "screenshot"
+
+    log(f"  Screenshot failed — trying press kit fallback for {tool_name}")
+    presskit_bytes = fetch_presskit_image(tool_name)
+    if presskit_bytes:
+        return presskit_bytes, "press_kit"
+
+    return None, "all sources failed"
 
 # ── Step 4: Upload to WordPress ───────────────────────────────────────────────
 def upload_to_wordpress(
@@ -407,8 +650,9 @@ def run():
         existing = article.get("image_data", {})
         has_hero = bool(existing.get("hero_media_id"))
         has_shot = bool(existing.get("screenshot_media_id"))
+        has_logo = bool(existing.get("logo_media_id"))
 
-        log(f"Processing: {tool_name} | hero: {'✅' if has_hero else '❌'} | screenshot: {'✅' if has_shot else '❌'}")
+        log(f"Processing: {tool_name} | hero: {'✅' if has_hero else '❌'} | screenshot: {'✅' if has_shot else '❌'} | logo: {'✅' if has_logo else '❌'}")
 
         queries     = get_image_search_query(tool_name, title, keyword)
         images_data = existing.copy()
@@ -436,9 +680,43 @@ def run():
             else:
                 log(f"  ❌ All hero sources exhausted for {tool_name}")
 
-        # ── Screenshot ──
+        # ── Logo (Clearbit) ──
+        if not has_logo:
+            logo_bytes = fetch_logo(tool_name)
+            if logo_bytes:
+                logo_id = upload_to_wordpress(
+                    logo_bytes, f"{slug}-logo.png",
+                    f"{tool_name} logo",
+                    caption=f"{tool_name} logo"
+                )
+                if logo_id:
+                    images_data["logo_media_id"] = logo_id
+                    log(f"  ✅ Logo uploaded — media ID: {logo_id}")
+
+                    # Inject logo at very top of article (before hero paragraph)
+                    if wp_post_id:
+                        logo_url = get_media_url(logo_id)
+                        if logo_url:
+                            post_response = requests.get(
+                                f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
+                                auth=wp_auth(), timeout=10
+                            )
+                            if post_response.status_code == 200:
+                                current_html = post_response.json().get("content", {}).get("raw", "")
+                                if not current_html:
+                                    current_html = post_response.json().get("content", {}).get("rendered", "")
+                                if current_html:
+                                    logo_block   = build_logo_html(logo_url, tool_name)
+                                    updated_html = logo_block + current_html
+                                    if update_wp_post_content(wp_post_id, updated_html):
+                                        log(f"  ✅ Logo injected at top of article")
+                                        images_data["logo_injected"] = True
+            else:
+                log(f"  ⚠️  Logo not found for {tool_name} — article still fine without it")
+
+        # ── Tool image: screenshot → press kit fallback ──
         if not has_shot:
-            shot_bytes = screenshot_tool(tool_name)
+            shot_bytes, shot_source = get_tool_image(tool_name)
             if shot_bytes:
                 shot_id = upload_to_wordpress(
                     shot_bytes, f"{slug}-screenshot.jpg",
@@ -448,13 +726,13 @@ def run():
                 if shot_id:
                     images_data["screenshot_media_id"] = shot_id
                     images_data["screenshot_alt_text"]  = queries["screenshot_alt_text"]
-                    log(f"  ✅ Screenshot uploaded — media ID: {shot_id}")
+                    images_data["screenshot_source"]    = shot_source
+                    log(f"  ✅ Tool image uploaded ({shot_source}) — media ID: {shot_id}")
 
-                    # ── Inject screenshot into article body ──
+                    # ── Inject into article body ──
                     if wp_post_id:
                         media_url = get_media_url(shot_id)
                         if media_url:
-                            # Get current post content
                             post_response = requests.get(
                                 f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
                                 auth=wp_auth(), timeout=10
@@ -462,7 +740,6 @@ def run():
                             if post_response.status_code == 200:
                                 current_html = post_response.json().get("content", {}).get("raw", "")
                                 if not current_html:
-                                    # Try rendered if raw is empty
                                     current_html = post_response.json().get("content", {}).get("rendered", "")
 
                                 if current_html:
@@ -475,22 +752,24 @@ def run():
                                         current_html, screenshot_block
                                     )
                                     if update_wp_post_content(wp_post_id, updated_html):
-                                        log(f"  ✅ Screenshot injected into article body")
+                                        log(f"  ✅ Image injected into article body")
                                         images_data["screenshot_injected"] = True
                                     else:
-                                        log(f"  ⚠️  Could not inject screenshot into article")
+                                        log(f"  ⚠️  Could not inject image into article")
                                 else:
                                     log(f"  ⚠️  Could not retrieve article content for injection")
                         else:
                             log(f"  ⚠️  Could not get media URL for injection")
                     else:
-                        log(f"  ℹ️  No wp_post_id yet — screenshot injection queued for publish time")
+                        log(f"  ℹ️  No wp_post_id yet — injection queued for publish time")
             else:
-                log(f"  ❌ Screenshot failed — will retry next run")
+                log(f"  ❌ Screenshot + press kit both failed for {tool_name} — retrying next run")
 
         # ── Determine final status ──
+        # Hero is required. Logo and screenshot are bonuses — don't block completion.
         now_has_hero = bool(images_data.get("hero_media_id"))
         now_has_shot = bool(images_data.get("screenshot_media_id"))
+        now_has_logo = bool(images_data.get("logo_media_id"))
 
         article["image_data"]  = images_data
         article["images_date"] = datetime.now().strftime("%Y-%m-%d")
@@ -498,11 +777,16 @@ def run():
         if now_has_hero and now_has_shot:
             article["images_added"] = True
             success_count += 1
-            log(f"  ✅ COMPLETE — hero + screenshot ready")
-        elif now_has_hero or now_has_shot:
+            logo_note = " + logo" if now_has_logo else " (no logo)"
+            log(f"  ✅ COMPLETE — hero + tool image{logo_note}")
+        elif now_has_hero:
+            article["images_added"] = True   # hero alone = complete, screenshot is bonus
+            success_count += 1
+            log(f"  ✅ COMPLETE — hero image ready (screenshot optional)")
+        elif now_has_shot:
             article["images_added"] = "partial"
             partial_count += 1
-            log(f"  ⚠️  PARTIAL — {'hero only' if now_has_hero else 'screenshot only'} — retrying next run")
+            log(f"  ⚠️  PARTIAL — screenshot only, no hero — retrying next run")
         else:
             article["images_added"] = False
             fail_count += 1
