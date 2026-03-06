@@ -1,0 +1,363 @@
+2026-03-06 20:33:48 — Image Agent starting
+2026-03-06 20:33:48 — Found 26 articles needing images
+2026-03-06 20:33:48 — Processing images for: Coursekit
+2026-03-06 20:33:52 —   Hero query: 'online course creator laptop' | Fallback: 'educator teaching digital content'
+2026-03-06 20:33:53 —   Unsplash: no result for 'online course creator laptop'
+2026-03-06 20:33:53 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:33:57 —   Pexels: got image (82KB)
+2026-03-06 20:34:00 —   Uploaded to WordPress — media ID: 20
+2026-03-06 20:34:01 —   ✅ Featured image set on post 10
+2026-03-06 20:34:02 —   No specific URL for Coursekit — using https://www.coursekit.com
+2026-03-06 20:34:02 —   Screenshotting: https://www.coursekit.com
+2026-03-06 20:34:10 —   Screenshot failed for Coursekit: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.coursekit.com/
+Call log:
+  - navigating to "https://www.coursekit.com/", waiting until "domcontentloaded"
+
+2026-03-06 20:34:10 —   ⚠️  No screenshot for Coursekit — add manually in WordPress
+2026-03-06 20:34:10 —   ✅ Images complete for Coursekit
+2026-03-06 20:34:10 — Processing images for: Krisp Accent Conversion
+2026-03-06 20:34:13 —   Hero query: 'podcaster recording studio microphone' | Fallback: 'content creator headphones laptop'
+2026-03-06 20:34:14 —   Unsplash: no result for 'podcaster recording studio microphone'
+2026-03-06 20:34:14 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:34:17 —   Pexels: got image (59KB)
+2026-03-06 20:34:19 —   Uploaded to WordPress — media ID: 22
+2026-03-06 20:34:19 —   ✅ Featured image set on post 11
+2026-03-06 20:34:19 —   No specific URL for Krisp Accent Conversion — using https://www.krispaccentconversion.com
+2026-03-06 20:34:19 —   Screenshotting: https://www.krispaccentconversion.com
+2026-03-06 20:34:20 —   Screenshot failed for Krisp Accent Conversion: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.krispaccentconversion.com/
+Call log:
+  - navigating to "https://www.krispaccentconversion.com/", waiting until "domcontentloaded"
+
+2026-03-06 20:34:20 —   ⚠️  No screenshot for Krisp Accent Conversion — add manually in WordPress
+2026-03-06 20:34:20 —   ✅ Images complete for Krisp Accent Conversion
+2026-03-06 20:34:20 — Processing images for: Willow Voice for Teams
+2026-03-06 20:34:23 —   Hero query: 'team meeting transcription laptop' | Fallback: 'voice recording headset workspace'
+2026-03-06 20:34:24 —   Unsplash: no result for 'team meeting transcription laptop'
+2026-03-06 20:34:24 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:34:26 —   Pexels: got image (58KB)
+2026-03-06 20:34:29 —   Uploaded to WordPress — media ID: 24
+2026-03-06 20:34:30 —   ✅ Featured image set on post 12
+2026-03-06 20:34:30 —   No specific URL for Willow Voice for Teams — using https://www.willowvoiceforteams.com
+2026-03-06 20:34:30 —   Screenshotting: https://www.willowvoiceforteams.com
+2026-03-06 20:34:31 —   Screenshot failed for Willow Voice for Teams: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.willowvoiceforteams.com/
+Call log:
+  - navigating to "https://www.willowvoiceforteams.com/", waiting until "domcontentloaded"
+
+2026-03-06 20:34:31 —   ⚠️  No screenshot for Willow Voice for Teams — add manually in WordPress
+2026-03-06 20:34:31 —   ✅ Images complete for Willow Voice for Teams
+2026-03-06 20:34:31 — Processing images for: Spoke
+2026-03-06 20:34:34 —   Hero query: 'person dictating laptop microphone' | Fallback: 'writer speaking voice recording'
+2026-03-06 20:34:35 —   Unsplash: no result for 'person dictating laptop microphone'
+2026-03-06 20:34:35 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:34:37 —   Pexels: got image (44KB)
+2026-03-06 20:34:39 —   Uploaded to WordPress — media ID: 26
+2026-03-06 20:34:40 —   ✅ Featured image set on post 13
+2026-03-06 20:34:40 —   No specific URL for Spoke — using https://www.spoke.com
+2026-03-06 20:34:40 —   Screenshotting: https://www.spoke.com
+2026-03-06 20:34:52 —   Screenshot taken (49KB)
+2026-03-06 20:34:54 —   Uploaded to WordPress — media ID: 28
+2026-03-06 20:34:54 —   ✅ Screenshot uploaded — media ID: 28
+2026-03-06 20:34:54 —   ✅ Images complete for Spoke
+2026-03-06 20:34:54 — Processing images for: Canva
+2026-03-06 20:34:57 —   Hero query: 'social media manager creating' | Fallback: 'designer laptop content creation'
+2026-03-06 20:34:58 —   Unsplash: no result for 'social media manager creating'
+2026-03-06 20:34:58 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:35:01 —   Pexels: got image (75KB)
+2026-03-06 20:35:04 —   Uploaded to WordPress — media ID: 29
+2026-03-06 20:35:05 —   ✅ Featured image set on post 14
+2026-03-06 20:35:05 —   Screenshotting: https://www.canva.com/design/
+2026-03-06 20:35:17 —   Screenshot taken (28KB)
+2026-03-06 20:35:19 —   Uploaded to WordPress — media ID: 31
+2026-03-06 20:35:19 —   ✅ Screenshot uploaded — media ID: 31
+2026-03-06 20:35:19 —   ✅ Images complete for Canva
+2026-03-06 20:35:19 — Processing images for: Descript
+2026-03-06 20:35:31 —   Hero query: 'video creator editing laptop' | Fallback: 'YouTuber recording content studio'
+2026-03-06 20:35:32 —   Unsplash: no result for 'video creator editing laptop'
+2026-03-06 20:35:32 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:35:35 —   Pexels: got image (60KB)
+2026-03-06 20:35:37 —   Uploaded to WordPress — media ID: 32
+2026-03-06 20:35:37 —   ✅ Featured image set on post 15
+2026-03-06 20:35:37 —   Screenshotting: https://web.descript.com
+2026-03-06 20:35:56 —   Screenshot taken (32KB)
+2026-03-06 20:35:58 —   Uploaded to WordPress — media ID: 34
+2026-03-06 20:35:58 —   ✅ Screenshot uploaded — media ID: 34
+2026-03-06 20:35:58 —   ✅ Images complete for Descript
+2026-03-06 20:35:58 — Processing images for: ElevenLabs
+2026-03-06 20:36:01 —   Hero query: 'podcaster recording studio microphone' | Fallback: 'content creator audio headphones'
+2026-03-06 20:36:02 —   Unsplash: no result for 'podcaster recording studio microphone'
+2026-03-06 20:36:02 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:36:02 —   ⚠️  No hero image found for ElevenLabs
+2026-03-06 20:36:02 —   Screenshotting: https://elevenlabs.io/app/speech-synthesis
+2026-03-06 20:36:11 —   Screenshot taken (25KB)
+2026-03-06 20:36:14 —   Uploaded to WordPress — media ID: 35
+2026-03-06 20:36:14 —   ✅ Screenshot uploaded — media ID: 35
+2026-03-06 20:36:14 —   ✅ Images complete for ElevenLabs
+2026-03-06 20:36:14 — Processing images for: Riverside.fm
+2026-03-06 20:36:17 —   Hero query: 'podcaster recording studio microphone' | Fallback: 'content creator headphones laptop'
+2026-03-06 20:36:18 —   Unsplash: no result for 'podcaster recording studio microphone'
+2026-03-06 20:36:18 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:36:18 —   Pexels: got image (59KB)
+2026-03-06 20:36:20 —   Uploaded to WordPress — media ID: 36
+2026-03-06 20:36:21 —   ✅ Featured image set on post 17
+2026-03-06 20:36:21 —   No specific URL for Riverside.fm — using https://www.riversidefm.com
+2026-03-06 20:36:21 —   Screenshotting: https://www.riversidefm.com
+2026-03-06 20:36:23 —   Screenshot failed for Riverside.fm: Page.goto: net::ERR_CONNECTION_REFUSED at https://www.riversidefm.com/
+Call log:
+  - navigating to "https://www.riversidefm.com/", waiting until "domcontentloaded"
+
+2026-03-06 20:36:23 —   ⚠️  No screenshot for Riverside.fm — add manually in WordPress
+2026-03-06 20:36:23 —   ✅ Images complete for Riverside.fm
+2026-03-06 20:36:23 — Processing images for: ConvertKit
+2026-03-06 20:36:26 —   Hero query: 'creator writing newsletter laptop' | Fallback: 'small business email marketing'
+2026-03-06 20:36:26 —   Unsplash: no result for 'creator writing newsletter laptop'
+2026-03-06 20:36:26 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:36:30 —   Pexels: got image (32KB)
+2026-03-06 20:36:31 —   Uploaded to WordPress — media ID: 38
+2026-03-06 20:36:32 —   ✅ Featured image set on post 18
+2026-03-06 20:36:32 —   Screenshotting: https://app.convertkit.com
+2026-03-06 20:36:48 —   Screenshot taken (95KB)
+2026-03-06 20:36:50 —   Uploaded to WordPress — media ID: 40
+2026-03-06 20:36:50 —   ✅ Screenshot uploaded — media ID: 40
+2026-03-06 20:36:50 —   ✅ Images complete for ConvertKit
+2026-03-06 20:36:50 — Processing images for: Beehiiv
+2026-03-06 20:36:53 —   Hero query: 'creator writing newsletter laptop' | Fallback: 'content creator desk computer'
+2026-03-06 20:36:54 —   Unsplash: no result for 'creator writing newsletter laptop'
+2026-03-06 20:36:54 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:36:56 —   Pexels: got image (54KB)
+2026-03-06 20:36:59 —   Uploaded to WordPress — media ID: 41
+2026-03-06 20:37:00 —   ✅ Featured image set on post 19
+2026-03-06 20:37:00 —   Screenshotting: https://app.beehiiv.com
+2026-03-06 20:37:17 —   Screenshot taken (31KB)
+2026-03-06 20:37:20 —   Uploaded to WordPress — media ID: 43
+2026-03-06 20:37:20 —   ✅ Screenshot uploaded — media ID: 43
+2026-03-06 20:37:20 —   ✅ Images complete for Beehiiv
+2026-03-06 20:37:20 — Processing images for: Kajabi
+2026-03-06 20:37:23 —   Hero query: 'online course creator laptop' | Fallback: 'woman teaching online video'
+2026-03-06 20:37:24 —   Unsplash: no result for 'online course creator laptop'
+2026-03-06 20:37:24 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:37:27 —   Pexels: got image (39KB)
+2026-03-06 20:37:29 —   Uploaded to WordPress — media ID: 44
+2026-03-06 20:37:29 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:37:29 —   Screenshotting: https://app.kajabi.com
+2026-03-06 20:37:42 —   Screenshot taken (49KB)
+2026-03-06 20:37:44 —   Uploaded to WordPress — media ID: 45
+2026-03-06 20:37:44 —   ✅ Screenshot uploaded — media ID: 45
+2026-03-06 20:37:44 —   ✅ Images complete for Kajabi
+2026-03-06 20:37:44 — Processing images for: Notion
+2026-03-06 20:37:48 —   Hero query: 'content creator planning workspace' | Fallback: 'writer organizing digital notes'
+2026-03-06 20:37:49 —   Unsplash: no result for 'content creator planning workspace'
+2026-03-06 20:37:49 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:37:49 —   ⚠️  No hero image found for Notion
+2026-03-06 20:37:49 —   Screenshotting: https://www.notion.so/templates
+2026-03-06 20:37:59 —   Screenshot taken (90KB)
+2026-03-06 20:38:03 —   Uploaded to WordPress — media ID: 46
+2026-03-06 20:38:03 —   ✅ Screenshot uploaded — media ID: 46
+2026-03-06 20:38:03 —   ✅ Images complete for Notion
+2026-03-06 20:38:03 — Processing images for: Loom
+2026-03-06 20:38:06 —   Hero query: 'content creator recording video' | Fallback: 'person screen recording laptop'
+2026-03-06 20:38:07 —   Unsplash: no result for 'content creator recording video'
+2026-03-06 20:38:07 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:38:09 —   Pexels: got image (60KB)
+2026-03-06 20:38:11 —   Uploaded to WordPress — media ID: 47
+2026-03-06 20:38:11 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:38:11 —   Screenshotting: https://www.loom.com/looms/videos
+2026-03-06 20:38:30 —   Screenshot taken (43KB)
+2026-03-06 20:38:33 —   Uploaded to WordPress — media ID: 48
+2026-03-06 20:38:33 —   ✅ Screenshot uploaded — media ID: 48
+2026-03-06 20:38:33 —   ✅ Images complete for Loom
+2026-03-06 20:38:33 — Processing images for: Opus Clip
+2026-03-06 20:38:36 —   Hero query: 'creator editing video smartphone' | Fallback: 'content creator phone laptop'
+2026-03-06 20:38:37 —   Unsplash: no result for 'creator editing video smartphone'
+2026-03-06 20:38:37 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:38:43 —   Pexels: got image (62KB)
+2026-03-06 20:38:46 —   Uploaded to WordPress — media ID: 49
+2026-03-06 20:38:46 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:38:46 —   Screenshotting: https://www.opus.pro
+2026-03-06 20:38:59 —   Screenshot taken (102KB)
+2026-03-06 20:39:02 —   Uploaded to WordPress — media ID: 50
+2026-03-06 20:39:02 —   ✅ Screenshot uploaded — media ID: 50
+2026-03-06 20:39:02 —   ✅ Images complete for Opus Clip
+2026-03-06 20:39:02 — Processing images for: Pictory
+2026-03-06 20:39:05 —   Hero query: 'video creator editing laptop' | Fallback: 'youtube creator filming studio'
+2026-03-06 20:39:06 —   Unsplash: no result for 'video creator editing laptop'
+2026-03-06 20:39:06 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:39:08 —   Pexels: got image (59KB)
+2026-03-06 20:39:10 —   Uploaded to WordPress — media ID: 51
+2026-03-06 20:39:10 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:39:10 —   Screenshotting: https://app.pictory.ai
+2026-03-06 20:39:31 —   Screenshot taken (66KB)
+2026-03-06 20:39:35 —   Uploaded to WordPress — media ID: 52
+2026-03-06 20:39:35 —   ✅ Screenshot uploaded — media ID: 52
+2026-03-06 20:39:35 —   ✅ Images complete for Pictory
+2026-03-06 20:39:35 — Image Agent complete — Success: 15 | Failed: 0
+2026-03-06 20:40:55 — Image Agent starting
+2026-03-06 20:40:55 — Found 11 articles needing images
+2026-03-06 20:40:55 — Processing images for: Buzzsprout
+2026-03-06 20:40:58 —   Hero query: 'podcaster recording studio microphone' | Fallback: 'woman headphones microphone recording'
+2026-03-06 20:40:59 —   Unsplash: no result for 'podcaster recording studio microphone'
+2026-03-06 20:40:59 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:40:59 —   ⚠️  No hero image found for Buzzsprout
+2026-03-06 20:40:59 —   Screenshotting: https://www.buzzsprout.com
+2026-03-06 20:41:11 —   Screenshot taken (77KB)
+2026-03-06 20:41:16 —   Uploaded to WordPress — media ID: 53
+2026-03-06 20:41:16 —   ✅ Screenshot uploaded — media ID: 53
+2026-03-06 20:41:16 —   ✅ Images complete for Buzzsprout
+2026-03-06 20:41:16 — Processing images for: Surfer SEO
+2026-03-06 20:41:20 —   Hero query: 'blogger writing laptop desk' | Fallback: 'content writer computer working'
+2026-03-06 20:41:20 —   Unsplash: no result for 'blogger writing laptop desk'
+2026-03-06 20:41:20 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:41:21 —   ⚠️  No hero image found for Surfer SEO
+2026-03-06 20:41:21 —   Screenshotting: https://app.surferseo.com
+2026-03-06 20:41:37 —   Screenshot taken (42KB)
+2026-03-06 20:41:39 —   Uploaded to WordPress — media ID: 54
+2026-03-06 20:41:39 —   ✅ Screenshot uploaded — media ID: 54
+2026-03-06 20:41:39 —   ✅ Images complete for Surfer SEO
+2026-03-06 20:41:39 — Processing images for: Podcastle
+2026-03-06 20:41:42 —   Hero query: 'podcaster recording studio microphone' | Fallback: 'content creator headphones laptop'
+2026-03-06 20:41:43 —   Unsplash: no result for 'podcaster recording studio microphone'
+2026-03-06 20:41:43 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:41:44 —   Pexels: got image (59KB)
+2026-03-06 20:41:48 —   Uploaded to WordPress — media ID: 55
+2026-03-06 20:41:48 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:41:48 —   Screenshotting: https://podcastle.ai
+2026-03-06 20:41:56 —   Screenshot taken (83KB)
+2026-03-06 20:42:00 —   Uploaded to WordPress — media ID: 56
+2026-03-06 20:42:00 —   ✅ Screenshot uploaded — media ID: 56
+2026-03-06 20:42:00 —   ✅ Images complete for Podcastle
+2026-03-06 20:42:00 — Processing images for: Synthesia
+2026-03-06 20:42:03 —   Hero query: 'video creator studio laptop' | Fallback: 'content creator recording video'
+2026-03-06 20:42:04 —   Unsplash: no result for 'video creator studio laptop'
+2026-03-06 20:42:04 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:42:07 —   Pexels: got image (42KB)
+2026-03-06 20:42:09 —   Uploaded to WordPress — media ID: 57
+2026-03-06 20:42:09 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:42:09 —   Screenshotting: https://www.synthesia.io/features/avatars
+2026-03-06 20:42:20 —   Screenshot taken (114KB)
+2026-03-06 20:42:29 —   Uploaded to WordPress — media ID: 58
+2026-03-06 20:42:29 —   ✅ Screenshot uploaded — media ID: 58
+2026-03-06 20:42:29 —   ✅ Images complete for Synthesia
+2026-03-06 20:42:29 — Processing images for: Teachable
+2026-03-06 20:42:32 —   Hero query: 'online course creator laptop' | Fallback: 'content creator teaching computer'
+2026-03-06 20:42:33 —   Unsplash: no result for 'online course creator laptop'
+2026-03-06 20:42:33 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:42:36 —   Pexels: got image (71KB)
+2026-03-06 20:42:40 —   Uploaded to WordPress — media ID: 59
+2026-03-06 20:42:40 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:42:40 —   Screenshotting: https://teachable.com/examples
+2026-03-06 20:42:52 —   Screenshot taken (64KB)
+2026-03-06 20:42:55 —   Uploaded to WordPress — media ID: 60
+2026-03-06 20:42:55 —   ✅ Screenshot uploaded — media ID: 60
+2026-03-06 20:42:55 —   ✅ Images complete for Teachable
+2026-03-06 20:42:55 — Processing images for: Otter.ai
+2026-03-06 20:42:58 —   Hero query: 'podcaster recording studio microphone' | Fallback: 'content creator headphones laptop'
+2026-03-06 20:42:59 —   Unsplash: no result for 'podcaster recording studio microphone'
+2026-03-06 20:42:59 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:43:00 —   Pexels: got image (59KB)
+2026-03-06 20:43:02 —   Uploaded to WordPress — media ID: 61
+2026-03-06 20:43:02 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:43:02 —   Screenshotting: https://otter.ai/home
+2026-03-06 20:43:23 —   Screenshot failed for Otter.ai: Page.goto: Timeout 20000ms exceeded.
+Call log:
+  - navigating to "https://otter.ai/home", waiting until "domcontentloaded"
+
+2026-03-06 20:43:23 —   ⚠️  No screenshot for Otter.ai — add manually in WordPress
+2026-03-06 20:43:23 —   ✅ Images complete for Otter.ai
+2026-03-06 20:43:23 — Processing images for: Later
+2026-03-06 20:43:27 —   Hero query: 'content creator phone scheduling' | Fallback: 'social media manager laptop'
+2026-03-06 20:43:28 —   Unsplash: no result for 'content creator phone scheduling'
+2026-03-06 20:43:28 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:43:30 —   Pexels: got image (79KB)
+2026-03-06 20:43:34 —   Uploaded to WordPress — media ID: 62
+2026-03-06 20:43:34 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:43:34 —   Screenshotting: https://app.later.com
+2026-03-06 20:43:48 —   Screenshot taken (36KB)
+2026-03-06 20:43:50 —   Uploaded to WordPress — media ID: 63
+2026-03-06 20:43:50 —   ✅ Screenshot uploaded — media ID: 63
+2026-03-06 20:43:50 —   ✅ Images complete for Later
+2026-03-06 20:43:50 — Processing images for: Stan Store
+2026-03-06 20:43:53 —   Hero query: 'content creator phone laptop' | Fallback: 'influencer working smartphone desk'
+2026-03-06 20:43:54 —   Unsplash: no result for 'content creator phone laptop'
+2026-03-06 20:43:54 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:43:54 —   ⚠️  No hero image found for Stan Store
+2026-03-06 20:43:54 —   Screenshotting: https://stanwith.me
+2026-03-06 20:44:07 —   Screenshot taken (101KB)
+2026-03-06 20:44:10 —   Uploaded to WordPress — media ID: 64
+2026-03-06 20:44:10 —   ✅ Screenshot uploaded — media ID: 64
+2026-03-06 20:44:10 —   ✅ Images complete for Stan Store
+2026-03-06 20:44:10 — Processing images for: Gumroad
+2026-03-06 20:44:14 —   Hero query: 'creator laptop digital products' | Fallback: 'entrepreneur desk selling online'
+2026-03-06 20:44:15 —   Unsplash: no result for 'creator laptop digital products'
+2026-03-06 20:44:15 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:44:16 —   ⚠️  No hero image found for Gumroad
+2026-03-06 20:44:16 —   Screenshotting: https://app.gumroad.com
+2026-03-06 20:44:29 —   Screenshot taken (91KB)
+2026-03-06 20:44:39 —   Uploaded to WordPress — media ID: 65
+2026-03-06 20:44:39 —   ✅ Screenshot uploaded — media ID: 65
+2026-03-06 20:44:39 —   ✅ Images complete for Gumroad
+2026-03-06 20:44:39 — Processing images for: Typeform
+2026-03-06 20:44:42 —   Hero query: 'creator laptop survey form' | Fallback: 'woman laptop feedback online'
+2026-03-06 20:44:45 —   Unsplash: no result for 'creator laptop survey form'
+2026-03-06 20:44:45 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:44:52 —   Pexels: got image (42KB)
+2026-03-06 20:44:55 —   Uploaded to WordPress — media ID: 66
+2026-03-06 20:44:55 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:44:55 —   Screenshotting: https://www.typeform.com/templates/
+2026-03-06 20:45:14 —   Screenshot taken (88KB)
+2026-03-06 20:45:26 —   Uploaded to WordPress — media ID: 67
+2026-03-06 20:45:26 —   ✅ Screenshot uploaded — media ID: 67
+2026-03-06 20:45:26 —   ✅ Images complete for Typeform
+2026-03-06 20:45:26 — Processing images for: Metricool
+2026-03-06 20:45:31 —   Hero query: 'content creator analytics laptop' | Fallback: 'social media manager desk'
+2026-03-06 20:45:32 —   Unsplash: no result for 'content creator analytics laptop'
+2026-03-06 20:45:32 —   Unsplash failed — trying Pexels fallback
+2026-03-06 20:45:34 —   Pexels: got image (79KB)
+2026-03-06 20:45:38 —   Uploaded to WordPress — media ID: 68
+2026-03-06 20:45:38 —   ℹ️  No wp_post_id yet — featured image will be set at publish time
+2026-03-06 20:45:38 —   Screenshotting: https://app.metricool.com
+2026-03-06 20:46:04 —   Screenshot taken (52KB)
+2026-03-06 20:46:07 —   Uploaded to WordPress — media ID: 69
+2026-03-06 20:46:07 —   ✅ Screenshot uploaded — media ID: 69
+2026-03-06 20:46:07 —   ✅ Images complete for Metricool
+2026-03-06 20:46:07 — Image Agent complete — Success: 11 | Failed: 0
+2026-03-06 20:46:34 — Image Agent starting
+2026-03-06 20:46:34 — Found 0 articles needing images (including partials)
+2026-03-06 20:46:34 — Nothing to process — exiting
+2026-03-06 20:46:40 — Image Agent starting
+2026-03-06 20:46:40 — Found 0 articles needing images (including partials)
+2026-03-06 20:46:40 — Nothing to process — exiting
+2026-03-06 23:15:10 — Image Agent starting
+2026-03-06 23:15:10 — Found 1 articles needing images (including partials)
+2026-03-06 23:15:10 — Processing: Canva | hero: ❌ | screenshot: ❌
+2026-03-06 23:15:10 —   Claude query generation failed: "Could not resolve authentication method. Expected either api_key or auth_token to be set. Or for one of the `X-Api-Key` or `Authorization` headers to be explicitly omitted"
+2026-03-06 23:15:10 —   Trying Pexels: 'Canva creator tool'
+2026-03-06 23:15:12 —   Pexels API error: 401
+2026-03-06 23:15:12 —   Trying Pexels: 'content creator laptop working'
+2026-03-06 23:15:13 —   Pexels API error: 401
+2026-03-06 23:15:13 —   Trying Pixabay: 'Canva creator tool'
+2026-03-06 23:15:14 —   Pixabay API error: 400
+2026-03-06 23:15:14 —   Trying Pixabay: 'content creator laptop working'
+2026-03-06 23:15:15 —   Pixabay API error: 400
+2026-03-06 23:15:15 —   Trying Pexels: 'person working laptop desk'
+2026-03-06 23:15:15 —   Pexels API error: 401
+2026-03-06 23:15:15 —   Trying Pixabay: 'person working laptop desk'
+2026-03-06 23:15:16 —   Pixabay API error: 400
+2026-03-06 23:15:16 —   ❌ All hero sources exhausted for Canva
+2026-03-06 23:15:16 —   Screenshotting: https://www.canva.com/design/
+2026-03-06 23:15:34 —   ✅ Screenshot quality: passed (28KB)
+2026-03-06 23:15:34 —   WordPress upload error: Invalid URL '/wp-json/wp/v2/media': No scheme supplied. Perhaps you meant https:///wp-json/wp/v2/media?
+2026-03-06 23:15:34 —   ❌ FAILED — no images added — retrying next run
+2026-03-06 23:15:34 — Image Agent complete — Complete: 0 | Partial: 0 | Failed: 1
+2026-03-06 23:19:14 — Image Agent starting
+2026-03-06 23:19:14 — Found 1 articles needing images (including partials)
+2026-03-06 23:19:14 — Processing: Canva | hero: ❌ | screenshot: ❌
+2026-03-06 23:19:18 —   Trying Pexels: 'social media manager creating content'
+2026-03-06 23:19:20 —   Pexels: got image (161KB) for 'social media manager creating content'
+2026-03-06 23:19:20 —   ✅ Hero quality check: passed (161KB from Pexels)
+2026-03-06 23:19:25 —   Uploaded → WordPress media ID: 70
+2026-03-06 23:19:26 —   ✅ Featured image set on post 14
+2026-03-06 23:19:26 —   Screenshotting: https://www.canva.com/design/
+2026-03-06 23:19:44 —   ✅ Screenshot quality: passed (28KB)
+2026-03-06 23:19:46 —   Uploaded → WordPress media ID: 71
+2026-03-06 23:19:46 —   ✅ Screenshot uploaded — media ID: 71
+2026-03-06 23:19:46 —   ✅ COMPLETE — hero + screenshot ready
+2026-03-06 23:19:46 — Image Agent complete — Complete: 1 | Partial: 0 | Failed: 0
