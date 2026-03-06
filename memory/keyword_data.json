@@ -215,7 +215,8 @@
     "tool_score": 95,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "descript": {
     "primary_keyword": "Descript review for YouTube creators 2026",
@@ -250,7 +251,8 @@
     "tool_score": 95,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "elevenlabs": {
     "primary_keyword": "ElevenLabs review for podcast voiceovers 2026",

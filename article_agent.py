@@ -10,7 +10,7 @@ TOPICS_USED_FILE = "memory/topics_used.json"
 
 # Max articles per run — each costs ~$0.066
 # Increase this once you're happy with quality
-DAILY_CAP = 2
+DAILY_CAP = 10
 
 client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
