@@ -735,7 +735,8 @@
     "tool_score": 85,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "podcastle": {
     "primary_keyword": "podcastle ai podcast editor review 2026",
@@ -787,7 +788,8 @@
     "tool_score": 83,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "synthesia": {
     "primary_keyword": "synthesia ai video generator review for content creators 2026",
@@ -839,7 +841,8 @@
     "tool_score": 82,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "teachable": {
     "primary_keyword": "teachable review for content creators 2026",
@@ -891,7 +894,8 @@
     "tool_score": 78,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "otter.ai": {
     "primary_keyword": "otter.ai review for podcasters 2026",
@@ -943,7 +947,8 @@
     "tool_score": 78,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "later": {
     "primary_keyword": "later social media scheduler review for content creators 2026",
@@ -995,7 +1000,8 @@
     "tool_score": 78,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "stan-store": {
     "primary_keyword": "stan store review for content creators 2026",
@@ -1047,7 +1053,8 @@
     "tool_score": 78,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "gumroad": {
     "primary_keyword": "gumroad review for selling digital products",
@@ -1099,7 +1106,8 @@
     "tool_score": 78,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "typeform": {
     "primary_keyword": "typeform review for content creators 2026",
@@ -1151,7 +1159,8 @@
     "tool_score": 73,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "metricool": {
     "primary_keyword": "metricool review for content creators 2026",
@@ -1203,7 +1212,8 @@
     "tool_score": 72,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-06"
   },
   "jasper-ai": {
     "primary_keyword": "jasper ai review for email marketers 2026",
