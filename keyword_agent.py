@@ -315,7 +315,7 @@ Respond ONLY with a valid JSON object, nothing else:
   "traffic_value": "high|medium|low",
   "article_type": "{locked_article_type}",
   "recommended_word_count": 2000,
-  "article_title": "A compelling SEO title under 60 characters",
+  "article_title": "A compelling SEO title under 60 characters — vary the format, do NOT always use 'Review 2026: Best X for Y?'. Use different structures like: '[Tool]: Is It Worth It for [Audience]?', 'I Tested [Tool] for 30 Days — Here\'s What [Audience] Need to Know', '[Tool] vs [Competitor]: Which Should [Audience] Choose?', 'The Honest [Tool] Review for [Audience] (2026)', '[Tool] Review: What [Audience] Actually Get'",
   "url_slug": "keyword-friendly-url-slug",
   "serp_gap": "What is missing from current page 1 results that we can do better",
   "reasoning": "One sentence explaining why this keyword was chosen",

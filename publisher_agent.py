@@ -83,6 +83,10 @@ def publish_to_wordpress(article):
     title = article.get("article_title", article.get("tool_name", ""))
     content = article.get("article_html", "")
     content = re.sub(r'<h1[^>]*>.*?</h1>', '', content, count=1, flags=re.DOTALL).strip()
+
+    # Strip emojis from headings — keep articles clean and professional
+    import unicodedata
+    content = ''.join(c for c in content if not unicodedata.category(c).startswith('So'))
     category_id = CATEGORY_MAP.get(article.get("category", "other"), DEFAULT_CATEGORY_ID)
     tag_ids = []
     pk = article.get("primary_keyword", "")

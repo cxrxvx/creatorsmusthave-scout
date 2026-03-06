@@ -215,8 +215,9 @@
     "tool_score": 95,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "article_written",
-    "article_written_date": "2026-03-06"
+    "status": "draft_live",
+    "article_written_date": "2026-03-06",
+    "wp_post_id": 14
   },
   "descript": {
     "primary_keyword": "Descript review for YouTube creators 2026",
@@ -251,8 +252,9 @@
     "tool_score": 95,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "article_written",
-    "article_written_date": "2026-03-06"
+    "status": "draft_live",
+    "article_written_date": "2026-03-06",
+    "wp_post_id": 15
   },
   "elevenlabs": {
     "primary_keyword": "ElevenLabs review for podcast voiceovers 2026",
@@ -287,8 +289,9 @@
     "tool_score": 92,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "article_written",
-    "article_written_date": "2026-03-06"
+    "status": "draft_live",
+    "article_written_date": "2026-03-06",
+    "wp_post_id": 16
   },
   "riverside.fm": {
     "primary_keyword": "riverside.fm review for podcasters 2026",
