@@ -14,6 +14,138 @@ DAILY_CAP = 10
 
 client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
+# ─────────────────────────────────────────
+# TOOL URLs — plain homepage links
+# Used until affiliate links are approved
+# affiliate_manager.py will replace these automatically
+# ─────────────────────────────────────────
+
+TOOL_URLS = {
+    # Seeded tools
+    "canva": "https://www.canva.com",
+    "descript": "https://www.descript.com",
+    "elevenlabs": "https://elevenlabs.io",
+    "riverside": "https://riverside.fm",
+    "riverside.fm": "https://riverside.fm",
+    "convertkit": "https://convertkit.com",
+    "beehiiv": "https://www.beehiiv.com",
+    "kajabi": "https://kajabi.com",
+    "notion": "https://www.notion.so",
+    "loom": "https://www.loom.com",
+    "opus clip": "https://www.opus.pro",
+    "opus_clip": "https://www.opus.pro",
+    "pictory": "https://pictory.ai",
+    "surfer seo": "https://surferseo.com",
+    "surfer_seo": "https://surferseo.com",
+    "buzzsprout": "https://www.buzzsprout.com",
+    "podcastle": "https://podcastle.ai",
+    "synthesia": "https://www.synthesia.io",
+    "otter.ai": "https://otter.ai",
+    "stan store": "https://stan.store",
+    "stan_store": "https://stan.store",
+    "gumroad": "https://gumroad.com",
+    "later": "https://later.com",
+    "teachable": "https://teachable.com",
+    "typeform": "https://www.typeform.com",
+    "metricool": "https://metricool.com",
+    "jasper ai": "https://www.jasper.ai",
+    "jasper_ai": "https://www.jasper.ai",
+    "jasper": "https://www.jasper.ai",
+    # Overnight discoveries
+    "coursekit": "https://coursekit.dev",
+    "krisp": "https://krisp.ai",
+    "krisp accent conversion": "https://krisp.ai",
+    "willow voice": "https://willow.voice",
+    "spoke": "https://www.spoke.app",
+    "substack": "https://substack.com",
+    "writesonic": "https://writesonic.com",
+    "trimmr": "https://trimmr.ai",
+    "trimmr.ai": "https://trimmr.ai",
+    "vois": "https://vois.ai",
+    "luma agents": "https://lumalabs.ai",
+    "luma": "https://lumalabs.ai",
+}
+
+def check_url_live(url: str, timeout: int = 8) -> bool:
+    """
+    Check if a URL is reachable and returns a real page (not a DNS error or
+    Cloudflare block). Returns True if the URL is usable, False if broken.
+
+    Uses HEAD first (fast), falls back to GET if HEAD is rejected.
+    Accepts any 2xx or 3xx response — redirects are fine (tool may redirect
+    to /app or /home). Only rejects connection errors and DNS failures.
+    """
+    import requests as _requests
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/120.0.0.0 Safari/537.36"
+    }
+    try:
+        r = _requests.head(url, headers=headers, timeout=timeout,
+                           allow_redirects=True)
+        if r.status_code < 500:
+            return True
+        # HEAD returned 5xx — try GET
+        r = _requests.get(url, headers=headers, timeout=timeout,
+                          allow_redirects=True, stream=True)
+        r.close()
+        return r.status_code < 500
+    except Exception:
+        # DNS failure, connection refused, timeout — URL is broken
+        return False
+
+
+def get_tool_url(tool_name: str) -> str:
+    """
+    Get the homepage URL for a tool.
+
+    Priority:
+      1. Known URL from TOOL_URLS dict — verified live before use
+      2. Partial name match in TOOL_URLS — verified live before use
+      3. Common domain guesses (tool_name.com / .ai / .io) — each checked live
+      4. Google search fallback — always works, affiliate_manager replaces later
+
+    The live check prevents dead links ending up in published articles.
+    Adds ~2-5 seconds per article but saves embarrassing broken links.
+    """
+    import re as _re
+
+    key = tool_name.lower().strip()
+
+    # ── Step 1: exact match ───────────────────────────────────────────────────
+    if key in TOOL_URLS:
+        candidate = TOOL_URLS[key]
+        if check_url_live(candidate):
+            return candidate
+        else:
+            print(f"   ⚠️  Known URL for {tool_name} is unreachable ({candidate}) — trying alternatives")
+
+    # ── Step 2: partial match ─────────────────────────────────────────────────
+    for k, v in TOOL_URLS.items():
+        if k in key or key in k:
+            if check_url_live(v):
+                return v
+
+    # ── Step 3: guess common domains ─────────────────────────────────────────
+    slug = _re.sub(r"[^a-z0-9]", "", key)   # strip spaces/special chars
+    guesses = [
+        f"https://www.{slug}.com",
+        f"https://{slug}.ai",
+        f"https://{slug}.io",
+        f"https://app.{slug}.com",
+        f"https://www.{slug}.co",
+    ]
+    for url in guesses:
+        if check_url_live(url):
+            print(f"   ✅ Verified URL for {tool_name}: {url}")
+            return url
+
+    # ── Step 4: safe fallback — Google search ─────────────────────────────────
+    # Article still publishes. affiliate_manager.py will add real link later.
+    print(f"   ⚠️  Could not verify a live URL for {tool_name} — using search fallback")
+    return f"https://www.google.com/search?q={tool_name.replace(' ', '+')}+official+website"
+
 
 # ─────────────────────────────────────────
 # FILE HELPERS
@@ -49,23 +181,24 @@ def get_structure(article_type):
         "review": """
 ARTICLE STRUCTURE — follow this exactly, in this order:
 
-1. AFFILIATE DISCLOSURE (mandatory first element)
-   <div class="affiliate-disclosure">
-   <p><strong>Disclosure:</strong> This article contains affiliate links.
-   If you purchase through our links, we may earn a commission at no extra
-   cost to you. We only recommend tools we've genuinely evaluated.</p>
-   </div>
-
-2. H1 TITLE
+1. H1 TITLE
    Use the exact article title provided. Do not change it.
 
-3. OPENING HOOK (no heading)
+2. OPENING HOOK (no heading)
    2-3 sentences maximum. Open with the specific pain point this tool solves.
    Do NOT start with "In today's world" or "Are you looking for".
    Start with the problem or a surprising fact.
    Example opening style: "Editing a 30-minute podcast used to mean 2 hours of work.
    Krisp's new accent conversion feature changes that for non-native English speakers
    who want to sound more natural on air."
+
+3. AFFILIATE DISCLOSURE
+   Place this AFTER the opening hook — not before it.
+   <div class="affiliate-disclosure">
+   <p><strong>Disclosure:</strong> This article contains affiliate links.
+   If you purchase through our links, we may earn a commission at no extra
+   cost to you. We only recommend tools we've genuinely evaluated.</p>
+   </div>
 
 4. KEY TAKEAWAYS BOX
    HTML format:
@@ -76,7 +209,7 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
    <li><strong>Pricing:</strong> [starting price or free tier]</li>
    <li><strong>Standout feature:</strong> [one thing it does better than alternatives]</li>
    <li><strong>Verdict:</strong> [one sentence — buy it or skip it and why]</li>
-   <li><strong>Affiliate link:</strong> <a href="[AFFILIATE_LINK]">Try [Tool Name] here</a></li>
+   <li><strong>Try it:</strong> <a href="[TOOL_URL]">Visit [Tool Name] →</a></li>
    </ul>
    </div>
 
@@ -116,7 +249,7 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
    Use EXACT plan names and prices from the tool's website (e.g. "Creator — $29/month").
    Never write vague ranges like "starts at around $X" — use real numbers.
    If exact pricing is unavailable: "Pricing starts at approximately $X/month —
-   verify current pricing at [TOOL_WEBSITE] as plans may have changed."
+   verify current pricing at [TOOL_URL] as plans may have changed."
    Always mention if there is a free trial or free tier.
    Always note if annual billing gives a significant discount.
 
@@ -159,7 +292,7 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
     — Who should buy it? (specific)
     — Who should skip it? (specific)
     — What is the one reason to choose it over alternatives?
-    End with CTA: <a href="[AFFILIATE_LINK]" class="cta-button">Try [Tool Name] →</a>
+    End with CTA: <a href="[TOOL_URL]" class="cta-button">Try [Tool Name] →</a>
 
 14. FAQ (H2, id="faq")
     4-5 questions people actually search for about this tool.
@@ -172,19 +305,20 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
         "alert": """
 ARTICLE STRUCTURE — follow this exactly, in this order:
 
-1. AFFILIATE DISCLOSURE (mandatory first element)
+1. H1 TITLE
+   Use the exact article title provided. Do not change it.
+
+2. OPENING HOOK (no heading)
+   2-3 sentences. What just launched and why creators should pay attention.
+   Create urgency without hype. Facts only.
+
+3. AFFILIATE DISCLOSURE
+   Place this AFTER the opening hook — not before it.
    <div class="affiliate-disclosure">
    <p><strong>Disclosure:</strong> This article contains affiliate links.
    If you purchase through our links, we may earn a commission at no extra
    cost to you. We only recommend tools we've genuinely evaluated.</p>
    </div>
-
-2. H1 TITLE
-   Use the exact article title provided. Do not change it.
-
-3. OPENING HOOK (no heading)
-   2-3 sentences. What just launched and why creators should pay attention.
-   Create urgency without hype. Facts only.
 
 4. KEY TAKEAWAYS BOX
    <div class="key-takeaways">
@@ -194,7 +328,7 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
    <li><strong>Best for:</strong> [specific creator type]</li>
    <li><strong>Pricing:</strong> [starting price or free tier]</li>
    <li><strong>Why it matters:</strong> [one sentence]</li>
-   <li><strong>Try it:</strong> <a href="[AFFILIATE_LINK]">Check it out here</a></li>
+   <li><strong>Try it:</strong> <a href="[TOOL_URL]">Visit [Tool Name] →</a></li>
    </ul>
    </div>
 
@@ -219,11 +353,59 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
     Honest assessment based on launch information.
     Be clear this is an early look, not a full tested review.
     Answer: is it worth trying now or waiting?
-    CTA: <a href="[AFFILIATE_LINK]" class="cta-button">Try [Tool Name] →</a>
+    CTA: <a href="[TOOL_URL]" class="cta-button">Try [Tool Name] →</a>
 
 11. FAQ (H2, id="faq")
     3-4 questions early adopters would actually ask.
     Each answer: 40-60 words directly below the H3.
+""",
+
+        "authority_article": """
+ARTICLE STRUCTURE — follow this exactly, in this order:
+
+NO affiliate disclosure in this article type — this is an informational
+authority piece, not a product review with affiliate links.
+
+1. H1 TITLE
+   Use the exact article title provided. Do not change it.
+
+2. OPENING HOOK (no heading)
+   2-3 sentences. State the problem or knowledge gap this article solves.
+   Do NOT start with "In today's world" or "Are you looking for".
+   Start with a surprising fact, a common misconception, or the exact
+   question the reader typed into Google.
+
+3. KEY TAKEAWAYS BOX
+   <div class="key-takeaways">
+   <h3>Key Takeaways</h3>
+   <ul>
+   <li><strong>Bottom line:</strong> [one sentence summary of the answer]</li>
+   <li>[Key point 1]</li>
+   <li>[Key point 2]</li>
+   <li>[Key point 3]</li>
+   </ul>
+   </div>
+
+4. TABLE OF CONTENTS
+   HTML anchor links to each H2 section.
+
+5. MAIN BODY (4-6 H2 sections, each with id attribute)
+   Each section covers one key sub-topic. Be comprehensive and specific.
+   Use H3 for sub-points. Include at least one table, list, or visual
+   break per H2 section.
+
+6. WHO THIS IS FOR (H2, id="who-this-is-for")
+   Specific creator types who would benefit from this information.
+   Keep this brief — 1 paragraph maximum.
+
+7. THE VERDICT / SUMMARY (H2, id="verdict")
+   Concrete takeaway. What should the reader do with this information?
+   No CTA button — this is not a product review.
+   Add 1-2 relevant internal links here.
+
+8. FAQ (H2, id="faq")
+   4-5 questions people actually search for on this topic.
+   Each answer: 40-60 words in a single paragraph directly below the H3.
 """
     }
     return structures.get(article_type, structures["review"])
@@ -238,6 +420,7 @@ def build_prompt(tool_data, published_slugs=None):
     structure = get_structure(article_type)
     keyword_cluster = ", ".join(tool_data.get("keyword_cluster", []))
     secondary = ", ".join(tool_data.get("secondary_keywords", []))
+    tool_url = get_tool_url(tool_data.get("tool_name", ""))
 
     # Build internal link context from already-published articles
     if published_slugs:
@@ -267,6 +450,7 @@ it's worth buying." Every recommendation must feel earned, not paid for.
 TOOL DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Tool name:      {tool_data['tool_name']}
+Tool URL:       {tool_url}
 Category:       {tool_data.get('tool_category', 'AI tool')}
 Article type:   {article_type}
 
@@ -297,10 +481,23 @@ SERP GAP — your content advantage:
 → This is why our article will outrank the competition
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MANDATORY: AFFILIATE DISCLOSURE
+IMPORTANT: LINKS IN THIS ARTICLE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-The VERY FIRST element of the article — before the H1 title — must be this
-exact disclosure block. Do not modify the wording:
+The tool URL for ALL CTAs and links in this article is:
+{tool_url}
+
+Replace every instance of [TOOL_URL] with: {tool_url}
+
+This is a direct homepage link — not an affiliate link yet.
+Affiliate tracking will be added later by our affiliate manager.
+Every CTA button must link to this URL — never leave [TOOL_URL] as a placeholder.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AFFILIATE DISCLOSURE RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{"NO disclosure needed — this is an authority_article (informational content, no affiliate links). Do NOT include any affiliate disclosure anywhere in this article." if article_type == "authority_article" else """This article needs an affiliate disclosure. Follow the ARTICLE STRUCTURE section exactly for placement — the disclosure goes AFTER the opening hook, not before the H1 title.
+
+Use this exact wording — do not modify it:
 
 <div class="affiliate-disclosure">
 <p><strong>Disclosure:</strong> This article contains affiliate links.
@@ -308,7 +505,7 @@ If you purchase through our links, we may earn a commission at no extra
 cost to you. We only recommend tools we've genuinely evaluated.</p>
 </div>
 
-This is a legal requirement. It must appear before anything else.
+This is a legal requirement."""}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 WRITING RULES
@@ -333,7 +530,7 @@ FACTUAL ACCURACY RULES — critical:
 - If a claim is unverified use: "according to their website" or
   "based on launch information" — never invent numbers
 - If pricing is unknown: "Pricing starts at approximately $X/month —
-  verify at [TOOL_WEBSITE] as this may have changed since publishing"
+  verify at {tool_url} as this may have changed since publishing"
 - Never invent user testimonials, case studies, or usage statistics
 - If you are uncertain about a feature, say "according to [tool name]'s
   website" — never state uncertain things as confirmed facts
@@ -345,7 +542,6 @@ NO FAKE SOCIAL PROOF — strictly forbidden:
 - Never write "creators report saving X hours" without a real attributed source
 - Never invent reviews, testimonials, or word-of-mouth claims
 - In the Pros section: if you include a performance claim, it MUST be attributed
-  Example: "According to Coursekit's documentation, users see..." NOT "Users report..."
 - If there are no real user reports yet — say the tool is new and
   real-world results aren't available yet. That's honest and builds trust.
 
@@ -360,22 +556,13 @@ META-COMMENTARY BAN — never break the fourth wall:
 - Never write "since no reviews exist yet, we..."
 - Never write "we're the first to cover this tool"
 - Never write "since this is one of the first comprehensive reviews..."
-- Never write "here's a complete walkthrough based on the current interface"
 - Never reference your SEO strategy inside the article
 - Never explain why you chose this topic
-- Never acknowledge your position as a reviewer writing for SEO purposes
 - Just write the article as if you're a journalist who tested the tool
 
 BRAND VOICE — Creators Must Have:
-Good sentence: "Coursekit cuts student support time in half for course
-creators who've scaled past 50 students."
-Bad sentence: "Coursekit is a powerful, revolutionary tool that leverages
-AI to seamlessly transform the way course creators interact with students."
-
-Good sentence: "The free plan works for testing one small course — but
-you'll hit the content limit fast if you have more than 2 hours of video."
-Bad sentence: "The free plan offers robust features that provide significant
-value for content creators at every stage of their journey."
+Good: "Coursekit cuts student support time in half for course creators who've scaled past 50 students."
+Bad: "Coursekit is a powerful, revolutionary tool that leverages AI to seamlessly transform the way course creators interact with students."
 
 CTA PLACEMENT RULES:
 - One CTA in the Key Takeaways box
@@ -383,6 +570,7 @@ CTA PLACEMENT RULES:
 - One CTA in the FAQ if it fits naturally — not forced
 - No more than 3 CTAs total in the entire article
 - Never add CTAs mid-article after every section
+- All CTAs must use the real tool URL: {tool_url}
 
 CONVERSION RULES:
 - Put the decision-making tools (Key Takeaways, Is It Right For You table) EARLY
@@ -393,26 +581,21 @@ CONVERSION RULES:
 FEATURED SNIPPET RULES:
 - FAQ answers must be 40-60 words in a single paragraph below the H3
 - Write FAQ answers as direct, complete responses
-- This format is what Google pulls for featured snippets
 
 INTERNAL LINKS:
 - Add 2-3 [INTERNAL_LINK: ...] placeholders where related articles fit naturally
-- These go in the body text, not forced at the end of sections
 {internal_link_context}
 
 SCANNING STRUCTURE RULE:
 - Every H2 section must contain at least one visual break
 - Visual breaks are: bullet list, numbered list, table, or a <strong> callout sentence
 - Pure paragraph walls are not acceptable — readers scan on mobile before they read
-- If a feature section has no natural list, add a "Key points:" bullet summary at the end
 
 PEOPLE ALSO ASK — FAQ TARGETING:
 - FAQ questions must mirror how people actually type into Google
-- Use question formats that appear in Google's "People Also Ask" boxes
 - Good: "Is Coursekit worth it for small course creators?"
 - Bad: "What are the benefits of using Coursekit?"
 - Every FAQ question should start with: Is, Can, Does, How, What, Why, or How much
-- These exact phrasings are what Google pulls into PAA results and featured snippets
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 HTML FORMATTING
@@ -421,12 +604,12 @@ HTML FORMATTING
 - Every H2 needs an id attribute for the table of contents
 - Use: <h1>, <h2>, <h3>, <p>, <ul>, <ol>, <table>, <strong>, <em>
 - Tables must have <thead> and <tbody>
-- CTAs: <a href="[AFFILIATE_LINK]" class="cta-button">text →</a>
+- CTAs: <a href="{tool_url}" class="cta-button">text →</a>
 - Key Takeaways: <div class="key-takeaways">
 - Decision table: <table class="decision-table">
 - Pricing table: <table class="pricing-table">
 - Pros: <div class="pros"> | Cons: <div class="cons">
-- Disclosure: <div class="affiliate-disclosure"> (first element always)
+- Disclosure: <div class="affiliate-disclosure"> (after opening hook, review/alert only)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ARTICLE STRUCTURE
@@ -437,7 +620,7 @@ ARTICLE STRUCTURE
 SELF-CHECK BEFORE SUBMITTING
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Before returning the article, silently verify:
-✓ Affiliate disclosure block is the very first element
+✓ Affiliate disclosure placed AFTER the opening hook (review/alert only — not in authority articles)
 ✓ Primary keyword appears in the first 100 words
 ✓ Target word count reached: {tool_data['recommended_word_count']} words
 ✓ Pricing table is included
@@ -447,6 +630,7 @@ Before returning the article, silently verify:
 ✓ No time-sensitive language that will date the article
 ✓ FAQ answers are 40-60 words each
 ✓ Maximum 3 CTAs in the entire article
+✓ All CTAs link to: {tool_url} — NO [TOOL_URL] placeholders left in the HTML
 ✓ 2-3 internal link placeholders included
 ✓ Verdict answers: who should buy, who should skip, one reason to choose it
 ✓ Pricing table has EXACT plan names and prices — not vague ranges
@@ -484,6 +668,11 @@ def write_article(tool_data, published_slugs=None):
         lines = article_html.split("\n")
         article_html = "\n".join(lines[1:-1]).strip()
 
+    # Safety net — replace any leftover [TOOL_URL] placeholders
+    tool_url = get_tool_url(tool_data.get("tool_name", ""))
+    article_html = article_html.replace("[TOOL_URL]", tool_url)
+    article_html = article_html.replace("[AFFILIATE_LINK]", tool_url)
+
     word_count = len(article_html.split())
 
     if word_count < 500:
@@ -505,7 +694,6 @@ def run():
     topics_used = load_json(TOPICS_USED_FILE, [])
 
     # Collect already-published slugs for smart internal linking
-    # Grows every week — articles link to each other automatically
     published_slugs = [
         data.get("url_slug", key)
         for key, data in keyword_data.items()
@@ -542,10 +730,11 @@ def run():
         tool_name = tool_data.get("tool_name", tool_key)
         article_type = tool_data.get("article_type", "review")
         score = tool_data.get("tool_score", "?")
+        tool_url = get_tool_url(tool_name)
 
         print(f"🔧 Writing: {tool_name}")
-        print(f"   Type: {article_type} | Score: {score} | Target: {tool_data.get('recommended_word_count')} words")
-        write_log(f"\n### {tool_name} ({article_type})")
+        print(f"   Type: {article_type} | Score: {score} | URL: {tool_url}")
+        write_log(f"\n### {tool_name} ({article_type}) — {tool_url}")
 
         try:
             article_html, word_count = write_article(tool_data, published_slugs)
@@ -567,7 +756,8 @@ def run():
                 "status": "pending_edit",
                 "written_date": datetime.now().strftime("%Y-%m-%d"),
                 "tool_score": score,
-                "category": tool_data.get("tool_category", "ai-tools")
+                "category": tool_data.get("tool_category", "ai-tools"),
+                "tool_url": tool_url
             }
 
             # Mark as written in keyword_data
@@ -580,7 +770,6 @@ def run():
                 topics_used.append(slug)
 
             written += 1
-            # Add this slug to published list so next article in same run can link to it
             if tool_data.get("url_slug") and tool_data["url_slug"] not in published_slugs:
                 published_slugs.append(tool_data["url_slug"])
             print(f"   💾 Saved to handoffs.json\n")

@@ -35,6 +35,7 @@ MIN_SCREENSHOT_BYTES = 60 * 1024   # Raised from 25KB — catches Cloudflare/log
 LOGIN_WALL_BYTES     = 15 * 1024   # Blank/login wall hard reject below 15KB
 MIN_PRESSKIT_BYTES   = 30 * 1024   # Press kit images can be smaller but still real
 MIN_LOGO_BYTES       =  2 * 1024   # Logos are small by nature — just reject blank/broken
+MAX_UPLOAD_BYTES     = 500 * 1024  # Compress anything over 500KB before uploading
 
 os.makedirs(LOGS_DIR, exist_ok=True)
 
@@ -71,11 +72,12 @@ TOOL_URLS = {
     "willow":                   "https://willow.app",
     "willow voice for teams":   "https://willow.app",
     "spoke":                    "https://www.spoke.app",
+    "trimmr":                   "https://app.trimmr.ai",
+    "vois":                     "https://vois.ai",
+    "luma agents":              "https://lumalabs.ai",
 }
 
 # ── Press kit / media page URLs ───────────────────────────────────────────────
-# Used as fallback when Playwright screenshot is blocked by bot protection.
-# These pages contain official product images — often better than screenshots.
 PRESS_KIT_URLS = {
     "canva":        "https://www.canva.com/newsroom/",
     "notion":       "https://www.notion.so/about",
@@ -93,6 +95,7 @@ PRESS_KIT_URLS = {
     "teachable":    "https://teachable.com/press",
     "jasper ai":    "https://www.jasper.ai/press",
     "elevenlabs":   "https://elevenlabs.io/press",
+    "trimmr":       "https://www.trimmr.ai/blog",
 }
 
 # ── Human-readable page labels for screenshot captions ───────────────────────
@@ -128,6 +131,9 @@ TOOL_PAGE_LABELS = {
     "willow":                   "voice assistant dashboard",
     "willow voice for teams":   "team dashboard",
     "spoke":                    "meeting intelligence dashboard",
+    "trimmr":                   "AI video trimmer",
+    "vois":                     "AI voice generator",
+    "luma agents":              "AI creative agents",
 }
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -152,14 +158,44 @@ def wp_auth():
     return (WP_USERNAME, WP_APP_PASSWORD)
 
 def get_screenshot_caption(tool_name: str) -> str:
-    """Returns a smart caption based on what page was actually screenshotted."""
     tool_key = tool_name.lower()
     page_label = TOOL_PAGE_LABELS.get(tool_key, "interface")
     return f"{tool_name} — {page_label}"
 
+# ── Image compression ─────────────────────────────────────────────────────────
+def compress_image(image_bytes: bytes, max_kb: int = 500) -> bytes:
+    """
+    Compress image to under max_kb using Pillow.
+    Prevents WordPress upload timeouts from oversized press kit images.
+    Falls back to original if Pillow not installed or compression fails.
+    """
+    if len(image_bytes) <= max_kb * 1024:
+        return image_bytes
+    try:
+        from PIL import Image
+        import io
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        img.thumbnail((1600, 1000), Image.LANCZOS)
+        buf = io.BytesIO()
+        quality = 85
+        while quality >= 40:
+            buf.seek(0)
+            buf.truncate()
+            img.save(buf, format="JPEG", quality=quality)
+            if len(buf.getvalue()) <= max_kb * 1024:
+                break
+            quality -= 10
+        compressed = buf.getvalue()
+        log(f"  Compressed image: {len(image_bytes) // 1024}KB → {len(compressed) // 1024}KB")
+        return compressed
+    except ImportError:
+        log("  Pillow not installed — skipping compression (run: pip install Pillow --break-system-packages)")
+        return image_bytes
+    except Exception as e:
+        log(f"  Compression failed: {e} — using original")
+        return image_bytes
+
 # ── Logo fetcher (Clearbit) ───────────────────────────────────────────────────
-# Clearbit returns any company logo as a clean PNG just from the domain.
-# Free, no API key, completely legitimate. Perfect for bot-blocking tools.
 TOOL_DOMAINS = {
     "canva":                    "canva.com",
     "descript":                 "descript.com",
@@ -192,20 +228,16 @@ TOOL_DOMAINS = {
     "willow":                   "willow.app",
     "willow voice for teams":   "willow.app",
     "spoke":                    "spoke.app",
+    "trimmr":                   "trimmr.ai",
+    "vois":                     "vois.ai",
+    "luma agents":              "lumalabs.ai",
 }
 
 def fetch_logo(tool_name: str) -> bytes | None:
-    """
-    Fetch tool logo via Clearbit Logo API.
-    Returns a clean PNG logo for any tool just from its domain.
-    Free, no API key required, completely legitimate.
-    Example: https://logo.clearbit.com/canva.com → Canva logo PNG
-    """
     tool_key = tool_name.lower()
     domain   = TOOL_DOMAINS.get(tool_key)
 
     if not domain:
-        # Try to guess domain from tool name as fallback
         slug   = re.sub(r"[^a-z0-9]", "", tool_key)
         domain = f"{slug}.com"
         log(f"  No domain mapping for {tool_name} — guessing {domain}")
@@ -231,7 +263,6 @@ def fetch_logo(tool_name: str) -> bytes | None:
         return None
 
 def build_logo_html(image_url: str, tool_name: str) -> str:
-    """Build a small centred logo block to inject at the very top of the article."""
     return f"""
 <div style="text-align: center; margin: 1em 0 2em 0;">
   <img
@@ -267,7 +298,6 @@ def check_presskit_quality(image_bytes: bytes) -> tuple[bool, str]:
 
 # ── Screenshot HTML injection ─────────────────────────────────────────────────
 def build_screenshot_html(image_url: str, alt_text: str, tool_name: str) -> str:
-    """Build a styled image block to inject after the first paragraph."""
     caption = get_screenshot_caption(tool_name)
     return f"""
 <figure style="margin: 2em 0; text-align: center;">
@@ -283,7 +313,6 @@ def build_screenshot_html(image_url: str, alt_text: str, tool_name: str) -> str:
 </figure>"""
 
 def inject_screenshot_into_article(article_html: str, screenshot_html: str) -> str:
-    """Inject image block after the first closing </p> tag."""
     first_p_end = article_html.find("</p>")
     if first_p_end == -1:
         log("  Could not find </p> — prepending screenshot")
@@ -297,7 +326,7 @@ def update_wp_post_content(wp_post_id: int, new_html: str) -> bool:
             f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
             json={"content": new_html},
             auth=wp_auth(),
-            timeout=15
+            timeout=30
         )
         return response.status_code in (200, 201)
     except Exception as e:
@@ -487,11 +516,6 @@ def screenshot_tool(tool_name: str) -> bytes | None:
 
 # ── Step 3b: Press kit fallback ───────────────────────────────────────────────
 def fetch_presskit_image(tool_name: str) -> bytes | None:
-    """
-    Fallback for tools that block Playwright (Canva, Notion, etc.)
-    Fetches their press/newsroom page and finds the best product image.
-    Looks for large .png/.jpg/.webp images that are likely product shots.
-    """
     tool_key     = tool_name.lower()
     presskit_url = PRESS_KIT_URLS.get(tool_key)
 
@@ -515,7 +539,6 @@ def fetch_presskit_image(tool_name: str) -> bytes | None:
         soup = BeautifulSoup(page_response.text, "html.parser")
         candidate_urls = []
 
-        # Check <img> tags
         for img in soup.find_all("img"):
             src = img.get("src") or img.get("data-src") or ""
             if src and any(ext in src.lower() for ext in [".jpg", ".jpeg", ".png", ".webp"]):
@@ -527,7 +550,6 @@ def fetch_presskit_image(tool_name: str) -> bytes | None:
                     src = f"{base.scheme}://{base.netloc}{src}"
                 candidate_urls.append(src)
 
-        # Also check <a> tags linking directly to images
         for a in soup.find_all("a", href=True):
             href = a["href"]
             if any(ext in href.lower() for ext in [".jpg", ".jpeg", ".png", ".webp"]):
@@ -537,7 +559,6 @@ def fetch_presskit_image(tool_name: str) -> bytes | None:
 
         log(f"  Found {len(candidate_urls)} candidate image URLs on press kit page")
 
-        # Try each candidate — return first one that passes quality check
         for img_url in candidate_urls[:15]:
             try:
                 img_response = requests.get(img_url, headers=headers, timeout=10)
@@ -561,11 +582,6 @@ def fetch_presskit_image(tool_name: str) -> bytes | None:
 
 # ── Step 3: Get best available tool image ─────────────────────────────────────
 def get_tool_image(tool_name: str) -> tuple[bytes | None, str]:
-    """
-    Try Playwright screenshot first.
-    If blocked or low quality, fall back to press kit page.
-    Returns (image_bytes, source_label).
-    """
     shot_bytes = screenshot_tool(tool_name)
     if shot_bytes:
         return shot_bytes, "screenshot"
@@ -581,6 +597,9 @@ def get_tool_image(tool_name: str) -> tuple[bytes | None, str]:
 def upload_to_wordpress(
     image_bytes: bytes, filename: str, alt_text: str, caption: str = ""
 ) -> int | None:
+    # Compress large images before upload to prevent timeouts
+    image_bytes = compress_image(image_bytes, max_kb=500)
+
     endpoint = f"{WP_URL}/wp-json/wp/v2/media"
     headers  = {
         "Content-Disposition": f'attachment; filename="{filename}"',
@@ -589,7 +608,7 @@ def upload_to_wordpress(
     try:
         response = requests.post(
             endpoint, headers=headers, data=image_bytes,
-            auth=wp_auth(), timeout=30
+            auth=wp_auth(), timeout=60  # increased from 30 to 60
         )
         if response.status_code in (200, 201):
             media_id = response.json().get("id")
@@ -624,13 +643,44 @@ def run():
     log("Image Agent starting")
     handoffs = load_json(HANDOFFS, {})
 
-    candidates = {
-        slug: article for slug, article in handoffs.items()
-        if article.get("status") in ("pending_publish", "draft_live")
-        and article.get("images_added") != True
-    }
+    # ── Candidate selection ───────────────────────────────────────────────────
+    # Three cases get processed:
+    #
+    # Case 1 — Needs images: images_added is not True (False, "partial", missing)
+    #          Catches pending_publish, draft_live, AND published articles
+    #          so nothing with missing images ever gets permanently skipped.
+    #
+    # Case 2 — Injection catch-up: images_added=True, screenshot was uploaded
+    #          but never injected into WordPress because article wasn't live yet.
+    #          Now has wp_post_id so we inject retroactively.
+    # ─────────────────────────────────────────────────────────────────────────
+    candidates = {}
+    for slug, article in handoffs.items():
+        status = article.get("status")
 
-    log(f"Found {len(candidates)} articles needing images (including partials)")
+        # Skip articles that haven't entered the pipeline yet
+        if status not in ("pending_publish", "draft_live", "published"):
+            continue
+
+        images_added     = article.get("images_added")
+        image_data       = article.get("image_data", {})
+        wp_post_id       = article.get("wp_post_id")
+
+        # Case 1: needs images — includes published articles with missing images
+        if images_added != True:
+            candidates[slug] = article
+            continue
+
+        # Case 2: screenshot uploaded but never injected into a live post
+        has_screenshot   = bool(image_data.get("screenshot_media_id"))
+        already_injected = bool(image_data.get("screenshot_injected"))
+        has_live_post    = bool(wp_post_id)
+
+        if has_screenshot and not already_injected and has_live_post:
+            log(f"  🔁 Queuing {article.get('tool_name', slug)} — screenshot needs injection into post {wp_post_id}")
+            candidates[slug] = article
+
+    log(f"Found {len(candidates)} articles needing images (including partials and pending injections)")
 
     if not candidates:
         log("Nothing to process — exiting")
@@ -647,12 +697,13 @@ def run():
         keyword    = article.get("primary_keyword", "")
         wp_post_id = article.get("wp_post_id")
 
-        existing = article.get("image_data", {})
-        has_hero = bool(existing.get("hero_media_id"))
-        has_shot = bool(existing.get("screenshot_media_id"))
-        has_logo = bool(existing.get("logo_media_id"))
+        existing         = article.get("image_data", {})
+        has_hero         = bool(existing.get("hero_media_id"))
+        has_shot         = bool(existing.get("screenshot_media_id"))
+        has_logo         = bool(existing.get("logo_media_id"))
+        already_injected = bool(existing.get("screenshot_injected"))
 
-        log(f"Processing: {tool_name} | hero: {'✅' if has_hero else '❌'} | screenshot: {'✅' if has_shot else '❌'} | logo: {'✅' if has_logo else '❌'}")
+        log(f"Processing: {tool_name} | hero: {'✅' if has_hero else '❌'} | screenshot: {'✅' if has_shot else '❌'} | logo: {'✅' if has_logo else '❌'} | injected: {'✅' if already_injected else '❌'}")
 
         queries     = get_image_search_query(tool_name, title, keyword)
         images_data = existing.copy()
@@ -693,7 +744,6 @@ def run():
                     images_data["logo_media_id"] = logo_id
                     log(f"  ✅ Logo uploaded — media ID: {logo_id}")
 
-                    # Inject logo at very top of article (before hero paragraph)
                     if wp_post_id:
                         logo_url = get_media_url(logo_id)
                         if logo_url:
@@ -714,7 +764,7 @@ def run():
             else:
                 log(f"  ⚠️  Logo not found for {tool_name} — article still fine without it")
 
-        # ── Tool image: screenshot → press kit fallback ──
+        # ── Tool screenshot: fetch if not yet uploaded ──
         if not has_shot:
             shot_bytes, shot_source = get_tool_image(tool_name)
             if shot_bytes:
@@ -728,45 +778,51 @@ def run():
                     images_data["screenshot_alt_text"]  = queries["screenshot_alt_text"]
                     images_data["screenshot_source"]    = shot_source
                     log(f"  ✅ Tool image uploaded ({shot_source}) — media ID: {shot_id}")
-
-                    # ── Inject into article body ──
-                    if wp_post_id:
-                        media_url = get_media_url(shot_id)
-                        if media_url:
-                            post_response = requests.get(
-                                f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
-                                auth=wp_auth(), timeout=10
-                            )
-                            if post_response.status_code == 200:
-                                current_html = post_response.json().get("content", {}).get("raw", "")
-                                if not current_html:
-                                    current_html = post_response.json().get("content", {}).get("rendered", "")
-
-                                if current_html:
-                                    screenshot_block = build_screenshot_html(
-                                        media_url,
-                                        queries["screenshot_alt_text"],
-                                        tool_name
-                                    )
-                                    updated_html = inject_screenshot_into_article(
-                                        current_html, screenshot_block
-                                    )
-                                    if update_wp_post_content(wp_post_id, updated_html):
-                                        log(f"  ✅ Image injected into article body")
-                                        images_data["screenshot_injected"] = True
-                                    else:
-                                        log(f"  ⚠️  Could not inject image into article")
-                                else:
-                                    log(f"  ⚠️  Could not retrieve article content for injection")
-                        else:
-                            log(f"  ⚠️  Could not get media URL for injection")
-                    else:
-                        log(f"  ℹ️  No wp_post_id yet — injection queued for publish time")
+                    has_shot = True  # mark so injection block below runs
             else:
                 log(f"  ❌ Screenshot + press kit both failed for {tool_name} — retrying next run")
 
+        # ── Inject screenshot into article body ──
+        # Runs if: screenshot exists AND not yet injected AND post is live
+        # Handles both fresh articles and catch-up injection for already-published ones
+        if has_shot and not already_injected and wp_post_id:
+            shot_id = images_data.get("screenshot_media_id")
+            if shot_id:
+                media_url = get_media_url(shot_id)
+                if media_url:
+                    post_response = requests.get(
+                        f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
+                        auth=wp_auth(), timeout=10
+                    )
+                    if post_response.status_code == 200:
+                        current_html = post_response.json().get("content", {}).get("raw", "")
+                        if not current_html:
+                            current_html = post_response.json().get("content", {}).get("rendered", "")
+
+                        if current_html:
+                            screenshot_block = build_screenshot_html(
+                                media_url,
+                                images_data.get("screenshot_alt_text", f"{tool_name} interface"),
+                                tool_name
+                            )
+                            updated_html = inject_screenshot_into_article(
+                                current_html, screenshot_block
+                            )
+                            if update_wp_post_content(wp_post_id, updated_html):
+                                log(f"  ✅ Image injected into article body (post {wp_post_id})")
+                                images_data["screenshot_injected"] = True
+                            else:
+                                log(f"  ⚠️  Could not inject image into article")
+                        else:
+                            log(f"  ⚠️  Could not retrieve article content for injection")
+                    else:
+                        log(f"  ⚠️  Could not fetch post {wp_post_id} from WordPress")
+                else:
+                    log(f"  ⚠️  Could not get media URL for injection")
+        elif has_shot and not already_injected and not wp_post_id:
+            log(f"  ℹ️  No wp_post_id yet — injection queued for publish time")
+
         # ── Determine final status ──
-        # Hero is required. Logo and screenshot are bonuses — don't block completion.
         now_has_hero = bool(images_data.get("hero_media_id"))
         now_has_shot = bool(images_data.get("screenshot_media_id"))
         now_has_logo = bool(images_data.get("logo_media_id"))

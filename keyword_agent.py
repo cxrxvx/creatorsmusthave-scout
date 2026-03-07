@@ -54,6 +54,75 @@ ARTICLE_TYPE_MAP = {
     "tutorial":          "tutorial"
 }
 
+# ─────────────────────────────────────────────────────────────
+# CONTENT TYPE ARCHITECTURE
+# Every high-value tool eventually gets full coverage across
+# all 5 types. The keyword agent assigns one type per article
+# so the system knows what's written and what's still missing.
+# ─────────────────────────────────────────────────────────────
+
+# Priority order — what to write first for a given tool
+CONTENT_TYPE_PRIORITY = [
+    "product_review",   # always first — the core review
+    "comparison",       # second — "[Tool A] vs [Tool B]" converts very well
+    "question",         # third — fast traffic, funnels to review
+    "money_page",       # fourth — "Best X for Y" list articles
+    "foundation_hub",   # fifth — niche-level guide, written once per category
+]
+
+# Title templates per content type — Claude picks from these
+CONTENT_TYPE_TEMPLATES = {
+    "product_review": [
+        "[Tool] Review: Is It Worth It for [Audience]? (2026)",
+        "I Tested [Tool] for 30 Days — Here's What [Audience] Need to Know",
+        "The Honest [Tool] Review for [Audience] (Tested 2026)",
+        "Is [Tool] Worth It for [Audience]? I Found Out",
+        "[Tool] Review: What [Audience] Actually Get for Their Money",
+        "[Number] Things [Audience] Should Know Before Buying [Tool]",
+        "[Tool] Pricing Explained: What [Audience] Actually Pay",
+        "[Tool] for [Audience]: [Specific Outcome] Without [Pain Point]",
+    ],
+    "comparison": [
+        "[Tool A] vs [Tool B]: Which Should [Audience] Choose in 2026?",
+        "[Tool A] vs [Tool B] for [Audience]: The Honest Comparison",
+        "[Tool A] or [Tool B]? I Tested Both — Here's the Verdict",
+        "[Brand A] vs [Brand B]: Which Is Better for [Audience]?",
+        "Premium vs Budget [Tool Type]: Is the Price Difference Worth It?",
+    ],
+    "question": [
+        "Why Does [Tool] [Common Problem]? (And How to Fix It)",
+        "How Long Does [Tool] Take to [Outcome]? Real Results",
+        "Is [Tool] Worth It for [Specific Audience]? Honest Answer",
+        "Can [Tool] Really [Bold Claim]? I Put It to the Test",
+        "How to Fix [Common Problem] in [Tool] (Step-by-Step)",
+        "[Tool] Not Working? Here's What to Do",
+        "Is [Tool] Safe for [Audience]? Everything You Need to Know",
+    ],
+    "money_page": [
+        "Best [Tool Type] for [Audience] in 2026 (Tested & Ranked)",
+        "Best [Tool Type] for [Audience] on a Budget",
+        "Best [Tool Type] Under $[Price]: Tested by [Audience]",
+        "Best [Tool Type] for Beginners: [Audience] Guide 2026",
+        "Best [Tool Type] for Professionals: Top Picks for [Audience]",
+    ],
+    "foundation_hub": [
+        "The Complete Guide to [Niche Topic] for [Audience] (2026)",
+        "[Niche Topic] for Beginners: Everything [Audience] Need to Know",
+        "How [Niche Technology] Works: A Plain-English Guide for [Audience]",
+        "[Niche Topic] Buyer's Guide: How [Audience] Should Choose",
+        "[Niche Topic] Cost Breakdown: What [Audience] Actually Pay",
+    ],
+}
+
+# What each content type is for — passed to Claude as context
+CONTENT_TYPE_DESCRIPTIONS = {
+    "product_review":  "Individual tool review. Captures buyer-intent search for this specific tool. 1,500-2,500 words. Includes pricing table, pros/cons, who it's for/not for.",
+    "comparison":      "Head-to-head comparison between two tools. Converts extremely well — search intent is very specific. 1,500-2,000 words.",
+    "question":        "Problem or question article. Attracts traffic fast, lower competition. Funnels readers to the main review. 800-1,500 words.",
+    "money_page":      "'Best X for Y' list article covering multiple tools. Strong buyer intent, high affiliate conversion. 2,000-3,500 words.",
+    "foundation_hub":  "Niche-level guide — not tool-specific. Written once per category. Becomes the internal linking backbone. 2,500-4,000 words.",
+}
+
 # Category-specific audience context for better keyword targeting
 CATEGORY_AUDIENCE = {
     "video":        "YouTubers, TikTok creators, Instagram Reels creators, video editors",
@@ -128,6 +197,48 @@ def build_slug_index(keyword_data):
         if slug:
             index[slug] = tool_key
     return index
+
+def get_content_type_for_tool(tool, existing_keyword_data):
+    """
+    Decide which content type to write next for this tool.
+
+    Logic:
+    - If this tool already has a product_review written → pick next type
+      in priority order that hasn't been written yet
+    - If no articles written yet → always start with product_review
+    - foundation_hub is niche-level, not tool-specific → only assigned
+      if no hub exists yet for this tool's category
+
+    Returns one of: product_review | comparison | question | money_page | foundation_hub
+    """
+    tool_key = tool["name"].lower().replace(" ", "-")
+    category = tool.get("category", "other")
+
+    # Find all content types already written for this tool
+    written_types = set()
+    for key, data in existing_keyword_data.items():
+        if data.get("tool_name", "").lower() == tool["name"].lower():
+            ct = data.get("content_type", "product_review")
+            written_types.add(ct)
+
+    # Check if a foundation_hub exists for this category already
+    hub_exists_for_category = any(
+        data.get("content_type") == "foundation_hub"
+        and data.get("tool_category", "") == category
+        for data in existing_keyword_data.values()
+    )
+
+    # Work through priority order — return first type not yet written
+    for content_type in CONTENT_TYPE_PRIORITY:
+        if content_type in written_types:
+            continue
+        # Skip foundation_hub if one already exists for this category
+        if content_type == "foundation_hub" and hub_exists_for_category:
+            continue
+        return content_type
+
+    # All types written — default back to product_review (freshness update)
+    return "product_review"
 
 def get_tools_needing_keywords():
     """
@@ -223,6 +334,12 @@ def research_keywords(tool, existing_keyword_data):
     audience = CATEGORY_AUDIENCE.get(category, CATEGORY_AUDIENCE["other"])
     locked_article_type = get_locked_article_type(tool)
 
+    # Determine content type for this article
+    content_type = get_content_type_for_tool(tool, existing_keyword_data)
+    content_type_desc = CONTENT_TYPE_DESCRIPTIONS.get(content_type, "")
+    title_templates = CONTENT_TYPE_TEMPLATES.get(content_type, CONTENT_TYPE_TEMPLATES["product_review"])
+    templates_formatted = "\n".join(f"  - {t}" for t in title_templates)
+
     days_since_launch = (datetime.now() - datetime.strptime(
         tool.get("discovered_date", datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d"
     )).days
@@ -251,11 +368,16 @@ Your job is only to find the best keywords for this article type.
 TARGET AUDIENCE for this category: {audience}
 Write keywords that THIS specific audience would search for.
 
+CONTENT TYPE FOR THIS ARTICLE: {content_type}
+What this means: {content_type_desc}
+This is what determines the angle, keyword, and title format.
+Do NOT change the content type. Research keywords that fit it exactly.
+
 YOUR TASK — think like a professional SEO strategist:
 
 STEP 1 — SEARCH INTENT
 Match the exact content type already ranking on page 1.
-The article type is locked to: {locked_article_type}
+The content type is locked to: {content_type}
 Find keywords where THIS content type ranks on page 1.
 
 STEP 2 — LONG-TAIL KEYWORD FIRST
@@ -283,17 +405,28 @@ What is missing from articles currently ranking?
 Outdated info? No pricing table? No creator workflow? No free trial info?
 This is our content advantage.
 
-STEP 7 — TOPIC CLUSTER (supporting articles)
-For every main review or alert article, identify 3 supporting articles that:
+STEP 7 — ARTICLE TITLE
+Choose a title from these templates for the content type "{content_type}":
+{templates_formatted}
+
+Adapt the chosen template to fit the tool and audience exactly.
+Keep it under 60 characters. Natural language. No keyword stuffing.
+
+STEP 8 — TOPIC CLUSTER (supporting articles)
+For every main article, identify 3 supporting articles that:
 - Target related long-tail keywords the main article cannot rank for alone
 - Answer specific questions people search AFTER discovering the main tool
 - Build topical authority so Google sees us as the expert on this tool/category
-Examples for a Descript review:
-  → "descript vs adobe audition for podcasters" (comparison)
-  → "how to remove filler words automatically in descript" (tutorial)
-  → "descript free plan limitations 2026" (problem/question)
-These supporting articles link back to the main review — building a content cluster
-that ranks the whole group faster than isolated articles.
+- Are drawn from DIFFERENT content types than the main article
+
+Assign each supporting article one of these content types:
+  product_review | comparison | question | money_page | foundation_hub
+
+Examples for a Descript review (content_type: product_review):
+  → "descript vs adobe audition for podcasters" (content_type: comparison)
+  → "how to remove filler words automatically in descript" (content_type: question)
+  → "descript free plan limitations 2026" (content_type: question)
+These supporting articles link back to the main review — building a content cluster.
 
 Respond ONLY with a valid JSON object, nothing else:
 {{
@@ -314,8 +447,9 @@ Respond ONLY with a valid JSON object, nothing else:
   "difficulty_score": 15,
   "traffic_value": "high|medium|low",
   "article_type": "{locked_article_type}",
+  "content_type": "{content_type}",
   "recommended_word_count": 2000,
-  "article_title": "A compelling SEO title under 60 characters — vary the format, do NOT always use 'Review 2026: Best X for Y?'. Use different structures like: '[Tool]: Is It Worth It for [Audience]?', 'I Tested [Tool] for 30 Days — Here\'s What [Audience] Need to Know', '[Tool] vs [Competitor]: Which Should [Audience] Choose?', 'The Honest [Tool] Review for [Audience] (2026)', '[Tool] Review: What [Audience] Actually Get'",
+  "article_title": "Title using one of the templates provided above — under 60 characters",
   "url_slug": "keyword-friendly-url-slug",
   "serp_gap": "What is missing from current page 1 results that we can do better",
   "reasoning": "One sentence explaining why this keyword was chosen",
@@ -324,16 +458,19 @@ Respond ONLY with a valid JSON object, nothing else:
     {{
       "title": "Supporting article title 1",
       "slug": "url-slug-1",
+      "content_type": "comparison|question|money_page|foundation_hub|product_review",
       "angle": "Why this supports the main article and builds topical authority"
     }},
     {{
       "title": "Supporting article title 2",
       "slug": "url-slug-2",
+      "content_type": "comparison|question|money_page|foundation_hub|product_review",
       "angle": "Why this supports the main article and builds topical authority"
     }},
     {{
       "title": "Supporting article title 3",
       "slug": "url-slug-3",
+      "content_type": "comparison|question|money_page|foundation_hub|product_review",
       "angle": "Why this supports the main article and builds topical authority"
     }}
   ]
@@ -359,6 +496,9 @@ Respond ONLY with a valid JSON object, nothing else:
     # Always enforce the locked article type — never let Claude override it
     result["article_type"] = locked_article_type
 
+    # Always enforce the content type — never let Claude override it
+    result["content_type"] = content_type
+
     # Duplicate slug check
     duplicate_of = is_duplicate_slug(result["url_slug"], existing_keyword_data)
     if duplicate_of:
@@ -377,7 +517,8 @@ Respond ONLY with a valid JSON object, nothing else:
     # Log supporting articles if generated
     if result.get("supporting_articles"):
         for sa in result["supporting_articles"]:
-            print(f"   📎 Cluster: {sa.get('title', '')}")
+            ct_label = sa.get("content_type", "")
+            print(f"   📎 Cluster [{ct_label}]: {sa.get('title', '')}")
 
     return result
 
@@ -415,7 +556,16 @@ def run():
                 result.get("urgency", "low"), "📅"
             )
 
+            content_type_emoji = {
+                "product_review":  "📝",
+                "comparison":      "⚖️",
+                "question":        "❓",
+                "money_page":      "💰",
+                "foundation_hub":  "🏛️",
+            }.get(result.get("content_type", ""), "📝")
+
             print(f"   ✅ Primary keyword: \"{result['primary_keyword']}\"")
+            print(f"   {content_type_emoji} Content type: {result.get('content_type', 'product_review')}")
             print(f"   📊 Difficulty: {result['estimated_difficulty']} ({result['difficulty_score']}/100)")
             print(f"   🎯 Intent: {result['search_intent']}")
             print(f"   💰 Traffic value: {result['traffic_value']}")
@@ -423,12 +573,12 @@ def run():
             print(f"   🏆 Title: {result['article_title']}")
             print(f"   🔗 Slug: {result['url_slug']}")
             print(f"   🕳️  SERP gap: {result['serp_gap']}")
-            print(f"   {urgency_emoji} Urgency: {result.get('urgency', 'unknown')}")
-            print(f"   💡 {result['reasoning']}\n")
+            print(f"   {urgency_emoji} Urgency: {result.get('urgency', 'unknown')}\n")
 
             log_entry = f"""
 ### {tool['name']} (score: {tool.get('score', 0)})
 - Primary keyword: {result['primary_keyword']}
+- Content type: {result.get('content_type', 'product_review')}
 - Keyword cluster: {', '.join(result['keyword_cluster'])}
 - Difficulty: {result['estimated_difficulty']} ({result['difficulty_score']}/100)
 - Intent: {result['search_intent']}

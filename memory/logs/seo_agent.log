@@ -1,0 +1,1419 @@
+[2026-03-07 16:20:14] ============================================================
+[2026-03-07 16:20:14] SEO Agent starting — DRY RUN MODE (nothing will be written to WordPress)
+[2026-03-07 16:20:14] No published articles need SEO metadata. All done!
+[2026-03-07 16:23:55] ============================================================
+[2026-03-07 16:23:55] SEO Agent starting — DRY RUN MODE (nothing will be written to WordPress)
+[2026-03-07 16:23:55] Found 12 articles needing SEO metadata
+[2026-03-07 16:23:55] Daily cap: 15
+[2026-03-07 16:23:55] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: coursekit-review-course-creators only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: krisp-accent-conversion-review-podcasters only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: willow-voice-for-teams-review-new-ai-transcription-2026 only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: spoke-voice-to-text-macos-review only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: canva-review-social-media-managers-2026 only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: descript-review-youtube-creators only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: elevenlabs-review-podcast-voiceovers only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: riverside-fm-review-podcasters-2026 only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: convertkit-review-small-creators-2026 only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: beehiiv-review-newsletter-creators only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: jasper-ai-review-email-marketers-2026 only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 16:23:55]   ⚠️  Soft 404 guard: trimmr-ai-review-youtube-creators only has 0 words (min 800) — skipping schema
+[2026-03-07 16:23:55] 
+============================================================
+[2026-03-07 16:23:55] SEO Agent complete
+[2026-03-07 16:23:55]   ✓ Success:  0
+[2026-03-07 16:23:55]   ✗ Failed:   0
+[2026-03-07 16:23:55]   ⏭  Skipped:  12
+[2026-03-07 16:23:55]   💰 Run cost: $0.0000
+[2026-03-07 16:23:55] ============================================================
+
+[2026-03-07 16:26:35] ============================================================
+[2026-03-07 16:26:35] SEO Agent starting — DRY RUN MODE (nothing will be written to WordPress)
+[2026-03-07 16:26:35] Found 12 articles needing SEO metadata
+[2026-03-07 16:26:35] Daily cap: 15
+[2026-03-07 16:26:35] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 16:26:35]   Generating SEO metadata via Claude...
+[2026-03-07 16:26:42]   Tokens: 600 in / 308 out | Cost: $0.00001
+[2026-03-07 16:26:42]   Meta title (52 chars): Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 16:26:42]   Meta desc  (158 chars): Our Coursekit review for course creators 2026 examines AI agents that answer student questions automatically. Save 10+ hours weekly. See pricing and features.
+[2026-03-07 16:26:42]   Schema type: Review + FAQPage
+[2026-03-07 16:26:42]   Pushing to WordPress...
+[2026-03-07 16:26:42]   [DRY RUN] Would push to post 10:
+[2026-03-07 16:26:42]   [DRY RUN] Title: Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 16:26:42]   [DRY RUN] Desc:  Our Coursekit review for course creators 2026 examines AI agents that answer student questions automatically. Save 10+ hours weekly. See pricing and features.
+[2026-03-07 16:26:42]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:26:42]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:26:42]   ✓ SEO metadata live for: Coursekit
+[2026-03-07 16:26:42] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 16:26:42]   Generating SEO metadata via Claude...
+[2026-03-07 16:26:50]   Tokens: 613 in / 309 out | Cost: $0.00001
+[2026-03-07 16:26:50]   Meta title (50 chars): Krisp Accent Conversion Review for Podcasters 2024
+[2026-03-07 16:26:50]   Meta desc  (133 chars): Our Krisp accent conversion review for podcasters tests real-time voice clarity, naturalness, and pricing. Find out if it's worth it.
+[2026-03-07 16:26:50]   Schema type: Review + FAQPage
+[2026-03-07 16:26:50]   Pushing to WordPress...
+[2026-03-07 16:26:50]   [DRY RUN] Would push to post 11:
+[2026-03-07 16:26:50]   [DRY RUN] Title: Krisp Accent Conversion Review for Podcasters 2024
+[2026-03-07 16:26:50]   [DRY RUN] Desc:  Our Krisp accent conversion review for podcasters tests real-time voice clarity, naturalness, and pricing. Find out if it's worth it.
+[2026-03-07 16:26:50]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:26:50]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:26:50]   ✓ SEO metadata live for: Krisp Accent Conversion
+[2026-03-07 16:26:50] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 16:26:50]   Generating SEO metadata via Claude...
+[2026-03-07 16:26:58]   ↻ Retry 1/2: primary keyword "Willow Voice for Teams review new AI transcription tool 2026" not found in meta title
+[2026-03-07 16:27:04]   Tokens: 1283 in / 618 out | Cost: $0.00001
+[2026-03-07 16:27:04]   Meta title (60 chars): Willow Voice for Teams Review New AI Transcription Tool 2026
+[2026-03-07 16:27:04]   Meta desc  (134 chars): Willow Voice for Teams review new AI transcription tool 2026: See how it compares to Otter.ai and Descript. Find out if it's worth it.
+[2026-03-07 16:27:04]   Schema type: Review + FAQPage
+[2026-03-07 16:27:04]   Pushing to WordPress...
+[2026-03-07 16:27:04]   [DRY RUN] Would push to post 12:
+[2026-03-07 16:27:04]   [DRY RUN] Title: Willow Voice for Teams Review New AI Transcription Tool 2026
+[2026-03-07 16:27:04]   [DRY RUN] Desc:  Willow Voice for Teams review new AI transcription tool 2026: See how it compares to Otter.ai and Descript. Find out if it's worth it.
+[2026-03-07 16:27:04]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:27:04]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:27:04]   ✓ SEO metadata live for: Willow Voice for Teams
+[2026-03-07 16:27:04] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 16:27:04]   Generating SEO metadata via Claude...
+[2026-03-07 16:27:12]   Tokens: 621 in / 311 out | Cost: $0.00001
+[2026-03-07 16:27:12]   Meta title (54 chars): Spoke Voice to Text macOS Review 2026: Is It Worth It?
+[2026-03-07 16:27:12]   Meta desc  (143 chars): Our Spoke voice to text macOS review reveals accuracy, speed, and real-world performance after two weeks of testing. Find out if it's worth it.
+[2026-03-07 16:27:12]   Schema type: Review + FAQPage
+[2026-03-07 16:27:12]   Pushing to WordPress...
+[2026-03-07 16:27:12]   [DRY RUN] Would push to post 13:
+[2026-03-07 16:27:12]   [DRY RUN] Title: Spoke Voice to Text macOS Review 2026: Is It Worth It?
+[2026-03-07 16:27:12]   [DRY RUN] Desc:  Our Spoke voice to text macOS review reveals accuracy, speed, and real-world performance after two weeks of testing. Find out if it's worth it.
+[2026-03-07 16:27:12]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:27:12]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:27:12]   ✓ SEO metadata live for: Spoke
+[2026-03-07 16:27:12] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 16:27:12]   Generating SEO metadata via Claude...
+[2026-03-07 16:27:20]   Tokens: 609 in / 320 out | Cost: $0.00001
+[2026-03-07 16:27:20]   Meta title (43 chars): Canva Review for Social Media Managers 2026
+[2026-03-07 16:27:20]   Meta desc  (138 chars): Canva review for social media managers 2026: pricing, AI features, workflow automation, and team collaboration. Find out if it's worth it.
+[2026-03-07 16:27:20]   Schema type: Review + FAQPage
+[2026-03-07 16:27:20]   Pushing to WordPress...
+[2026-03-07 16:27:20]   [DRY RUN] Would push to post 14:
+[2026-03-07 16:27:20]   [DRY RUN] Title: Canva Review for Social Media Managers 2026
+[2026-03-07 16:27:20]   [DRY RUN] Desc:  Canva review for social media managers 2026: pricing, AI features, workflow automation, and team collaboration. Find out if it's worth it.
+[2026-03-07 16:27:20]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:27:20]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:27:20]   ✓ SEO metadata live for: Canva
+[2026-03-07 16:27:20] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 16:27:20]   Generating SEO metadata via Claude...
+[2026-03-07 16:27:29]   Tokens: 627 in / 333 out | Cost: $0.00001
+[2026-03-07 16:27:29]   Meta title (52 chars): Descript Review for YouTube Creators 2026: Worth It?
+[2026-03-07 16:27:29]   Meta desc  (143 chars): Descript review for YouTube creators 2026: tested text-based editing, AI features, and export quality. See if it saves time for weekly uploads.
+[2026-03-07 16:27:29]   Schema type: Review + FAQPage
+[2026-03-07 16:27:29]   Pushing to WordPress...
+[2026-03-07 16:27:29]   [DRY RUN] Would push to post 15:
+[2026-03-07 16:27:29]   [DRY RUN] Title: Descript Review for YouTube Creators 2026: Worth It?
+[2026-03-07 16:27:29]   [DRY RUN] Desc:  Descript review for YouTube creators 2026: tested text-based editing, AI features, and export quality. See if it saves time for weekly uploads.
+[2026-03-07 16:27:29]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:27:29]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:27:29]   ✓ SEO metadata live for: Descript
+[2026-03-07 16:27:29] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 16:27:29]   Generating SEO metadata via Claude...
+[2026-03-07 16:27:37]   Tokens: 627 in / 315 out | Cost: $0.00001
+[2026-03-07 16:27:37]   Meta title (45 chars): ElevenLabs Review for Podcast Voiceovers 2026
+[2026-03-07 16:27:37]   Meta desc  (131 chars): Our ElevenLabs review for podcast voiceovers 2026 covers pricing, voice quality, and real-world results. Find out if it's worth it.
+[2026-03-07 16:27:37]   Schema type: Review + FAQPage
+[2026-03-07 16:27:37]   Pushing to WordPress...
+[2026-03-07 16:27:37]   [DRY RUN] Would push to post 16:
+[2026-03-07 16:27:37]   [DRY RUN] Title: ElevenLabs Review for Podcast Voiceovers 2026
+[2026-03-07 16:27:37]   [DRY RUN] Desc:  Our ElevenLabs review for podcast voiceovers 2026 covers pricing, voice quality, and real-world results. Find out if it's worth it.
+[2026-03-07 16:27:37]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:27:37]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:27:37]   ✓ SEO metadata live for: ElevenLabs
+[2026-03-07 16:27:37] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 16:27:37]   Generating SEO metadata via Claude...
+[2026-03-07 16:27:47]   Tokens: 596 in / 307 out | Cost: $0.00001
+[2026-03-07 16:27:47]   Meta title (56 chars): Riverside.fm Review for Podcasters 2026: Is It Worth It?
+[2026-03-07 16:27:47]   Meta desc  (138 chars): Our riverside.fm review for podcasters 2026 covers pricing, audio quality, and new features. See if it's the right recording tool for you.
+[2026-03-07 16:27:47]   Schema type: Review + FAQPage
+[2026-03-07 16:27:47]   Pushing to WordPress...
+[2026-03-07 16:27:47]   [DRY RUN] Would push to post 17:
+[2026-03-07 16:27:47]   [DRY RUN] Title: Riverside.fm Review for Podcasters 2026: Is It Worth It?
+[2026-03-07 16:27:47]   [DRY RUN] Desc:  Our riverside.fm review for podcasters 2026 covers pricing, audio quality, and new features. See if it's the right recording tool for you.
+[2026-03-07 16:27:47]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:27:47]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:27:47]   ✓ SEO metadata live for: Riverside.fm
+[2026-03-07 16:27:47] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 16:27:47]   Generating SEO metadata via Claude...
+[2026-03-07 16:27:53]   Tokens: 605 in / 322 out | Cost: $0.00001
+[2026-03-07 16:27:53]   Meta title (52 chars): ConvertKit Review for Small Creators 2026: Worth It?
+[2026-03-07 16:27:53]   Meta desc  (149 chars): ConvertKit review for small creators 2026: pricing, free plan limits, and workflows for beginners under 1,000 subscribers. Find out if it's worth it.
+[2026-03-07 16:27:53]   Schema type: Review + FAQPage
+[2026-03-07 16:27:53]   Pushing to WordPress...
+[2026-03-07 16:27:53]   [DRY RUN] Would push to post 18:
+[2026-03-07 16:27:53]   [DRY RUN] Title: ConvertKit Review for Small Creators 2026: Worth It?
+[2026-03-07 16:27:53]   [DRY RUN] Desc:  ConvertKit review for small creators 2026: pricing, free plan limits, and workflows for beginners under 1,000 subscribers. Find out if it's worth it.
+[2026-03-07 16:27:53]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:27:53]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:27:53]   ✓ SEO metadata live for: ConvertKit
+[2026-03-07 16:27:53] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 16:27:53]   Generating SEO metadata via Claude...
+[2026-03-07 16:28:02]   Tokens: 609 in / 365 out | Cost: $0.00001
+[2026-03-07 16:28:02]   Meta title (55 chars): Beehiiv Review for Newsletter Creators 2026 | Worth It?
+[2026-03-07 16:28:02]   Meta desc  (147 chars): Our beehiiv review for newsletter creators 2026 covers pricing, deliverability, monetization features, and growth tools. Find out if it's worth it.
+[2026-03-07 16:28:02]   Schema type: Review + FAQPage
+[2026-03-07 16:28:02]   Pushing to WordPress...
+[2026-03-07 16:28:02]   [DRY RUN] Would push to post 19:
+[2026-03-07 16:28:02]   [DRY RUN] Title: Beehiiv Review for Newsletter Creators 2026 | Worth It?
+[2026-03-07 16:28:02]   [DRY RUN] Desc:  Our beehiiv review for newsletter creators 2026 covers pricing, deliverability, monetization features, and growth tools. Find out if it's worth it.
+[2026-03-07 16:28:02]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:28:02]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:28:02]   ✓ SEO metadata live for: Beehiiv
+[2026-03-07 16:28:02] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 16:28:02]   Generating SEO metadata via Claude...
+[2026-03-07 16:28:09]   Tokens: 610 in / 297 out | Cost: $0.00001
+[2026-03-07 16:28:09]   Meta title (55 chars): Jasper AI Review for Email Marketers 2026: Test Results
+[2026-03-07 16:28:09]   Meta desc  (138 chars): Our 2026 Jasper AI review for email marketers tests subject lines, copy quality, and ROI. See real campaign results and pricing breakdown.
+[2026-03-07 16:28:09]   Schema type: Review + FAQPage
+[2026-03-07 16:28:09]   Pushing to WordPress...
+[2026-03-07 16:28:09]   [DRY RUN] Would push to post 132:
+[2026-03-07 16:28:09]   [DRY RUN] Title: Jasper AI Review for Email Marketers 2026: Test Results
+[2026-03-07 16:28:09]   [DRY RUN] Desc:  Our 2026 Jasper AI review for email marketers tests subject lines, copy quality, and ROI. See real campaign results and pricing breakdown.
+[2026-03-07 16:28:09]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:28:09]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:28:09]   ✓ SEO metadata live for: Jasper AI
+[2026-03-07 16:28:09] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 16:28:09]   Generating SEO metadata via Claude...
+[2026-03-07 16:28:20]   Tokens: 631 in / 326 out | Cost: $0.00001
+[2026-03-07 16:28:20]   Meta title (56 chars): Trimmr AI Review for YouTube Creators 2026 | Honest Test
+[2026-03-07 16:28:20]   Meta desc  (145 chars): Trimmr AI review for YouTube creators 2026: Does it actually turn long videos into shorts automatically? Real tests, pricing, and results inside.
+[2026-03-07 16:28:20]   Schema type: Review + FAQPage
+[2026-03-07 16:28:20]   Pushing to WordPress...
+[2026-03-07 16:28:20]   [DRY RUN] Would push to post 133:
+[2026-03-07 16:28:20]   [DRY RUN] Title: Trimmr AI Review for YouTube Creators 2026 | Honest Test
+[2026-03-07 16:28:20]   [DRY RUN] Desc:  Trimmr AI review for YouTube creators 2026: Does it actually turn long videos into shorts automatically? Real tests, pricing, and results inside.
+[2026-03-07 16:28:20]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:28:20]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:28:20]   ✓ SEO metadata live for: Trimmr
+[2026-03-07 16:28:20] 
+============================================================
+[2026-03-07 16:28:20] SEO Agent complete
+[2026-03-07 16:28:20]   ✓ Success:  12
+[2026-03-07 16:28:20]   ✗ Failed:   0
+[2026-03-07 16:28:20]   ⏭  Skipped:  0
+[2026-03-07 16:28:20]   💰 Run cost: $0.0001
+[2026-03-07 16:28:20] ============================================================
+
+[2026-03-07 16:32:25] ============================================================
+[2026-03-07 16:32:25] SEO Agent starting — DRY RUN MODE (nothing will be written to WordPress)
+[2026-03-07 16:32:25] Found 12 articles needing SEO metadata
+[2026-03-07 16:32:25] Daily cap: 15
+[2026-03-07 16:32:25] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 16:32:25]   Generating SEO metadata via Claude...
+[2026-03-07 16:32:33]   Tokens: 663 in / 285 out | Cost: $0.00001
+[2026-03-07 16:32:33]   Meta title (52 chars): Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 16:32:33]   Meta desc  (142 chars): Our Coursekit review for course creators 2026 tests AI agents that answer student questions automatically. See pricing, features, and results.
+[2026-03-07 16:32:33]   Schema type: Review + FAQPage
+[2026-03-07 16:32:33]   Pushing to WordPress...
+[2026-03-07 16:32:33]   [DRY RUN] Would push to post 10:
+[2026-03-07 16:32:33]   [DRY RUN] Title: Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 16:32:33]   [DRY RUN] Desc:  Our Coursekit review for course creators 2026 tests AI agents that answer student questions automatically. See pricing, features, and results.
+[2026-03-07 16:32:33]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:32:33]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:32:33]   ✓ SEO metadata live for: Coursekit
+[2026-03-07 16:32:33] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 16:32:33]   Generating SEO metadata via Claude...
+[2026-03-07 16:32:41]   Tokens: 676 in / 311 out | Cost: $0.00001
+[2026-03-07 16:32:41]   Meta title (50 chars): Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 16:32:41]   Meta desc  (139 chars): Our Krisp accent conversion review for podcasters tests real-time voice clarity, audio quality, and ease of use. Find out if it's worth it.
+[2026-03-07 16:32:41]   Schema type: Review + FAQPage
+[2026-03-07 16:32:41]   Pushing to WordPress...
+[2026-03-07 16:32:41]   [DRY RUN] Would push to post 11:
+[2026-03-07 16:32:41]   [DRY RUN] Title: Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 16:32:41]   [DRY RUN] Desc:  Our Krisp accent conversion review for podcasters tests real-time voice clarity, audio quality, and ease of use. Find out if it's worth it.
+[2026-03-07 16:32:41]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:32:41]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:32:41]   ✓ SEO metadata live for: Krisp Accent Conversion
+[2026-03-07 16:32:41] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 16:32:41]   Generating SEO metadata via Claude...
+[2026-03-07 16:32:48]   ↻ Retry 1/2: primary keyword "Willow Voice for Teams review new AI transcription tool 2026" not found in meta title
+[2026-03-07 16:32:54]   Tokens: 1409 in / 605 out | Cost: $0.00001
+[2026-03-07 16:32:54]   Meta title (60 chars): Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 16:32:54]   Meta desc  (135 chars): Willow Voice for Teams review new AI transcription tool 2026: faster accuracy for remote teams and creators. Find out if it's worth it.
+[2026-03-07 16:32:54]   Schema type: Review + FAQPage
+[2026-03-07 16:32:54]   Pushing to WordPress...
+[2026-03-07 16:32:54]   [DRY RUN] Would push to post 12:
+[2026-03-07 16:32:54]   [DRY RUN] Title: Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 16:32:54]   [DRY RUN] Desc:  Willow Voice for Teams review new AI transcription tool 2026: faster accuracy for remote teams and creators. Find out if it's worth it.
+[2026-03-07 16:32:54]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:32:54]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:32:54]   ✓ SEO metadata live for: Willow Voice for Teams
+[2026-03-07 16:32:54] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 16:32:54]   Generating SEO metadata via Claude...
+[2026-03-07 16:33:02]   Tokens: 684 in / 303 out | Cost: $0.00001
+[2026-03-07 16:33:02]   Meta title (54 chars): Spoke Voice to Text macOS Review 2026: Is It Worth It?
+[2026-03-07 16:33:02]   Meta desc  (159 chars): Our Spoke voice to text macOS review tests accuracy, speed, and real-world performance across Mac apps. See pros, cons, and pricing. Find out if it's worth it.
+[2026-03-07 16:33:02]   Schema type: Review + FAQPage
+[2026-03-07 16:33:02]   Pushing to WordPress...
+[2026-03-07 16:33:02]   [DRY RUN] Would push to post 13:
+[2026-03-07 16:33:02]   [DRY RUN] Title: Spoke Voice to Text macOS Review 2026: Is It Worth It?
+[2026-03-07 16:33:02]   [DRY RUN] Desc:  Our Spoke voice to text macOS review tests accuracy, speed, and real-world performance across Mac apps. See pros, cons, and pricing. Find out if it's worth it.
+[2026-03-07 16:33:02]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:33:02]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:33:02]   ✓ SEO metadata live for: Spoke
+[2026-03-07 16:33:02] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 16:33:02]   Generating SEO metadata via Claude...
+[2026-03-07 16:33:10]   Tokens: 672 in / 324 out | Cost: $0.00001
+[2026-03-07 16:33:10]   Meta title (53 chars): Canva Review for Social Media Managers 2026 Worth It?
+[2026-03-07 16:33:10]   Meta desc  (143 chars): Our Canva review for social media managers 2026 tests workflows, AI tools, and team features. See pricing, pros, and cons to decide if it fits.
+[2026-03-07 16:33:10]   Schema type: Review + FAQPage
+[2026-03-07 16:33:10]   Pushing to WordPress...
+[2026-03-07 16:33:10]   [DRY RUN] Would push to post 14:
+[2026-03-07 16:33:10]   [DRY RUN] Title: Canva Review for Social Media Managers 2026 Worth It?
+[2026-03-07 16:33:10]   [DRY RUN] Desc:  Our Canva review for social media managers 2026 tests workflows, AI tools, and team features. See pricing, pros, and cons to decide if it fits.
+[2026-03-07 16:33:10]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:33:10]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:33:10]   ✓ SEO metadata live for: Canva
+[2026-03-07 16:33:10] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 16:33:10]   Generating SEO metadata via Claude...
+[2026-03-07 16:33:19]   Tokens: 690 in / 330 out | Cost: $0.00001
+[2026-03-07 16:33:19]   Meta title (53 chars): Descript Review for YouTube Creators 2026 | Worth It?
+[2026-03-07 16:33:19]   Meta desc  (138 chars): Our Descript review for YouTube creators 2026 tests text-based editing, AI tools, and export quality. See if it beats traditional editors.
+[2026-03-07 16:33:19]   Schema type: Review + FAQPage
+[2026-03-07 16:33:19]   Pushing to WordPress...
+[2026-03-07 16:33:19]   [DRY RUN] Would push to post 15:
+[2026-03-07 16:33:19]   [DRY RUN] Title: Descript Review for YouTube Creators 2026 | Worth It?
+[2026-03-07 16:33:19]   [DRY RUN] Desc:  Our Descript review for YouTube creators 2026 tests text-based editing, AI tools, and export quality. See if it beats traditional editors.
+[2026-03-07 16:33:19]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:33:19]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:33:19]   ✓ SEO metadata live for: Descript
+[2026-03-07 16:33:19] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 16:33:19]   Generating SEO metadata via Claude...
+[2026-03-07 16:33:28]   Tokens: 690 in / 338 out | Cost: $0.00001
+[2026-03-07 16:33:28]   Meta title (55 chars): ElevenLabs Review for Podcast Voiceovers 2026 Worth It?
+[2026-03-07 16:33:28]   Meta desc  (135 chars): Our ElevenLabs review for podcast voiceovers 2026 covers voice quality, pricing, and real-world performance. Find out if it's worth it.
+[2026-03-07 16:33:28]   Schema type: Review + FAQPage
+[2026-03-07 16:33:28]   Pushing to WordPress...
+[2026-03-07 16:33:28]   [DRY RUN] Would push to post 16:
+[2026-03-07 16:33:28]   [DRY RUN] Title: ElevenLabs Review for Podcast Voiceovers 2026 Worth It?
+[2026-03-07 16:33:28]   [DRY RUN] Desc:  Our ElevenLabs review for podcast voiceovers 2026 covers voice quality, pricing, and real-world performance. Find out if it's worth it.
+[2026-03-07 16:33:28]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:33:28]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:33:28]   ✓ SEO metadata live for: ElevenLabs
+[2026-03-07 16:33:28] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 16:33:28]   Generating SEO metadata via Claude...
+[2026-03-07 16:33:37]   Tokens: 659 in / 290 out | Cost: $0.00001
+[2026-03-07 16:33:37]   Meta title (56 chars): Riverside.fm Review for Podcasters 2026: Is It Worth It?
+[2026-03-07 16:33:37]   Meta desc  (139 chars): Our riverside.fm review for podcasters 2026 examines pricing, audio quality, and features. See if it solves your remote recording problems.
+[2026-03-07 16:33:37]   Schema type: Review + FAQPage
+[2026-03-07 16:33:37]   Pushing to WordPress...
+[2026-03-07 16:33:37]   [DRY RUN] Would push to post 17:
+[2026-03-07 16:33:37]   [DRY RUN] Title: Riverside.fm Review for Podcasters 2026: Is It Worth It?
+[2026-03-07 16:33:37]   [DRY RUN] Desc:  Our riverside.fm review for podcasters 2026 examines pricing, audio quality, and features. See if it solves your remote recording problems.
+[2026-03-07 16:33:37]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:33:37]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:33:37]   ✓ SEO metadata live for: Riverside.fm
+[2026-03-07 16:33:37] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 16:33:37]   Generating SEO metadata via Claude...
+[2026-03-07 16:33:45]   Tokens: 668 in / 333 out | Cost: $0.00001
+[2026-03-07 16:33:45]   Meta title (58 chars): ConvertKit Review for Small Creators 2026: Is It Worth It?
+[2026-03-07 16:33:45]   Meta desc  (159 chars): Our ConvertKit review for small creators 2026 covers pricing, free plan limits, and workflows for beginners under 1,000 subscribers. Find out if it's worth it.
+[2026-03-07 16:33:45]   Schema type: Review + FAQPage
+[2026-03-07 16:33:45]   Pushing to WordPress...
+[2026-03-07 16:33:45]   [DRY RUN] Would push to post 18:
+[2026-03-07 16:33:45]   [DRY RUN] Title: ConvertKit Review for Small Creators 2026: Is It Worth It?
+[2026-03-07 16:33:45]   [DRY RUN] Desc:  Our ConvertKit review for small creators 2026 covers pricing, free plan limits, and workflows for beginners under 1,000 subscribers. Find out if it's worth it.
+[2026-03-07 16:33:45]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:33:45]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:33:45]   ✓ SEO metadata live for: ConvertKit
+[2026-03-07 16:33:45] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 16:33:45]   Generating SEO metadata via Claude...
+[2026-03-07 16:33:53]   Tokens: 672 in / 341 out | Cost: $0.00001
+[2026-03-07 16:33:53]   Meta title (56 chars): Beehiiv Review for Newsletter Creators 2026: Honest Test
+[2026-03-07 16:33:53]   Meta desc  (147 chars): Our beehiiv review for newsletter creators 2026 covers pricing, deliverability, monetization features, and growth tools. Find out if it's worth it.
+[2026-03-07 16:33:53]   Schema type: Review + FAQPage
+[2026-03-07 16:33:53]   Pushing to WordPress...
+[2026-03-07 16:33:53]   [DRY RUN] Would push to post 19:
+[2026-03-07 16:33:53]   [DRY RUN] Title: Beehiiv Review for Newsletter Creators 2026: Honest Test
+[2026-03-07 16:33:53]   [DRY RUN] Desc:  Our beehiiv review for newsletter creators 2026 covers pricing, deliverability, monetization features, and growth tools. Find out if it's worth it.
+[2026-03-07 16:33:53]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:33:53]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:33:53]   ✓ SEO metadata live for: Beehiiv
+[2026-03-07 16:33:53] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 16:33:53]   Generating SEO metadata via Claude...
+[2026-03-07 16:34:02]   Tokens: 673 in / 336 out | Cost: $0.00001
+[2026-03-07 16:34:02]   Meta title (55 chars): Jasper AI Review for Email Marketers 2026: Test Results
+[2026-03-07 16:34:02]   Meta desc  (146 chars): Our Jasper AI review for email marketers 2026 reveals real test results on email campaign quality, time saved, and ROI. Find out if it's worth it.
+[2026-03-07 16:34:02]   Schema type: Review + FAQPage
+[2026-03-07 16:34:02]   Pushing to WordPress...
+[2026-03-07 16:34:02]   [DRY RUN] Would push to post 132:
+[2026-03-07 16:34:02]   [DRY RUN] Title: Jasper AI Review for Email Marketers 2026: Test Results
+[2026-03-07 16:34:02]   [DRY RUN] Desc:  Our Jasper AI review for email marketers 2026 reveals real test results on email campaign quality, time saved, and ROI. Find out if it's worth it.
+[2026-03-07 16:34:02]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:34:02]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:34:02]   ✓ SEO metadata live for: Jasper AI
+[2026-03-07 16:34:02] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 16:34:02]   Generating SEO metadata via Claude...
+[2026-03-07 16:34:10]   Tokens: 694 in / 303 out | Cost: $0.00001
+[2026-03-07 16:34:10]   Meta title (56 chars): Trimmr AI Review for YouTube Creators 2026 | Honest Test
+[2026-03-07 16:34:10]   Meta desc  (139 chars): Our Trimmr AI review for YouTube creators 2026 tests if this tool actually saves editing time on short clips. See real results and pricing.
+[2026-03-07 16:34:10]   Schema type: Review + FAQPage
+[2026-03-07 16:34:10]   Pushing to WordPress...
+[2026-03-07 16:34:10]   [DRY RUN] Would push to post 133:
+[2026-03-07 16:34:10]   [DRY RUN] Title: Trimmr AI Review for YouTube Creators 2026 | Honest Test
+[2026-03-07 16:34:10]   [DRY RUN] Desc:  Our Trimmr AI review for YouTube creators 2026 tests if this tool actually saves editing time on short clips. See real results and pricing.
+[2026-03-07 16:34:10]   [DRY RUN] Schema injected as HTML block
+[2026-03-07 16:34:10]   [DRY RUN] Skipping handoffs save
+[2026-03-07 16:34:10]   ✓ SEO metadata live for: Trimmr
+[2026-03-07 16:34:10] 
+============================================================
+[2026-03-07 16:34:10] SEO Agent complete
+[2026-03-07 16:34:10]   ✓ Success:  12
+[2026-03-07 16:34:10]   ✗ Failed:   0
+[2026-03-07 16:34:10]   ⏭  Skipped:  0
+[2026-03-07 16:34:10]   💰 Run cost: $0.0001
+[2026-03-07 16:34:10] ============================================================
+
+[2026-03-07 16:34:30] ============================================================
+[2026-03-07 16:34:30] SEO Agent starting
+[2026-03-07 16:34:30] Found 12 articles needing SEO metadata
+[2026-03-07 16:34:30] Daily cap: 15
+[2026-03-07 16:34:30] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 16:34:30]   Generating SEO metadata via Claude...
+[2026-03-07 16:34:39]   Tokens: 663 in / 307 out | Cost: $0.00001
+[2026-03-07 16:34:39]   Meta title (52 chars): Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 16:34:39]   Meta desc  (155 chars): Our Coursekit review for course creators 2026 examines AI agents that answer student questions automatically. Save support time. Find out if it's worth it.
+[2026-03-07 16:34:39]   Schema type: Review + FAQPage
+[2026-03-07 16:34:40]   Pushing to WordPress...
+[2026-03-07 16:34:43]   ✓ SEO metadata live for: Coursekit
+[2026-03-07 16:34:43] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 16:34:43]   Generating SEO metadata via Claude...
+[2026-03-07 16:34:52]   Tokens: 676 in / 289 out | Cost: $0.00001
+[2026-03-07 16:34:52]   Meta title (50 chars): Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 16:34:52]   Meta desc  (137 chars): Our Krisp accent conversion review for podcasters tests real-time voice clarity, naturalness, and ease of use. Find out if it's worth it.
+[2026-03-07 16:34:52]   Schema type: Review + FAQPage
+[2026-03-07 16:34:53]   Pushing to WordPress...
+[2026-03-07 16:34:55]   ✓ SEO metadata live for: Krisp Accent Conversion
+[2026-03-07 16:34:55] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 16:34:55]   Generating SEO metadata via Claude...
+[2026-03-07 16:35:01]   ↻ Retry 1/2: primary keyword "Willow Voice for Teams review new AI transcription tool 2026" not found in meta title
+[2026-03-07 16:35:09]   Tokens: 1409 in / 623 out | Cost: $0.00001
+[2026-03-07 16:35:09]   Meta title (60 chars): Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 16:35:09]   Meta desc  (140 chars): Willow Voice for Teams review new AI transcription tool 2026: faster voice-to-text for remote teams. Compare features vs Otter.ai. Worth it?
+[2026-03-07 16:35:09]   Schema type: Review + FAQPage
+[2026-03-07 16:35:10]   Pushing to WordPress...
+[2026-03-07 16:35:13]   ✓ SEO metadata live for: Willow Voice for Teams
+[2026-03-07 16:35:13] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 16:35:13]   Generating SEO metadata via Claude...
+[2026-03-07 16:35:21]   Tokens: 684 in / 299 out | Cost: $0.00001
+[2026-03-07 16:35:21]   Meta title (54 chars): Spoke Voice to Text macOS Review 2026: Is It Worth It?
+[2026-03-07 16:35:21]   Meta desc  (154 chars): Our Spoke voice to text macOS review tests accuracy, speed, and value after two weeks of real-world use. Find out if it's the best dictation tool for Mac.
+[2026-03-07 16:35:21]   Schema type: Review + FAQPage
+[2026-03-07 16:35:22]   Pushing to WordPress...
+[2026-03-07 16:35:24]   ✓ SEO metadata live for: Spoke
+[2026-03-07 16:35:24] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 16:35:24]   Generating SEO metadata via Claude...
+[2026-03-07 16:35:32]   Tokens: 672 in / 323 out | Cost: $0.00001
+[2026-03-07 16:35:32]   Meta title (43 chars): Canva Review for Social Media Managers 2026
+[2026-03-07 16:35:32]   Meta desc  (127 chars): Canva review for social media managers 2026: AI features, workflows, pricing, and team tools tested. Find out if it's worth it.
+[2026-03-07 16:35:32]   Schema type: Review + FAQPage
+[2026-03-07 16:35:33]   Pushing to WordPress...
+[2026-03-07 16:35:35]   ✓ SEO metadata live for: Canva
+[2026-03-07 16:35:35] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 16:35:35]   Generating SEO metadata via Claude...
+[2026-03-07 16:35:43]   Tokens: 690 in / 319 out | Cost: $0.00001
+[2026-03-07 16:35:43]   Meta title (52 chars): Descript Review for YouTube Creators 2026: Worth It?
+[2026-03-07 16:35:43]   Meta desc  (145 chars): Our Descript review for YouTube creators 2026 tests text-based editing, AI features, and export quality. See if it saves time or adds complexity.
+[2026-03-07 16:35:43]   Schema type: Review + FAQPage
+[2026-03-07 16:35:44]   Pushing to WordPress...
+[2026-03-07 16:36:10]   ✓ SEO metadata live for: Descript
+[2026-03-07 16:36:10] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 16:36:10]   Generating SEO metadata via Claude...
+[2026-03-07 16:36:22]   Tokens: 690 in / 316 out | Cost: $0.00001
+[2026-03-07 16:36:22]   Meta title (55 chars): ElevenLabs Review for Podcast Voiceovers 2026 Worth It?
+[2026-03-07 16:36:22]   Meta desc  (136 chars): Our ElevenLabs review for podcast voiceovers 2026 tests voice quality, pricing, and ease of use. Find out if it's worth it for creators.
+[2026-03-07 16:36:22]   Schema type: Review + FAQPage
+[2026-03-07 16:36:23]   Pushing to WordPress...
+[2026-03-07 16:36:25]   ✓ SEO metadata live for: ElevenLabs
+[2026-03-07 16:36:25] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 16:36:25]   Generating SEO metadata via Claude...
+[2026-03-07 16:36:34]   Tokens: 659 in / 331 out | Cost: $0.00001
+[2026-03-07 16:36:34]   Meta title (56 chars): Riverside.fm Review for Podcasters 2026: Is It Worth It?
+[2026-03-07 16:36:34]   Meta desc  (139 chars): Our riverside.fm review for podcasters 2026 covers pricing, features, and audio quality. See if this remote recording tool fits your needs.
+[2026-03-07 16:36:34]   Schema type: Review + FAQPage
+[2026-03-07 16:36:35]   Pushing to WordPress...
+[2026-03-07 16:36:37]   ✓ SEO metadata live for: Riverside.fm
+[2026-03-07 16:36:37] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 16:36:37]   Generating SEO metadata via Claude...
+[2026-03-07 16:36:44]   ↻ Retry 1/2: meta description is 164 chars — must be 160 or under
+[2026-03-07 16:36:52]   Tokens: 1372 in / 667 out | Cost: $0.00001
+[2026-03-07 16:36:52]   Meta title (52 chars): ConvertKit Review for Small Creators 2026: Worth It?
+[2026-03-07 16:36:52]   Meta desc  (140 chars): Our ConvertKit review for small creators 2026 covers free plan limits, real pricing, and workflows for beginners. Find out if it's worth it.
+[2026-03-07 16:36:52]   Schema type: Review + FAQPage
+[2026-03-07 16:36:52]   Pushing to WordPress...
+[2026-03-07 16:36:55]   ✓ SEO metadata live for: ConvertKit
+[2026-03-07 16:36:55] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 16:36:55]   Generating SEO metadata via Claude...
+[2026-03-07 16:37:04]   Tokens: 672 in / 366 out | Cost: $0.00001
+[2026-03-07 16:37:04]   Meta title (57 chars): Beehiiv Review for Newsletter Creators 2026 | Honest Test
+[2026-03-07 16:37:04]   Meta desc  (138 chars): Our beehiiv review for newsletter creators 2026 covers pricing, deliverability, monetization, and growth tools. Find out if it's worth it.
+[2026-03-07 16:37:04]   Schema type: Review + FAQPage
+[2026-03-07 16:37:05]   Pushing to WordPress...
+[2026-03-07 16:37:07]   ✓ SEO metadata live for: Beehiiv
+[2026-03-07 16:37:07] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 16:37:07]   Generating SEO metadata via Claude...
+[2026-03-07 16:37:16]   Tokens: 673 in / 326 out | Cost: $0.00001
+[2026-03-07 16:37:16]   Meta title (54 chars): Jasper AI Review for Email Marketers 2026 | Real Tests
+[2026-03-07 16:37:16]   Meta desc  (142 chars): Our Jasper AI review for email marketers 2026 reveals how much time it saves on campaigns, pricing breakdown, and real test results. Worth it?
+[2026-03-07 16:37:16]   Schema type: Review + FAQPage
+[2026-03-07 16:37:17]   Pushing to WordPress...
+[2026-03-07 16:37:23]   ✓ SEO metadata live for: Jasper AI
+[2026-03-07 16:37:23] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 16:37:23]   Generating SEO metadata via Claude...
+[2026-03-07 16:37:30]   Tokens: 694 in / 309 out | Cost: $0.00001
+[2026-03-07 16:37:30]   Meta title (55 chars): Trimmr AI Review for YouTube Creators 2026: Honest Test
+[2026-03-07 16:37:30]   Meta desc  (136 chars): Our Trimmr AI review for YouTube creators 2026 tests if this tool really saves hours on short clips. See pricing, features, and results.
+[2026-03-07 16:37:30]   Schema type: Review + FAQPage
+[2026-03-07 16:37:31]   Pushing to WordPress...
+[2026-03-07 16:37:37]   ✓ SEO metadata live for: Trimmr
+[2026-03-07 16:37:37] 
+============================================================
+[2026-03-07 16:37:37] SEO Agent complete
+[2026-03-07 16:37:37]   ✓ Success:  12
+[2026-03-07 16:37:37]   ✗ Failed:   0
+[2026-03-07 16:37:37]   ⏭  Skipped:  0
+[2026-03-07 16:37:37]   💰 Run cost: $0.0001
+[2026-03-07 16:37:37] ============================================================
+
+[2026-03-07 17:00:45] ============================================================
+[2026-03-07 17:00:45] SEO Agent starting — DRY RUN MODE (nothing will be written to WordPress)
+[2026-03-07 17:00:45] Found 12 articles needing SEO metadata
+[2026-03-07 17:00:45] Daily cap: 15
+[2026-03-07 17:00:45] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 17:00:45]   Generating SEO metadata via Claude...
+[2026-03-07 17:00:54]   Tokens: 663 in / 279 out | Cost: $0.00001
+[2026-03-07 17:00:54]   Meta title (52 chars): Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 17:00:54]   Meta desc  (142 chars): Our Coursekit review for course creators 2026 covers AI agents that answer student questions automatically. See pricing, features, and limits.
+[2026-03-07 17:00:54]   Schema type: Review + FAQPage
+[2026-03-07 17:00:54]   Pushing to WordPress...
+[2026-03-07 17:00:54]   [DRY RUN] Would push to post 10:
+[2026-03-07 17:00:54]   [DRY RUN] Title: Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 17:00:54]   [DRY RUN] Desc:  Our Coursekit review for course creators 2026 covers AI agents that answer student questions automatically. See pricing, features, and limits.
+[2026-03-07 17:00:54]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:00:54]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:00:54]   ✓ SEO metadata live for: Coursekit
+[2026-03-07 17:00:54] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 17:00:54]   Generating SEO metadata via Claude...
+[2026-03-07 17:01:02]   Tokens: 676 in / 302 out | Cost: $0.00001
+[2026-03-07 17:01:02]   Meta title (50 chars): Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 17:01:02]   Meta desc  (153 chars): Our Krisp accent conversion review for podcasters tests real-time voice clarity. Does it preserve personality while improving comprehension? See results.
+[2026-03-07 17:01:02]   Schema type: Review + FAQPage
+[2026-03-07 17:01:02]   Pushing to WordPress...
+[2026-03-07 17:01:02]   [DRY RUN] Would push to post 11:
+[2026-03-07 17:01:02]   [DRY RUN] Title: Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 17:01:02]   [DRY RUN] Desc:  Our Krisp accent conversion review for podcasters tests real-time voice clarity. Does it preserve personality while improving comprehension? See results.
+[2026-03-07 17:01:02]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:01:02]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:01:02]   ✓ SEO metadata live for: Krisp Accent Conversion
+[2026-03-07 17:01:02] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 17:01:02]   Generating SEO metadata via Claude...
+[2026-03-07 17:01:10]   ↻ Retry 1/2: primary keyword "Willow Voice for Teams review new AI transcription tool 2026" not found in meta title
+[2026-03-07 17:01:16]   Tokens: 1409 in / 654 out | Cost: $0.00001
+[2026-03-07 17:01:16]   Meta title (60 chars): Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 17:01:16]   Meta desc  (148 chars): Willow Voice for Teams review new AI transcription tool 2026: faster voice-to-text for remote teams. Find out if it's worth switching from Otter.ai.
+[2026-03-07 17:01:16]   Schema type: Review + FAQPage
+[2026-03-07 17:01:16]   Pushing to WordPress...
+[2026-03-07 17:01:16]   [DRY RUN] Would push to post 12:
+[2026-03-07 17:01:16]   [DRY RUN] Title: Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 17:01:16]   [DRY RUN] Desc:  Willow Voice for Teams review new AI transcription tool 2026: faster voice-to-text for remote teams. Find out if it's worth switching from Otter.ai.
+[2026-03-07 17:01:16]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:01:16]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:01:16]   ✓ SEO metadata live for: Willow Voice for Teams
+[2026-03-07 17:01:16] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 17:01:16]   Generating SEO metadata via Claude...
+[2026-03-07 17:01:23]   Tokens: 684 in / 275 out | Cost: $0.00001
+[2026-03-07 17:01:23]   Meta title (48 chars): Spoke Voice to Text macOS Review 2026: Worth It?
+[2026-03-07 17:01:23]   Meta desc  (142 chars): Our Spoke voice to text macOS review tests accuracy, speed, and real-world performance across Mac apps. See results from two weeks of testing.
+[2026-03-07 17:01:23]   Schema type: Review + FAQPage
+[2026-03-07 17:01:23]   Pushing to WordPress...
+[2026-03-07 17:01:23]   [DRY RUN] Would push to post 13:
+[2026-03-07 17:01:23]   [DRY RUN] Title: Spoke Voice to Text macOS Review 2026: Worth It?
+[2026-03-07 17:01:23]   [DRY RUN] Desc:  Our Spoke voice to text macOS review tests accuracy, speed, and real-world performance across Mac apps. See results from two weeks of testing.
+[2026-03-07 17:01:23]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:01:23]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:01:23]   ✓ SEO metadata live for: Spoke
+[2026-03-07 17:01:23] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 17:01:23]   Generating SEO metadata via Claude...
+[2026-03-07 17:01:33]   Tokens: 672 in / 320 out | Cost: $0.00001
+[2026-03-07 17:01:33]   Meta title (53 chars): Canva Review for Social Media Managers 2026 Worth It?
+[2026-03-07 17:01:33]   Meta desc  (143 chars): Our Canva review for social media managers 2026 covers workflow automation, AI tools, and team features. Find out if it's worth the investment.
+[2026-03-07 17:01:33]   Schema type: Review + FAQPage
+[2026-03-07 17:01:33]   Pushing to WordPress...
+[2026-03-07 17:01:33]   [DRY RUN] Would push to post 14:
+[2026-03-07 17:01:33]   [DRY RUN] Title: Canva Review for Social Media Managers 2026 Worth It?
+[2026-03-07 17:01:33]   [DRY RUN] Desc:  Our Canva review for social media managers 2026 covers workflow automation, AI tools, and team features. Find out if it's worth the investment.
+[2026-03-07 17:01:33]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:01:33]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:01:33]   ✓ SEO metadata live for: Canva
+[2026-03-07 17:01:33] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 17:01:33]   Generating SEO metadata via Claude...
+[2026-03-07 17:01:41]   Tokens: 690 in / 305 out | Cost: $0.00001
+[2026-03-07 17:01:41]   Meta title (52 chars): Descript Review for YouTube Creators 2026: Worth It?
+[2026-03-07 17:01:41]   Meta desc  (138 chars): Our Descript review for YouTube creators 2026 tests text-based editing, AI tools, and workflow speed. See if it beats traditional editors.
+[2026-03-07 17:01:41]   Schema type: Review + FAQPage
+[2026-03-07 17:01:41]   Pushing to WordPress...
+[2026-03-07 17:01:41]   [DRY RUN] Would push to post 15:
+[2026-03-07 17:01:41]   [DRY RUN] Title: Descript Review for YouTube Creators 2026: Worth It?
+[2026-03-07 17:01:41]   [DRY RUN] Desc:  Our Descript review for YouTube creators 2026 tests text-based editing, AI tools, and workflow speed. See if it beats traditional editors.
+[2026-03-07 17:01:41]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:01:41]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:01:41]   ✓ SEO metadata live for: Descript
+[2026-03-07 17:01:41] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 17:01:41]   Generating SEO metadata via Claude...
+[2026-03-07 17:01:49]   Tokens: 690 in / 306 out | Cost: $0.00001
+[2026-03-07 17:01:49]   Meta title (51 chars): ElevenLabs Review for Podcast Voiceovers 2026 Guide
+[2026-03-07 17:01:49]   Meta desc  (136 chars): Our ElevenLabs review for podcast voiceovers 2026 tests voice quality, pricing, and ease of use. Find out if it's worth it for creators.
+[2026-03-07 17:01:49]   Schema type: Review + FAQPage
+[2026-03-07 17:01:49]   Pushing to WordPress...
+[2026-03-07 17:01:49]   [DRY RUN] Would push to post 16:
+[2026-03-07 17:01:49]   [DRY RUN] Title: ElevenLabs Review for Podcast Voiceovers 2026 Guide
+[2026-03-07 17:01:49]   [DRY RUN] Desc:  Our ElevenLabs review for podcast voiceovers 2026 tests voice quality, pricing, and ease of use. Find out if it's worth it for creators.
+[2026-03-07 17:01:49]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:01:49]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:01:49]   ✓ SEO metadata live for: ElevenLabs
+[2026-03-07 17:01:49] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 17:01:49]   Generating SEO metadata via Claude...
+[2026-03-07 17:01:57]   Tokens: 659 in / 309 out | Cost: $0.00001
+[2026-03-07 17:01:57]   Meta title (50 chars): Riverside.fm Review for Podcasters 2026: Worth It?
+[2026-03-07 17:01:57]   Meta desc  (144 chars): Our riverside.fm review for podcasters 2026 covers pricing, audio quality, and local recording features. Find out if it's worth your investment.
+[2026-03-07 17:01:57]   Schema type: Review + FAQPage
+[2026-03-07 17:01:57]   Pushing to WordPress...
+[2026-03-07 17:01:57]   [DRY RUN] Would push to post 17:
+[2026-03-07 17:01:57]   [DRY RUN] Title: Riverside.fm Review for Podcasters 2026: Worth It?
+[2026-03-07 17:01:57]   [DRY RUN] Desc:  Our riverside.fm review for podcasters 2026 covers pricing, audio quality, and local recording features. Find out if it's worth your investment.
+[2026-03-07 17:01:57]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:01:57]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:01:57]   ✓ SEO metadata live for: Riverside.fm
+[2026-03-07 17:01:57] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 17:01:57]   Generating SEO metadata via Claude...
+[2026-03-07 17:02:06]   ↻ Retry 1/2: meta description is 164 chars — must be 160 or under
+[2026-03-07 17:02:14]   Tokens: 1372 in / 663 out | Cost: $0.00001
+[2026-03-07 17:02:14]   Meta title (53 chars): ConvertKit Review for Small Creators 2026 | Worth It?
+[2026-03-07 17:02:14]   Meta desc  (137 chars): Our ConvertKit review for small creators 2026 covers real pricing, free plan limits, and workflows for beginners under 1,000 subscribers.
+[2026-03-07 17:02:14]   Schema type: Review + FAQPage
+[2026-03-07 17:02:14]   Pushing to WordPress...
+[2026-03-07 17:02:14]   [DRY RUN] Would push to post 18:
+[2026-03-07 17:02:14]   [DRY RUN] Title: ConvertKit Review for Small Creators 2026 | Worth It?
+[2026-03-07 17:02:14]   [DRY RUN] Desc:  Our ConvertKit review for small creators 2026 covers real pricing, free plan limits, and workflows for beginners under 1,000 subscribers.
+[2026-03-07 17:02:14]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:02:14]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:02:14]   ✓ SEO metadata live for: ConvertKit
+[2026-03-07 17:02:14] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 17:02:14]   Generating SEO metadata via Claude...
+[2026-03-07 17:02:22]   Tokens: 672 in / 364 out | Cost: $0.00001
+[2026-03-07 17:02:22]   Meta title (54 chars): Beehiiv Review for Newsletter Creators 2026: Worth It?
+[2026-03-07 17:02:22]   Meta desc  (132 chars): Our beehiiv review for newsletter creators 2026 examines pricing, deliverability, and monetization tools. Find out if it's worth it.
+[2026-03-07 17:02:22]   Schema type: Review + FAQPage
+[2026-03-07 17:02:22]   Pushing to WordPress...
+[2026-03-07 17:02:22]   [DRY RUN] Would push to post 19:
+[2026-03-07 17:02:22]   [DRY RUN] Title: Beehiiv Review for Newsletter Creators 2026: Worth It?
+[2026-03-07 17:02:22]   [DRY RUN] Desc:  Our beehiiv review for newsletter creators 2026 examines pricing, deliverability, and monetization tools. Find out if it's worth it.
+[2026-03-07 17:02:22]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:02:22]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:02:22]   ✓ SEO metadata live for: Beehiiv
+[2026-03-07 17:02:22] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 17:02:22]   Generating SEO metadata via Claude...
+[2026-03-07 17:02:31]   Tokens: 673 in / 337 out | Cost: $0.00001
+[2026-03-07 17:02:31]   Meta title (55 chars): Jasper AI Review for Email Marketers 2026: Test Results
+[2026-03-07 17:02:31]   Meta desc  (141 chars): Our Jasper AI review for email marketers 2026 shows real campaign results, time savings, and ROI data. Find out if it's worth the investment.
+[2026-03-07 17:02:31]   Schema type: Review + FAQPage
+[2026-03-07 17:02:31]   Pushing to WordPress...
+[2026-03-07 17:02:31]   [DRY RUN] Would push to post 132:
+[2026-03-07 17:02:31]   [DRY RUN] Title: Jasper AI Review for Email Marketers 2026: Test Results
+[2026-03-07 17:02:31]   [DRY RUN] Desc:  Our Jasper AI review for email marketers 2026 shows real campaign results, time savings, and ROI data. Find out if it's worth the investment.
+[2026-03-07 17:02:31]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:02:31]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:02:31]   ✓ SEO metadata live for: Jasper AI
+[2026-03-07 17:02:31] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 17:02:31]   Generating SEO metadata via Claude...
+[2026-03-07 17:02:40]   Tokens: 694 in / 331 out | Cost: $0.00001
+[2026-03-07 17:02:40]   Meta title (56 chars): Trimmr AI Review for YouTube Creators 2026 | Honest Test
+[2026-03-07 17:02:40]   Meta desc  (137 chars): Our Trimmr AI review for YouTube creators 2026 tests if this tool actually saves time on short clips. See pricing, features, and results.
+[2026-03-07 17:02:40]   Schema type: Review + FAQPage
+[2026-03-07 17:02:40]   Pushing to WordPress...
+[2026-03-07 17:02:40]   [DRY RUN] Would push to post 133:
+[2026-03-07 17:02:40]   [DRY RUN] Title: Trimmr AI Review for YouTube Creators 2026 | Honest Test
+[2026-03-07 17:02:40]   [DRY RUN] Desc:  Our Trimmr AI review for YouTube creators 2026 tests if this tool actually saves time on short clips. See pricing, features, and results.
+[2026-03-07 17:02:40]   [DRY RUN] Schema via RankMath meta field (post content untouched)
+[2026-03-07 17:02:40]   [DRY RUN] Skipping handoffs save
+[2026-03-07 17:02:40]   ✓ SEO metadata live for: Trimmr
+[2026-03-07 17:02:40] 
+============================================================
+[2026-03-07 17:02:40] SEO Agent complete
+[2026-03-07 17:02:40]   ✓ Success:  12
+[2026-03-07 17:02:40]   ✗ Failed:   0
+[2026-03-07 17:02:40]   ⏭  Skipped:  0
+[2026-03-07 17:02:40]   💰 Run cost: $0.0001
+[2026-03-07 17:02:40] ============================================================
+
+[2026-03-07 17:03:02] ============================================================
+[2026-03-07 17:03:02] SEO Agent starting
+[2026-03-07 17:03:02] Found 12 articles needing SEO metadata
+[2026-03-07 17:03:02] Daily cap: 15
+[2026-03-07 17:03:02] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 17:03:02]   Generating SEO metadata via Claude...
+[2026-03-07 17:03:11]   Tokens: 663 in / 289 out | Cost: $0.00001
+[2026-03-07 17:03:11]   Meta title (52 chars): Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 17:03:11]   Meta desc  (142 chars): Our Coursekit review for course creators 2026 tests AI agents that answer student questions automatically. See pricing, features, and results.
+[2026-03-07 17:03:11]   Schema type: Review + FAQPage
+[2026-03-07 17:03:12]   Pushing to WordPress...
+[2026-03-07 17:03:13]   ✓ SEO metadata live for: Coursekit
+[2026-03-07 17:03:13] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 17:03:13]   Generating SEO metadata via Claude...
+[2026-03-07 17:03:20]   Tokens: 676 in / 293 out | Cost: $0.00001
+[2026-03-07 17:03:20]   Meta title (50 chars): Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 17:03:20]   Meta desc  (139 chars): Our Krisp accent conversion review for podcasters tests real-time voice clarity, audio quality, and ease of use. Find out if it's worth it.
+[2026-03-07 17:03:20]   Schema type: Review + FAQPage
+[2026-03-07 17:03:21]   Pushing to WordPress...
+[2026-03-07 17:03:22]   ✓ SEO metadata live for: Krisp Accent Conversion
+[2026-03-07 17:03:22] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 17:03:22]   Generating SEO metadata via Claude...
+[2026-03-07 17:03:27]   ↻ Retry 1/2: primary keyword "Willow Voice for Teams review new AI transcription tool 2026" not found in meta title
+[2026-03-07 17:03:34]   Tokens: 1409 in / 604 out | Cost: $0.00001
+[2026-03-07 17:03:34]   Meta title (60 chars): Willow Voice for Teams Review New AI Transcription Tool 2026
+[2026-03-07 17:03:34]   Meta desc  (157 chars): Willow Voice for Teams review new AI transcription tool 2026. See how it compares to Otter.ai and Descript for accuracy and speed. Find out if it's worth it.
+[2026-03-07 17:03:34]   Schema type: Review + FAQPage
+[2026-03-07 17:03:35]   Pushing to WordPress...
+[2026-03-07 17:03:36]   ✓ SEO metadata live for: Willow Voice for Teams
+[2026-03-07 17:03:36] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 17:03:36]   Generating SEO metadata via Claude...
+[2026-03-07 17:03:44]   Tokens: 684 in / 296 out | Cost: $0.00001
+[2026-03-07 17:03:44]   Meta title (54 chars): Spoke Voice to Text macOS Review 2026: Is It Worth It?
+[2026-03-07 17:03:44]   Meta desc  (142 chars): Our Spoke voice to text macOS review tests accuracy, speed, and real-world performance across Mac apps. Find out if it's worth the investment.
+[2026-03-07 17:03:44]   Schema type: Review + FAQPage
+[2026-03-07 17:03:45]   Pushing to WordPress...
+[2026-03-07 17:03:46]   ✓ SEO metadata live for: Spoke
+[2026-03-07 17:03:46] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 17:03:46]   Generating SEO metadata via Claude...
+[2026-03-07 17:03:54]   Tokens: 672 in / 327 out | Cost: $0.00001
+[2026-03-07 17:03:54]   Meta title (55 chars): Canva Review for Social Media Managers 2026 | Worth It?
+[2026-03-07 17:03:54]   Meta desc  (146 chars): Our Canva review for social media managers 2026 covers AI tools, workflows, and pricing. See if it saves time on your content. Read the full test.
+[2026-03-07 17:03:54]   Schema type: Review + FAQPage
+[2026-03-07 17:03:55]   Pushing to WordPress...
+[2026-03-07 17:03:56]   ✓ SEO metadata live for: Canva
+[2026-03-07 17:03:56] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 17:03:56]   Generating SEO metadata via Claude...
+[2026-03-07 17:04:05]   Tokens: 690 in / 321 out | Cost: $0.00001
+[2026-03-07 17:04:05]   Meta title (53 chars): Descript Review for YouTube Creators 2026 | Worth It?
+[2026-03-07 17:04:05]   Meta desc  (138 chars): Our Descript review for YouTube creators 2026 tests text-based editing, AI tools, and workflow speed. See if it beats traditional editors.
+[2026-03-07 17:04:05]   Schema type: Review + FAQPage
+[2026-03-07 17:04:05]   Pushing to WordPress...
+[2026-03-07 17:04:06]   ✓ SEO metadata live for: Descript
+[2026-03-07 17:04:06] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 17:04:06]   Generating SEO metadata via Claude...
+[2026-03-07 17:04:19]   Tokens: 690 in / 324 out | Cost: $0.00001
+[2026-03-07 17:04:19]   Meta title (55 chars): ElevenLabs Review for Podcast Voiceovers 2026 Worth It?
+[2026-03-07 17:04:19]   Meta desc  (140 chars): Our ElevenLabs review for podcast voiceovers 2026 tests voice quality, pricing, and ease of use. Find out if it's the right AI tool for you.
+[2026-03-07 17:04:19]   Schema type: Review + FAQPage
+[2026-03-07 17:04:19]   Pushing to WordPress...
+[2026-03-07 17:04:20]   ✓ SEO metadata live for: ElevenLabs
+[2026-03-07 17:04:20] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 17:04:20]   Generating SEO metadata via Claude...
+[2026-03-07 17:04:29]   Tokens: 659 in / 324 out | Cost: $0.00001
+[2026-03-07 17:04:29]   Meta title (50 chars): Riverside.fm Review for Podcasters 2026: Full Test
+[2026-03-07 17:04:29]   Meta desc  (135 chars): Our riverside.fm review for podcasters 2026 covers pricing, audio quality, and new features. See if local recording justifies the cost.
+[2026-03-07 17:04:29]   Schema type: Review + FAQPage
+[2026-03-07 17:04:30]   Pushing to WordPress...
+[2026-03-07 17:04:30]   ✓ SEO metadata live for: Riverside.fm
+[2026-03-07 17:04:30] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 17:04:30]   Generating SEO metadata via Claude...
+[2026-03-07 17:04:38]   Tokens: 668 in / 311 out | Cost: $0.00001
+[2026-03-07 17:04:38]   Meta title (52 chars): ConvertKit Review for Small Creators 2026: Worth It?
+[2026-03-07 17:04:38]   Meta desc  (148 chars): Our ConvertKit review for small creators 2026 covers pricing, free plan limits, and workflows for beginners under 1,000 subscribers. See if it fits.
+[2026-03-07 17:04:38]   Schema type: Review + FAQPage
+[2026-03-07 17:04:39]   Pushing to WordPress...
+[2026-03-07 17:04:40]   ✓ SEO metadata live for: ConvertKit
+[2026-03-07 17:04:40] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 17:04:40]   Generating SEO metadata via Claude...
+[2026-03-07 17:04:48]   Tokens: 672 in / 326 out | Cost: $0.00001
+[2026-03-07 17:04:48]   Meta title (56 chars): Beehiiv Review for Newsletter Creators 2026: Honest Test
+[2026-03-07 17:04:48]   Meta desc  (143 chars): Our beehiiv review for newsletter creators 2026 reveals pricing, deliverability, and growth tools. See real results. Find out if it's worth it.
+[2026-03-07 17:04:48]   Schema type: Review + FAQPage
+[2026-03-07 17:04:49]   Pushing to WordPress...
+[2026-03-07 17:04:51]   ✓ SEO metadata live for: Beehiiv
+[2026-03-07 17:04:51] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 17:04:51]   Generating SEO metadata via Claude...
+[2026-03-07 17:04:59]   Tokens: 673 in / 325 out | Cost: $0.00001
+[2026-03-07 17:04:59]   Meta title (54 chars): Jasper AI Review for Email Marketers 2026 | Real Tests
+[2026-03-07 17:04:59]   Meta desc  (149 chars): Jasper AI review for email marketers 2026: We tested it on real campaigns. See performance, pricing, and if it saves time. Find out if it's worth it.
+[2026-03-07 17:04:59]   Schema type: Review + FAQPage
+[2026-03-07 17:05:00]   Pushing to WordPress...
+[2026-03-07 17:05:03]   ✓ SEO metadata live for: Jasper AI
+[2026-03-07 17:05:03] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 17:05:03]   Generating SEO metadata via Claude...
+[2026-03-07 17:05:11]   Tokens: 694 in / 306 out | Cost: $0.00001
+[2026-03-07 17:05:11]   Meta title (53 chars): Trimmr AI Review for YouTube Creators 2026: Worth It?
+[2026-03-07 17:05:11]   Meta desc  (142 chars): Our Trimmr AI review for YouTube creators 2026 tests if this tool actually saves hours on short-form clips. See pricing, features, and limits.
+[2026-03-07 17:05:11]   Schema type: Review + FAQPage
+[2026-03-07 17:05:12]   Pushing to WordPress...
+[2026-03-07 17:05:15]   ✓ SEO metadata live for: Trimmr
+[2026-03-07 17:05:15] 
+============================================================
+[2026-03-07 17:05:15] SEO Agent complete
+[2026-03-07 17:05:15]   ✓ Success:  12
+[2026-03-07 17:05:15]   ✗ Failed:   0
+[2026-03-07 17:05:15]   ⏭  Skipped:  0
+[2026-03-07 17:05:15]   💰 Run cost: $0.0001
+[2026-03-07 17:05:15] ============================================================
+
+[2026-03-07 17:14:51] ============================================================
+[2026-03-07 17:14:51] SEO Agent starting
+[2026-03-07 17:14:51] Found 12 articles needing SEO metadata
+[2026-03-07 17:14:51] Daily cap: 15
+[2026-03-07 17:14:51] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 17:14:51]   Generating SEO metadata via Claude...
+[2026-03-07 17:15:00]   Tokens: 663 in / 292 out | Cost: $0.00001
+[2026-03-07 17:15:00]   Meta title (58 chars): Coursekit Review for Course Creators 2026: Is It Worth It?
+[2026-03-07 17:15:00]   Meta desc  (144 chars): Our Coursekit review for course creators 2026 covers AI student support, pricing, integrations, and real performance. Find out if it's worth it.
+[2026-03-07 17:15:00]   Focus keyword: Coursekit review for course creators 2026
+[2026-03-07 17:15:00]   Schema type: Review + FAQPage
+[2026-03-07 17:15:01]   Pushing to WordPress...
+[2026-03-07 17:15:03]   ✓ SEO metadata live for: Coursekit
+[2026-03-07 17:15:03] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 17:15:03]   Generating SEO metadata via Claude...
+[2026-03-07 17:15:11]   Tokens: 676 in / 309 out | Cost: $0.00001
+[2026-03-07 17:15:11]   Meta title (50 chars): Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 17:15:11]   Meta desc  (145 chars): This Krisp accent conversion review for podcasters tests real-time voice clarity features. See pricing, audio quality, and ease of use. Worth it?
+[2026-03-07 17:15:11]   Focus keyword: Krisp accent conversion review for podcasters
+[2026-03-07 17:15:11]   Schema type: Review + FAQPage
+[2026-03-07 17:15:12]   Pushing to WordPress...
+[2026-03-07 17:15:13]   ✓ SEO metadata live for: Krisp Accent Conversion
+[2026-03-07 17:15:13] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 17:15:13]   Generating SEO metadata via Claude...
+[2026-03-07 17:15:20]   ↻ Retry 1/2: primary keyword "Willow Voice for Teams review new AI transcription tool 2026" not found in meta title
+[2026-03-07 17:15:27]   Tokens: 1409 in / 633 out | Cost: $0.00001
+[2026-03-07 17:15:27]   Meta title (60 chars): Willow Voice for Teams Review New AI Transcription Tool 2026
+[2026-03-07 17:15:27]   Meta desc  (154 chars): Willow Voice for Teams review new AI transcription tool 2026: Launch details, accuracy tests, and pricing compared to Otter.ai. Find out if it's worth it.
+[2026-03-07 17:15:27]   Focus keyword: Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 17:15:27]   Schema type: Review + FAQPage
+[2026-03-07 17:15:28]   Pushing to WordPress...
+[2026-03-07 17:15:29]   ✓ SEO metadata live for: Willow Voice for Teams
+[2026-03-07 17:15:29] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 17:15:29]   Generating SEO metadata via Claude...
+[2026-03-07 17:15:38]   Tokens: 684 in / 276 out | Cost: $0.00001
+[2026-03-07 17:15:38]   Meta title (48 chars): Spoke Voice to Text macOS Review 2026: Worth It?
+[2026-03-07 17:15:38]   Meta desc  (135 chars): Our Spoke voice to text macOS review tests accuracy, speed, and app integration after two weeks of real use. Find out if it's worth it.
+[2026-03-07 17:15:38]   Focus keyword: Spoke voice to text macOS review
+[2026-03-07 17:15:38]   Schema type: Review + FAQPage
+[2026-03-07 17:15:39]   Pushing to WordPress...
+[2026-03-07 17:15:40]   ✓ SEO metadata live for: Spoke
+[2026-03-07 17:15:40] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 17:15:40]   Generating SEO metadata via Claude...
+[2026-03-07 17:15:47]   Tokens: 672 in / 311 out | Cost: $0.00001
+[2026-03-07 17:15:47]   Meta title (49 chars): Canva Review for Social Media Managers 2026 Guide
+[2026-03-07 17:15:47]   Meta desc  (130 chars): Canva review for social media managers 2026: AI features, team workflows, and time-saving tools tested. Find out if it's worth it.
+[2026-03-07 17:15:47]   Focus keyword: canva review for social media managers 2026
+[2026-03-07 17:15:47]   Schema type: Review + FAQPage
+[2026-03-07 17:15:48]   Pushing to WordPress...
+[2026-03-07 17:15:49]   ✓ SEO metadata live for: Canva
+[2026-03-07 17:15:49] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 17:15:49]   Generating SEO metadata via Claude...
+[2026-03-07 17:15:57]   Tokens: 690 in / 309 out | Cost: $0.00001
+[2026-03-07 17:15:57]   Meta title (52 chars): Descript Review for YouTube Creators 2026: Worth It?
+[2026-03-07 17:15:57]   Meta desc  (142 chars): Our Descript review for YouTube creators 2026 tests text-based editing, AI tools, and export quality. See if it saves time for weekly uploads.
+[2026-03-07 17:15:57]   Focus keyword: Descript review for YouTube creators 2026
+[2026-03-07 17:15:57]   Schema type: Review + FAQPage
+[2026-03-07 17:15:58]   Pushing to WordPress...
+[2026-03-07 17:16:01]   ✓ SEO metadata live for: Descript
+[2026-03-07 17:16:01] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 17:16:01]   Generating SEO metadata via Claude...
+[2026-03-07 17:16:12]   Tokens: 690 in / 317 out | Cost: $0.00001
+[2026-03-07 17:16:12]   Meta title (51 chars): ElevenLabs Review for Podcast Voiceovers 2026 Guide
+[2026-03-07 17:16:12]   Meta desc  (136 chars): Our ElevenLabs review for podcast voiceovers 2026 tests voice quality, pricing, and ease of use. Find out if it's worth it for creators.
+[2026-03-07 17:16:12]   Focus keyword: ElevenLabs review for podcast voiceovers 2026
+[2026-03-07 17:16:12]   Schema type: Review + FAQPage
+[2026-03-07 17:16:13]   Pushing to WordPress...
+[2026-03-07 17:16:14]   ✓ SEO metadata live for: ElevenLabs
+[2026-03-07 17:16:14] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 17:16:14]   Generating SEO metadata via Claude...
+[2026-03-07 17:16:22]   Tokens: 659 in / 331 out | Cost: $0.00001
+[2026-03-07 17:16:22]   Meta title (56 chars): Riverside.fm Review for Podcasters 2026: Is It Worth It?
+[2026-03-07 17:16:22]   Meta desc  (139 chars): Our Riverside.fm review for podcasters 2026 breaks down pricing, audio quality, and new features. See if it's the right tool for your show.
+[2026-03-07 17:16:22]   Focus keyword: riverside.fm review for podcasters 2026
+[2026-03-07 17:16:22]   Schema type: Review + FAQPage
+[2026-03-07 17:16:22]   Pushing to WordPress...
+[2026-03-07 17:16:23]   ✓ SEO metadata live for: Riverside.fm
+[2026-03-07 17:16:23] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 17:16:23]   Generating SEO metadata via Claude...
+[2026-03-07 17:16:31]   Tokens: 668 in / 338 out | Cost: $0.00001
+[2026-03-07 17:16:31]   Meta title (58 chars): ConvertKit Review for Small Creators 2026: Is It Worth It?
+[2026-03-07 17:16:31]   Meta desc  (156 chars): ConvertKit review for small creators 2026: honest pricing, free plan limits, and workflows for beginners under 1,000 subscribers. Find out if it's worth it.
+[2026-03-07 17:16:31]   Focus keyword: convertkit review for small creators 2026
+[2026-03-07 17:16:31]   Schema type: Review + FAQPage
+[2026-03-07 17:16:32]   Pushing to WordPress...
+[2026-03-07 17:16:32]   ✓ SEO metadata live for: ConvertKit
+[2026-03-07 17:16:32] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 17:16:32]   Generating SEO metadata via Claude...
+[2026-03-07 17:16:40]   Tokens: 672 in / 355 out | Cost: $0.00001
+[2026-03-07 17:16:40]   Meta title (55 chars): Beehiiv Review for Newsletter Creators 2026 | Worth It?
+[2026-03-07 17:16:40]   Meta desc  (138 chars): Our beehiiv review for newsletter creators 2026 covers pricing, deliverability, monetization, and growth tools. Find out if it's worth it.
+[2026-03-07 17:16:40]   Focus keyword: beehiiv review for newsletter creators 2026
+[2026-03-07 17:16:40]   Schema type: Review + FAQPage
+[2026-03-07 17:16:41]   Pushing to WordPress...
+[2026-03-07 17:16:42]   ✓ SEO metadata live for: Beehiiv
+[2026-03-07 17:16:42] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 17:16:42]   Generating SEO metadata via Claude...
+[2026-03-07 17:16:49]   Tokens: 673 in / 320 out | Cost: $0.00001
+[2026-03-07 17:16:49]   Meta title (55 chars): Jasper AI Review for Email Marketers 2026: Test Results
+[2026-03-07 17:16:49]   Meta desc  (138 chars): Our Jasper AI review for email marketers 2026 reveals real test results on speed, quality, and ROI. Find out if it's worth the investment.
+[2026-03-07 17:16:49]   Focus keyword: jasper ai review for email marketers 2026
+[2026-03-07 17:16:49]   Schema type: Review + FAQPage
+[2026-03-07 17:16:50]   Pushing to WordPress...
+[2026-03-07 17:16:53]   ✓ SEO metadata live for: Jasper AI
+[2026-03-07 17:16:53] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 17:16:53]   Generating SEO metadata via Claude...
+[2026-03-07 17:17:01]   Tokens: 694 in / 315 out | Cost: $0.00001
+[2026-03-07 17:17:01]   Meta title (56 chars): Trimmr AI Review for YouTube Creators 2026 | Honest Test
+[2026-03-07 17:17:01]   Meta desc  (141 chars): Our Trimmr AI review for YouTube creators 2026 tests if this tool actually saves editing time on Shorts and Reels. Find out if it's worth it.
+[2026-03-07 17:17:01]   Focus keyword: Trimmr AI review for YouTube creators 2026
+[2026-03-07 17:17:01]   Schema type: Review + FAQPage
+[2026-03-07 17:17:02]   Pushing to WordPress...
+[2026-03-07 17:17:04]   ✓ SEO metadata live for: Trimmr
+[2026-03-07 17:17:04] 
+============================================================
+[2026-03-07 17:17:04] SEO Agent complete
+[2026-03-07 17:17:04]   ✓ Success:  12
+[2026-03-07 17:17:04]   ✗ Failed:   0
+[2026-03-07 17:17:04]   ⏭  Skipped:  0
+[2026-03-07 17:17:04]   💰 Run cost: $0.0001
+[2026-03-07 17:17:04] ============================================================
+
+[2026-03-07 17:27:39] ============================================================
+[2026-03-07 17:27:39] SEO Agent starting
+[2026-03-07 17:27:39] Found 12 articles needing SEO metadata
+[2026-03-07 17:27:39] Daily cap: 15
+[2026-03-07 17:27:39] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 17:27:39]   Generating SEO metadata via Claude...
+[2026-03-07 17:27:47]   Tokens: 663 in / 282 out | Cost: $0.00001
+[2026-03-07 17:27:47]   Meta title (52 chars): Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 17:27:47]   Meta desc  (131 chars): Our Coursekit review for course creators 2026 covers AI agents, pricing, and student support automation. Find out if it's worth it.
+[2026-03-07 17:27:47]   Focus keyword: Coursekit review for course creators 2026
+[2026-03-07 17:27:47]   Schema type: Review + FAQPage
+[2026-03-07 17:27:47]   Pushing to WordPress...
+[2026-03-07 17:27:48]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:27:48] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 17:27:48]   Generating SEO metadata via Claude...
+[2026-03-07 17:27:59]   Tokens: 676 in / 327 out | Cost: $0.00001
+[2026-03-07 17:27:59]   Meta title (50 chars): Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 17:27:59]   Meta desc  (139 chars): Our Krisp accent conversion review for podcasters tests real-time voice clarity, audio quality, and ease of use. Find out if it's worth it.
+[2026-03-07 17:27:59]   Focus keyword: Krisp accent conversion review for podcasters
+[2026-03-07 17:27:59]   Schema type: Review + FAQPage
+[2026-03-07 17:28:00]   Pushing to WordPress...
+[2026-03-07 17:28:00]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:28:00] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 17:28:00]   Generating SEO metadata via Claude...
+[2026-03-07 17:28:07]   ↻ Retry 1/2: primary keyword "Willow Voice for Teams review new AI transcription tool 2026" not found in meta title
+[2026-03-07 17:28:14]   Tokens: 1409 in / 606 out | Cost: $0.00001
+[2026-03-07 17:28:14]   Meta title (60 chars): Willow Voice for Teams Review New AI Transcription Tool 2026
+[2026-03-07 17:28:14]   Meta desc  (139 chars): Willow Voice for Teams review new AI transcription tool 2026: specs, pricing, accuracy tests vs Otter.ai. Find out if it's worth switching.
+[2026-03-07 17:28:14]   Focus keyword: Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 17:28:14]   Schema type: Review + FAQPage
+[2026-03-07 17:28:15]   Pushing to WordPress...
+[2026-03-07 17:28:16]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:28:16] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 17:28:16]   Generating SEO metadata via Claude...
+[2026-03-07 17:28:24]   Tokens: 684 in / 311 out | Cost: $0.00001
+[2026-03-07 17:28:24]   Meta title (48 chars): Spoke Voice to Text macOS Review 2026: Worth It?
+[2026-03-07 17:28:24]   Meta desc  (142 chars): Our Spoke voice to text macOS review covers accuracy, speed, and real-world performance after two weeks of testing. Find out if it's worth it.
+[2026-03-07 17:28:24]   Focus keyword: Spoke voice to text macOS review
+[2026-03-07 17:28:24]   Schema type: Review + FAQPage
+[2026-03-07 17:28:24]   Pushing to WordPress...
+[2026-03-07 17:28:25]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:28:25] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 17:28:25]   Generating SEO metadata via Claude...
+[2026-03-07 17:28:34]   Tokens: 672 in / 314 out | Cost: $0.00001
+[2026-03-07 17:28:34]   Meta title (54 chars): Canva Review for Social Media Managers 2026 [58 chars]
+[2026-03-07 17:28:34]   Meta desc  (133 chars): Our Canva review for social media managers 2026 explores AI tools, workflows, and pricing. See if it saves time and fits your budget.
+[2026-03-07 17:28:34]   Focus keyword: canva review for social media managers 2026
+[2026-03-07 17:28:34]   Schema type: Review + FAQPage
+[2026-03-07 17:28:35]   Pushing to WordPress...
+[2026-03-07 17:28:36]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:28:36] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 17:28:36]   Generating SEO metadata via Claude...
+[2026-03-07 17:28:45]   Tokens: 690 in / 332 out | Cost: $0.00001
+[2026-03-07 17:28:45]   Meta title (52 chars): Descript Review for YouTube Creators 2026: Worth It?
+[2026-03-07 17:28:45]   Meta desc  (137 chars): This Descript review for YouTube creators 2026 tests text-based editing, AI tools, and export quality. See if it speeds up your workflow.
+[2026-03-07 17:28:45]   Focus keyword: Descript review for YouTube creators 2026
+[2026-03-07 17:28:45]   Schema type: Review + FAQPage
+[2026-03-07 17:28:46]   Pushing to WordPress...
+[2026-03-07 17:28:47]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:28:47] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 17:28:47]   Generating SEO metadata via Claude...
+[2026-03-07 17:28:57]   Tokens: 690 in / 329 out | Cost: $0.00001
+[2026-03-07 17:28:57]   Meta title (55 chars): ElevenLabs Review for Podcast Voiceovers 2026 Worth It?
+[2026-03-07 17:28:57]   Meta desc  (145 chars): Our ElevenLabs review for podcast voiceovers 2026 tests voice quality, pricing, and ease of use. Find out if it's the right AI tool for creators.
+[2026-03-07 17:28:57]   Focus keyword: ElevenLabs review for podcast voiceovers 2026
+[2026-03-07 17:28:57]   Schema type: Review + FAQPage
+[2026-03-07 17:28:59]   Pushing to WordPress...
+[2026-03-07 17:29:00]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:29:00] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 17:29:00]   Generating SEO metadata via Claude...
+[2026-03-07 17:29:09]   Tokens: 659 in / 310 out | Cost: $0.00001
+[2026-03-07 17:29:09]   Meta title (50 chars): Riverside.fm Review for Podcasters 2026: Worth It?
+[2026-03-07 17:29:09]   Meta desc  (142 chars): Our Riverside.fm review for podcasters 2026 examines pricing, audio quality, and new features. See if this recording platform fits your needs.
+[2026-03-07 17:29:09]   Focus keyword: riverside.fm review for podcasters 2026
+[2026-03-07 17:29:09]   Schema type: Review + FAQPage
+[2026-03-07 17:29:10]   Pushing to WordPress...
+[2026-03-07 17:29:11]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:29:11] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 17:29:11]   Generating SEO metadata via Claude...
+[2026-03-07 17:29:19]   ↻ Retry 1/2: meta description is 164 chars — must be 160 or under
+[2026-03-07 17:29:28]   Tokens: 1372 in / 641 out | Cost: $0.00001
+[2026-03-07 17:29:28]   Meta title (53 chars): ConvertKit Review for Small Creators 2026 | Worth It?
+[2026-03-07 17:29:28]   Meta desc  (145 chars): ConvertKit review for small creators 2026: honest pricing, free plan limits, and workflows for beginners under 1,000 subscribers. See if it fits.
+[2026-03-07 17:29:28]   Focus keyword: convertkit review for small creators 2026
+[2026-03-07 17:29:28]   Schema type: Review + FAQPage
+[2026-03-07 17:29:29]   Pushing to WordPress...
+[2026-03-07 17:29:30]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:29:30] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 17:29:30]   Generating SEO metadata via Claude...
+[2026-03-07 17:29:38]   Tokens: 672 in / 353 out | Cost: $0.00001
+[2026-03-07 17:29:38]   Meta title (55 chars): Beehiiv Review for Newsletter Creators 2026 | Worth It?
+[2026-03-07 17:29:38]   Meta desc  (142 chars): This beehiiv review for newsletter creators 2026 reveals pricing, features, and deliverability rates. See if it beats Substack and ConvertKit.
+[2026-03-07 17:29:38]   Focus keyword: beehiiv review for newsletter creators 2026
+[2026-03-07 17:29:38]   Schema type: Review + FAQPage
+[2026-03-07 17:29:39]   Pushing to WordPress...
+[2026-03-07 17:29:40]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:29:40] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 17:29:40]   Generating SEO metadata via Claude...
+[2026-03-07 17:29:48]   Tokens: 673 in / 306 out | Cost: $0.00001
+[2026-03-07 17:29:48]   Meta title (55 chars): Jasper AI Review for Email Marketers 2026: Test Results
+[2026-03-07 17:29:48]   Meta desc  (138 chars): Our Jasper AI review for email marketers 2026 reveals real test results on speed, quality, and ROI. Find out if it's worth the investment.
+[2026-03-07 17:29:48]   Focus keyword: jasper ai review for email marketers 2026
+[2026-03-07 17:29:48]   Schema type: Review + FAQPage
+[2026-03-07 17:29:48]   Pushing to WordPress...
+[2026-03-07 17:29:52]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:29:52] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 17:29:52]   Generating SEO metadata via Claude...
+[2026-03-07 17:29:59]   Tokens: 694 in / 310 out | Cost: $0.00001
+[2026-03-07 17:29:59]   Meta title (56 chars): Trimmr AI Review for YouTube Creators 2026 | Honest Test
+[2026-03-07 17:29:59]   Meta desc  (139 chars): Our Trimmr AI review for YouTube creators 2026 tests if this tool really saves hours on short clips. Pricing, features, and results tested.
+[2026-03-07 17:29:59]   Focus keyword: Trimmr AI review for YouTube creators 2026
+[2026-03-07 17:29:59]   Schema type: Review + FAQPage
+[2026-03-07 17:30:00]   Pushing to WordPress...
+[2026-03-07 17:30:04]   ✗ WordPress push failed: Push error 400: {"code":"rest_invalid_type","message":"meta.rank_math_robots is not of type string.","data":{"status":400},"additional_data":[{"param":"meta.rank_math_robots"}]}
+[2026-03-07 17:30:04] 
+============================================================
+[2026-03-07 17:30:04] SEO Agent complete
+[2026-03-07 17:30:04]   ✓ Success:  0
+[2026-03-07 17:30:04]   ✗ Failed:   12
+[2026-03-07 17:30:04]   ⏭  Skipped:  0
+[2026-03-07 17:30:04]   💰 Run cost: $0.0001
+[2026-03-07 17:30:04] ============================================================
+
+[2026-03-07 17:31:43] ============================================================
+[2026-03-07 17:31:43] SEO Agent starting
+[2026-03-07 17:31:43] Found 12 articles needing SEO metadata
+[2026-03-07 17:31:43] Daily cap: 15
+[2026-03-07 17:31:43] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 17:31:43]   Generating SEO metadata via Claude...
+[2026-03-07 17:31:52]   Tokens: 663 in / 285 out | Cost: $0.00001
+[2026-03-07 17:31:52]   Meta title (52 chars): Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 17:31:52]   Meta desc  (144 chars): Our Coursekit review for course creators 2026 examines AI agents that answer student questions automatically. See pricing, features, and limits.
+[2026-03-07 17:31:52]   Focus keyword: Coursekit review for course creators 2026
+[2026-03-07 17:31:52]   Schema type: Review + FAQPage
+[2026-03-07 17:31:52]   Rollback stored
+[2026-03-07 17:31:52]   Pushing to WordPress...
+[2026-03-07 17:31:53]   ✓ SEO metadata live for: Coursekit
+[2026-03-07 17:31:53] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 17:31:53]   Generating SEO metadata via Claude...
+[2026-03-07 17:32:01]   Tokens: 676 in / 286 out | Cost: $0.00001
+[2026-03-07 17:32:01]   Meta title (50 chars): Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 17:32:01]   Meta desc  (139 chars): Our Krisp accent conversion review for podcasters tests real-time voice clarity, audio quality, and ease of use. Find out if it's worth it.
+[2026-03-07 17:32:01]   Focus keyword: Krisp accent conversion review for podcasters
+[2026-03-07 17:32:01]   Schema type: Review + FAQPage
+[2026-03-07 17:32:02]   Rollback stored
+[2026-03-07 17:32:02]   Pushing to WordPress...
+[2026-03-07 17:32:02]   ✓ SEO metadata live for: Krisp Accent Conversion
+[2026-03-07 17:32:02] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 17:32:02]   Generating SEO metadata via Claude...
+[2026-03-07 17:32:09]   ↻ Retry 1/2: primary keyword "Willow Voice for Teams review new AI transcription tool 2026" not found in meta title
+[2026-03-07 17:32:16]   Tokens: 1409 in / 627 out | Cost: $0.00001
+[2026-03-07 17:32:16]   Meta title (60 chars): Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 17:32:16]   Meta desc  (148 chars): Willow Voice for Teams review new AI transcription tool 2026: faster voice-to-text for remote teams. Find out if it's worth switching from Otter.ai.
+[2026-03-07 17:32:16]   Focus keyword: Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 17:32:16]   Schema type: Review + FAQPage
+[2026-03-07 17:32:17]   Rollback stored
+[2026-03-07 17:32:17]   Pushing to WordPress...
+[2026-03-07 17:32:18]   ✓ SEO metadata live for: Willow Voice for Teams
+[2026-03-07 17:32:18] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 17:32:18]   Generating SEO metadata via Claude...
+[2026-03-07 17:32:26]   Tokens: 684 in / 318 out | Cost: $0.00001
+[2026-03-07 17:32:26]   Meta title (48 chars): Spoke Voice to Text macOS Review 2026: Worth It?
+[2026-03-07 17:32:26]   Meta desc  (141 chars): Our Spoke voice to text macOS review tests accuracy, speed, and real-world performance. See how it handles dictation across Mac apps in 2026.
+[2026-03-07 17:32:26]   Focus keyword: Spoke voice to text macOS review
+[2026-03-07 17:32:26]   Schema type: Review + FAQPage
+[2026-03-07 17:32:27]   Rollback stored
+[2026-03-07 17:32:27]   Pushing to WordPress...
+[2026-03-07 17:32:28]   ✓ SEO metadata live for: Spoke
+[2026-03-07 17:32:28] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 17:32:28]   Generating SEO metadata via Claude...
+[2026-03-07 17:32:36]   Tokens: 672 in / 322 out | Cost: $0.00001
+[2026-03-07 17:32:36]   Meta title (43 chars): Canva Review for Social Media Managers 2026
+[2026-03-07 17:32:36]   Meta desc  (149 chars): Canva review for social media managers 2026: workflows, AI features, and pricing analyzed. Save hours on content creation. Find out if it's worth it.
+[2026-03-07 17:32:36]   Focus keyword: canva review for social media managers 2026
+[2026-03-07 17:32:36]   Schema type: Review + FAQPage
+[2026-03-07 17:32:37]   Rollback stored
+[2026-03-07 17:32:37]   Pushing to WordPress...
+[2026-03-07 17:32:38]   ✓ SEO metadata live for: Canva
+[2026-03-07 17:32:38] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 17:32:38]   Generating SEO metadata via Claude...
+[2026-03-07 17:32:46]   Tokens: 690 in / 315 out | Cost: $0.00001
+[2026-03-07 17:32:46]   Meta title (52 chars): Descript Review for YouTube Creators 2026: Worth It?
+[2026-03-07 17:32:46]   Meta desc  (135 chars): Our Descript review for YouTube creators 2026 tests text-based editing, AI features, and export quality. See if it actually saves time.
+[2026-03-07 17:32:46]   Focus keyword: Descript review for YouTube creators 2026
+[2026-03-07 17:32:46]   Schema type: Review + FAQPage
+[2026-03-07 17:32:47]   Rollback stored
+[2026-03-07 17:32:47]   Pushing to WordPress...
+[2026-03-07 17:32:48]   ✓ SEO metadata live for: Descript
+[2026-03-07 17:32:48] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 17:32:48]   Generating SEO metadata via Claude...
+[2026-03-07 17:32:57]   Tokens: 690 in / 340 out | Cost: $0.00001
+[2026-03-07 17:32:57]   Meta title (57 chars): ElevenLabs Review for Podcast Voiceovers 2026 | Worth It?
+[2026-03-07 17:32:57]   Meta desc  (135 chars): Our ElevenLabs review for podcast voiceovers 2026 covers pricing, voice quality, and real-world performance. Find out if it's worth it.
+[2026-03-07 17:32:57]   Focus keyword: ElevenLabs review for podcast voiceovers 2026
+[2026-03-07 17:32:57]   Schema type: Review + FAQPage
+[2026-03-07 17:32:58]   Rollback stored
+[2026-03-07 17:32:58]   Pushing to WordPress...
+[2026-03-07 17:32:59]   ✓ SEO metadata live for: ElevenLabs
+[2026-03-07 17:32:59] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 17:32:59]   Generating SEO metadata via Claude...
+[2026-03-07 17:33:08]   Tokens: 659 in / 324 out | Cost: $0.00001
+[2026-03-07 17:33:08]   Meta title (50 chars): Riverside.fm Review for Podcasters 2026: Worth It?
+[2026-03-07 17:33:08]   Meta desc  (140 chars): Our riverside.fm review for podcasters 2026 covers pricing, audio quality, and new features. See if this recording platform fits your needs.
+[2026-03-07 17:33:08]   Focus keyword: riverside.fm review for podcasters 2026
+[2026-03-07 17:33:08]   Schema type: Review + FAQPage
+[2026-03-07 17:33:09]   Rollback stored
+[2026-03-07 17:33:09]   Pushing to WordPress...
+[2026-03-07 17:33:10]   ✓ SEO metadata live for: Riverside.fm
+[2026-03-07 17:33:10] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 17:33:10]   Generating SEO metadata via Claude...
+[2026-03-07 17:33:17]   Tokens: 668 in / 313 out | Cost: $0.00001
+[2026-03-07 17:33:17]   Meta title (55 chars): ConvertKit Review for Small Creators 2026 | Honest Test
+[2026-03-07 17:33:17]   Meta desc  (140 chars): Our ConvertKit review for small creators 2026 covers real pricing, free plan limits, and workflows for beginners. Find out if it's worth it.
+[2026-03-07 17:33:17]   Focus keyword: convertkit review for small creators 2026
+[2026-03-07 17:33:17]   Schema type: Review + FAQPage
+[2026-03-07 17:33:18]   Rollback stored
+[2026-03-07 17:33:18]   Pushing to WordPress...
+[2026-03-07 17:33:19]   ✓ SEO metadata live for: ConvertKit
+[2026-03-07 17:33:19] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 17:33:19]   Generating SEO metadata via Claude...
+[2026-03-07 17:33:26]   Tokens: 672 in / 350 out | Cost: $0.00001
+[2026-03-07 17:33:26]   Meta title (57 chars): Beehiiv Review for Newsletter Creators 2026 | Honest Test
+[2026-03-07 17:33:26]   Meta desc  (134 chars): Our beehiiv review for newsletter creators 2026 reveals pricing, deliverability, and monetization features. Find out if it's worth it.
+[2026-03-07 17:33:26]   Focus keyword: beehiiv review for newsletter creators 2026
+[2026-03-07 17:33:26]   Schema type: Review + FAQPage
+[2026-03-07 17:33:27]   Rollback stored
+[2026-03-07 17:33:27]   Pushing to WordPress...
+[2026-03-07 17:33:28]   ✓ SEO metadata live for: Beehiiv
+[2026-03-07 17:33:28] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 17:33:28]   Generating SEO metadata via Claude...
+[2026-03-07 17:33:35]   Tokens: 673 in / 308 out | Cost: $0.00001
+[2026-03-07 17:33:35]   Meta title (56 chars): Jasper AI Review for Email Marketers 2026 | Test Results
+[2026-03-07 17:33:35]   Meta desc  (139 chars): Our Jasper AI review for email marketers 2026 reveals real test results on time savings, email quality, and ROI. Find out if it's worth it.
+[2026-03-07 17:33:35]   Focus keyword: jasper ai review for email marketers 2026
+[2026-03-07 17:33:35]   Schema type: Review + FAQPage
+[2026-03-07 17:33:37]   Rollback stored
+[2026-03-07 17:33:37]   Pushing to WordPress...
+[2026-03-07 17:33:40]   ✓ SEO metadata live for: Jasper AI
+[2026-03-07 17:33:40] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 17:33:40]   Generating SEO metadata via Claude...
+[2026-03-07 17:33:48]   Tokens: 694 in / 321 out | Cost: $0.00001
+[2026-03-07 17:33:48]   Meta title (59 chars): Trimmr AI Review for YouTube Creators 2026: Is It Worth It?
+[2026-03-07 17:33:48]   Meta desc  (152 chars): Our Trimmr AI review for YouTube creators 2026 tests if this tool can actually turn long videos into viral shorts in minutes. Find out if it's worth it.
+[2026-03-07 17:33:48]   Focus keyword: Trimmr AI review for YouTube creators 2026
+[2026-03-07 17:33:48]   Schema type: Review + FAQPage
+[2026-03-07 17:33:49]   Rollback stored
+[2026-03-07 17:33:49]   Pushing to WordPress...
+[2026-03-07 17:33:52]   ✓ SEO metadata live for: Trimmr
+[2026-03-07 17:33:52] 
+============================================================
+[2026-03-07 17:33:52] SEO Agent complete
+[2026-03-07 17:33:52]   ✓ Success:  12
+[2026-03-07 17:33:52]   ✗ Failed:   0
+[2026-03-07 17:33:52]   ⏭  Skipped:  0
+[2026-03-07 17:33:52]   💰 Run cost: $0.0001
+[2026-03-07 17:33:52] ============================================================
+
+[2026-03-07 17:45:53] ============================================================
+[2026-03-07 17:45:53] SEO Agent starting
+[2026-03-07 17:45:53] Found 12 articles needing SEO metadata
+[2026-03-07 17:45:53] Daily cap: 15
+[2026-03-07 17:45:53] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 17:45:53]   Generating SEO metadata via Claude...
+[2026-03-07 17:46:02]   Tokens: 663 in / 301 out | Cost: $0.00001
+[2026-03-07 17:46:02]   Meta title (52 chars): Coursekit Review for Course Creators 2026: Worth It?
+[2026-03-07 17:46:02]   Meta desc  (133 chars): Coursekit review for course creators 2026: AI agents answer student questions automatically. See pricing, features, and real results.
+[2026-03-07 17:46:02]   Focus keyword: Coursekit review for course creators 2026
+[2026-03-07 17:46:02]   Schema type: Review + FAQPage
+[2026-03-07 17:46:02]   OG image: using site default
+[2026-03-07 17:46:03]   Rollback stored
+[2026-03-07 17:46:03]   Pushing to WordPress...
+[2026-03-07 17:46:04]   ✓ SEO metadata + Open Graph live for: Coursekit
+[2026-03-07 17:46:04] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 17:46:04]   Generating SEO metadata via Claude...
+[2026-03-07 17:46:12]   Tokens: 676 in / 286 out | Cost: $0.00001
+[2026-03-07 17:46:12]   Meta title (50 chars): Krisp Accent Conversion Review for Podcasters 2026
+[2026-03-07 17:46:12]   Meta desc  (143 chars): Our Krisp accent conversion review for podcasters tests real-time voice clarity. See pricing, audio quality, and ease of use. Worth it in 2026?
+[2026-03-07 17:46:12]   Focus keyword: Krisp accent conversion review for podcasters
+[2026-03-07 17:46:12]   Schema type: Review + FAQPage
+[2026-03-07 17:46:12]   OG image: using site default
+[2026-03-07 17:46:12]   Rollback stored
+[2026-03-07 17:46:12]   Pushing to WordPress...
+[2026-03-07 17:46:13]   ✓ SEO metadata + Open Graph live for: Krisp Accent Conversion
+[2026-03-07 17:46:13] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 17:46:13]   Generating SEO metadata via Claude...
+[2026-03-07 17:46:20]   ↻ Retry 1/2: primary keyword "Willow Voice for Teams review new AI transcription tool 2026" not found in meta title
+[2026-03-07 17:46:27]   ↻ Retry 2/2: meta description is 163 chars — must be 160 or under
+[2026-03-07 17:46:34]   ⚠️  All retries exhausted — applying hard truncate fallback
+[2026-03-07 17:46:34]   Tokens: 2127 in / 936 out | Cost: $0.00002
+[2026-03-07 17:46:34]   Meta title (47 chars): Willow Voice for Teams Review: New AI Tool 2026
+[2026-03-07 17:46:34]   Meta desc  (135 chars): Willow Voice for Teams review covers this new AI transcription tool launched in 2026. See how it compares to competitors. Worth trying?
+[2026-03-07 17:46:34]   Focus keyword: Willow Voice for Teams review new AI transcription tool 2026
+[2026-03-07 17:46:34]   Schema type: Review + FAQPage
+[2026-03-07 17:46:34]   OG image: using site default
+[2026-03-07 17:46:35]   Rollback stored
+[2026-03-07 17:46:35]   Pushing to WordPress...
+[2026-03-07 17:46:35]   ✓ SEO metadata + Open Graph live for: Willow Voice for Teams
+[2026-03-07 17:46:35] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 17:46:35]   Generating SEO metadata via Claude...
+[2026-03-07 17:46:43]   Tokens: 684 in / 300 out | Cost: $0.00001
+[2026-03-07 17:46:43]   Meta title (54 chars): Spoke Voice to Text macOS Review 2026: Is It Worth It?
+[2026-03-07 17:46:43]   Meta desc  (142 chars): Our Spoke voice to text macOS review covers accuracy, speed, and real-world performance after two weeks of testing. Find out if it's worth it.
+[2026-03-07 17:46:43]   Focus keyword: Spoke voice to text macOS review
+[2026-03-07 17:46:43]   Schema type: Review + FAQPage
+[2026-03-07 17:46:43]   OG image: using site default
+[2026-03-07 17:46:44]   Rollback stored
+[2026-03-07 17:46:44]   Pushing to WordPress...
+[2026-03-07 17:46:44]   ✓ SEO metadata + Open Graph live for: Spoke
+[2026-03-07 17:46:44] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 17:46:44]   Generating SEO metadata via Claude...
+[2026-03-07 17:46:53]   Tokens: 672 in / 318 out | Cost: $0.00001
+[2026-03-07 17:46:53]   Meta title (49 chars): Canva Review for Social Media Managers 2026 Guide
+[2026-03-07 17:46:53]   Meta desc  (147 chars): Canva review for social media managers 2026: See how it handles multi-platform workflows, AI tools, and brand templates. Find out if it's worth it.
+[2026-03-07 17:46:53]   Focus keyword: canva review for social media managers 2026
+[2026-03-07 17:46:53]   Schema type: Review + FAQPage
+[2026-03-07 17:46:53]   OG image: using site default
+[2026-03-07 17:46:54]   Rollback stored
+[2026-03-07 17:46:54]   Pushing to WordPress...
+[2026-03-07 17:46:55]   ✓ SEO metadata + Open Graph live for: Canva
+[2026-03-07 17:46:55] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 17:46:55]   Generating SEO metadata via Claude...
+[2026-03-07 17:47:06]   Tokens: 690 in / 347 out | Cost: $0.00001
+[2026-03-07 17:47:06]   Meta title (53 chars): Descript Review for YouTube Creators 2026 | Worth It?
+[2026-03-07 17:47:06]   Meta desc  (150 chars): Our Descript review for YouTube creators 2026 tests text-based editing, AI tools, and export quality. See if it actually saves time or adds confusion.
+[2026-03-07 17:47:06]   Focus keyword: Descript review for YouTube creators 2026
+[2026-03-07 17:47:06]   Schema type: Review + FAQPage
+[2026-03-07 17:47:06]   OG image: using site default
+[2026-03-07 17:47:07]   Rollback stored
+[2026-03-07 17:47:07]   Pushing to WordPress...
+[2026-03-07 17:47:08]   ✓ SEO metadata + Open Graph live for: Descript
+[2026-03-07 17:47:08] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 17:47:08]   Generating SEO metadata via Claude...
+[2026-03-07 17:47:16]   Tokens: 690 in / 307 out | Cost: $0.00001
+[2026-03-07 17:47:16]   Meta title (55 chars): ElevenLabs Review for Podcast Voiceovers 2026 Worth It?
+[2026-03-07 17:47:16]   Meta desc  (146 chars): Our ElevenLabs review for podcast voiceovers 2026 reveals pricing, voice quality, and key limitations. Find out if it's the right AI tool for you.
+[2026-03-07 17:47:16]   Focus keyword: ElevenLabs review for podcast voiceovers 2026
+[2026-03-07 17:47:16]   Schema type: Review + FAQPage
+[2026-03-07 17:47:16]   OG image: using site default
+[2026-03-07 17:47:18]   Rollback stored
+[2026-03-07 17:47:18]   Pushing to WordPress...
+[2026-03-07 17:47:20]   ✓ SEO metadata + Open Graph live for: ElevenLabs
+[2026-03-07 17:47:20] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 17:47:20]   Generating SEO metadata via Claude...
+[2026-03-07 17:47:29]   Tokens: 659 in / 326 out | Cost: $0.00001
+[2026-03-07 17:47:29]   Meta title (56 chars): Riverside.fm Review for Podcasters 2026: Is It Worth It?
+[2026-03-07 17:47:29]   Meta desc  (139 chars): Our riverside.fm review for podcasters 2026 covers pricing, features, and audio quality. See if this remote recording tool fits your needs.
+[2026-03-07 17:47:29]   Focus keyword: riverside.fm review for podcasters 2026
+[2026-03-07 17:47:29]   Schema type: Review + FAQPage
+[2026-03-07 17:47:29]   OG image: using site default
+[2026-03-07 17:47:34]   Rollback stored
+[2026-03-07 17:47:34]   Pushing to WordPress...
+[2026-03-07 17:47:40]   ✓ SEO metadata + Open Graph live for: Riverside.fm
+[2026-03-07 17:47:40] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 17:47:40]   Generating SEO metadata via Claude...
+[2026-03-07 17:47:58]   Tokens: 668 in / 292 out | Cost: $0.00001
+[2026-03-07 17:47:58]   Meta title (55 chars): ConvertKit Review for Small Creators 2026 | Honest Test
+[2026-03-07 17:47:58]   Meta desc  (132 chars): Our ConvertKit review for small creators 2026 covers pricing, free plan limits, and workflows for beginners under 1,000 subscribers.
+[2026-03-07 17:47:58]   Focus keyword: convertkit review for small creators 2026
+[2026-03-07 17:47:58]   Schema type: Review + FAQPage
+[2026-03-07 17:47:58]   OG image: using site default
+[2026-03-07 17:47:59]   Rollback stored
+[2026-03-07 17:47:59]   Pushing to WordPress...
+[2026-03-07 17:48:00]   ✓ SEO metadata + Open Graph live for: ConvertKit
+[2026-03-07 17:48:00] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 17:48:00]   Generating SEO metadata via Claude...
+[2026-03-07 17:48:08]   Tokens: 672 in / 373 out | Cost: $0.00001
+[2026-03-07 17:48:08]   Meta title (55 chars): Beehiiv Review for Newsletter Creators 2026 | Worth It?
+[2026-03-07 17:48:08]   Meta desc  (138 chars): Our beehiiv review for newsletter creators 2026 covers pricing, deliverability, monetization, and growth tools. Find out if it's worth it.
+[2026-03-07 17:48:08]   Focus keyword: beehiiv review for newsletter creators 2026
+[2026-03-07 17:48:08]   Schema type: Review + FAQPage
+[2026-03-07 17:48:08]   OG image: using site default
+[2026-03-07 17:48:09]   Rollback stored
+[2026-03-07 17:48:09]   Pushing to WordPress...
+[2026-03-07 17:48:10]   ✓ SEO metadata + Open Graph live for: Beehiiv
+[2026-03-07 17:48:10] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 17:48:10]   Generating SEO metadata via Claude...
+[2026-03-07 17:48:17]   Tokens: 673 in / 316 out | Cost: $0.00001
+[2026-03-07 17:48:17]   Meta title (56 chars): Jasper AI Review for Email Marketers 2026 | Test Results
+[2026-03-07 17:48:17]   Meta desc  (144 chars): Our Jasper AI review for email marketers 2026 shows real test results on campaign performance, time savings, and ROI. Find out if it's worth it.
+[2026-03-07 17:48:17]   Focus keyword: jasper ai review for email marketers 2026
+[2026-03-07 17:48:17]   Schema type: Review + FAQPage
+[2026-03-07 17:48:17]   OG image: using site default
+[2026-03-07 17:48:18]   Rollback stored
+[2026-03-07 17:48:18]   Pushing to WordPress...
+[2026-03-07 17:48:21]   ✓ SEO metadata + Open Graph live for: Jasper AI
+[2026-03-07 17:48:21] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 17:48:21]   Generating SEO metadata via Claude...
+[2026-03-07 17:48:30]   Tokens: 694 in / 323 out | Cost: $0.00001
+[2026-03-07 17:48:30]   Meta title (56 chars): Trimmr AI Review for YouTube Creators 2026 | Honest Test
+[2026-03-07 17:48:30]   Meta desc  (141 chars): Our Trimmr AI review for YouTube creators 2026 tests if this tool actually saves editing time on Shorts and Reels. Find out if it's worth it.
+[2026-03-07 17:48:30]   Focus keyword: Trimmr AI review for YouTube creators 2026
+[2026-03-07 17:48:30]   Schema type: Review + FAQPage
+[2026-03-07 17:48:30]   OG image: using site default
+[2026-03-07 17:48:31]   Rollback stored
+[2026-03-07 17:48:31]   Pushing to WordPress...
+[2026-03-07 17:48:34]   ✓ SEO metadata + Open Graph live for: Trimmr
+[2026-03-07 17:48:34] 
+============================================================
+[2026-03-07 17:48:34] SEO Agent complete
+[2026-03-07 17:48:34]   ✓ Success:  12
+[2026-03-07 17:48:34]   ✗ Failed:   0
+[2026-03-07 17:48:34]   ⏭  Skipped:  0
+[2026-03-07 17:48:34]   💰 Run cost: $0.0001
+[2026-03-07 17:48:34] ============================================================
+

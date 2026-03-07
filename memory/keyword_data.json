@@ -180,7 +180,9 @@
     "tool_score": 62,
     "researched_date": "2026-03-05",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "published",
+    "article_written_date": "2026-03-07",
+    "wp_post_id": 133
   },
   "canva": {
     "primary_keyword": "canva review for social media managers 2026",
@@ -1268,6 +1270,114 @@
     "tool_score": 63,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "pending_article"
+    "status": "published",
+    "article_written_date": "2026-03-07",
+    "wp_post_id": 132
+  },
+  "luma-agents": {
+    "primary_keyword": "luma agents review for content creators",
+    "secondary_keywords": [
+      "luma agents ai video tool review",
+      "is luma agents worth it for youtube creators",
+      "luma agents pricing for video creators 2026"
+    ],
+    "keyword_cluster": [
+      "luma agents vs traditional video editing",
+      "luma agents ai coordination features",
+      "best ai agents for multi-format content creation",
+      "luma agents text to video quality",
+      "luma agents free trial review",
+      "how luma agents works for tiktok creators",
+      "luma agents output quality for instagram reels",
+      "luma agents workflow automation review"
+    ],
+    "search_intent": "buyer",
+    "estimated_difficulty": "easy",
+    "difficulty_score": 8,
+    "traffic_value": "high",
+    "article_type": "review",
+    "recommended_word_count": 2500,
+    "article_title": "Luma Agents: Is It Worth It for Video Creators? (2026)",
+    "url_slug": "luma-agents-review-content-creators",
+    "serp_gap": "No existing reviews from creator perspective testing actual workflow for YouTube/TikTok/Reels; no real-world examples of coordinated AI output quality; missing pricing breakdown for creator budgets; no comparison of time saved vs traditional editing",
+    "reasoning": "Brand new tool with zero established reviews creates perfect first-mover opportunity with ultra-low competition for creator-specific angle before tech blogs dominate SERPs",
+    "urgency": "high",
+    "supporting_articles": [
+      {
+        "title": "Luma Agents vs Runway Gen-3 for Short-Form Video: Which AI Wins?",
+        "slug": "luma-agents-vs-runway-gen-3-short-form-video",
+        "angle": "Captures comparison searches from creators already researching AI video tools, positions us as authority on multiple platforms, links back to main review with head-to-head feature analysis"
+      },
+      {
+        "title": "How to Use Luma Agents for YouTube Shorts Automation (Step-by-Step)",
+        "slug": "how-to-use-luma-agents-youtube-shorts-automation",
+        "angle": "Targets tutorial searches from creators who discovered Luma Agents and need implementation guidance, demonstrates deep product knowledge, naturally links to full review for feature details"
+      },
+      {
+        "title": "Luma Agents Free vs Paid: What Tier Do Video Creators Actually Need?",
+        "slug": "luma-agents-free-vs-paid-pricing-tiers-creators",
+        "angle": "Answers critical pricing question that review teases, captures high-intent searchers making purchase decision, establishes pricing authority and links back to complete review for context"
+      }
+    ],
+    "tool_name": "Luma Agents",
+    "tool_category": "video",
+    "tool_score": 62,
+    "researched_date": "2026-03-07",
+    "days_since_launch": 0,
+    "status": "article_written",
+    "article_written_date": "2026-03-07"
+  },
+  "vois": {
+    "primary_keyword": "vois ai voice generator review for podcasters",
+    "secondary_keywords": [
+      "vois voice software review 2026",
+      "vois ai voiceover tool review",
+      "is vois worth it for content creators"
+    ],
+    "keyword_cluster": [
+      "vois desktop voice generator",
+      "vois ai pricing for podcasters",
+      "vois voice quality test",
+      "vois vs elevenlabs for podcasters",
+      "local ai voice generator vois",
+      "vois free trial review",
+      "best offline voice generator 2026",
+      "vois voice cloning accuracy"
+    ],
+    "search_intent": "buyer",
+    "estimated_difficulty": "easy",
+    "difficulty_score": 8,
+    "traffic_value": "high",
+    "article_type": "review",
+    "recommended_word_count": 2500,
+    "article_title": "Vois Review: Is This Local AI Voice Tool Worth It for Podcasters?",
+    "url_slug": "vois-ai-voice-generator-review-podcasters",
+    "serp_gap": "No existing reviews exist yet (brand new tool), giving us first-mover advantage. Current generic AI voice tool reviews lack local/desktop focus, offline capability comparisons, and podcast-specific workflow testing that audio creators actually need.",
+    "reasoning": "Brand new tool with zero existing reviews creates ultra-low competition window; long-tail includes audience specificity (podcasters) to match our target demographic and filter high-intent traffic.",
+    "urgency": "high",
+    "supporting_articles": [
+      {
+        "title": "Vois vs ElevenLabs for Podcasters: Which AI Voice Tool in 2026?",
+        "slug": "vois-vs-elevenlabs-podcasters-comparison",
+        "angle": "Comparison article targets podcasters researching between cloud vs local AI voice solutions, links back to main Vois review while building authority in podcast voiceover category"
+      },
+      {
+        "title": "Does Vois Work Offline? Desktop Voice Generator Test 2026",
+        "slug": "vois-offline-desktop-voice-generator-test",
+        "angle": "Answers specific question about offline capability that podcasters searching for local solutions ask, demonstrates hands-on testing authority to support main review credibility"
+      },
+      {
+        "title": "Vois Pricing Breakdown: What Podcasters Actually Pay in 2026",
+        "slug": "vois-pricing-cost-podcasters-2026",
+        "angle": "Captures high-intent buyers searching pricing details before purchase, provides detailed cost analysis that supports conversion from main review article"
+      }
+    ],
+    "tool_name": "Vois",
+    "tool_category": "audio",
+    "tool_score": 62,
+    "researched_date": "2026-03-07",
+    "days_since_launch": 2,
+    "status": "article_written",
+    "article_written_date": "2026-03-07"
   }
 }

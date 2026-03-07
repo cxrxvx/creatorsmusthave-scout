@@ -201,3 +201,116 @@ Call log:
 2026-03-07 00:29:26 —   ℹ️  No wp_post_id yet — injection queued for publish time
 2026-03-07 00:29:26 —   ✅ COMPLETE — hero + tool image (no logo)
 2026-03-07 00:29:26 — Image Agent complete — Complete: 15 | Partial: 0 | Failed: 0
+2026-03-07 14:20:52 — Image Agent starting
+2026-03-07 14:20:52 — Found 5 articles needing images (including partials)
+2026-03-07 14:20:52 — Processing: Teachable | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 14:20:56 —   Fetching logo: https://logo.clearbit.com/teachable.com
+2026-03-07 14:20:56 —   Logo fetch failed for Teachable: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /teachable.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 14:20:56 —   ⚠️  Logo not found for Teachable — article still fine without it
+2026-03-07 14:20:56 —   Screenshotting: https://teachable.com/examples
+2026-03-07 14:21:07 —   ✅ Screenshot quality: passed (64KB)
+2026-03-07 14:21:10 —   Uploaded → WordPress media ID: 134
+2026-03-07 14:21:10 —   ✅ Tool image uploaded (screenshot) — media ID: 134
+2026-03-07 14:21:10 —   ℹ️  No wp_post_id yet — injection queued for publish time
+2026-03-07 14:21:10 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 14:21:10 — Processing: Otter.ai | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 14:21:13 —   Fetching logo: https://logo.clearbit.com/otter.ai
+2026-03-07 14:21:13 —   Logo fetch failed for Otter.ai: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /otter.ai (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 14:21:13 —   ⚠️  Logo not found for Otter.ai — article still fine without it
+2026-03-07 14:21:13 —   Screenshotting: https://otter.ai/home
+2026-03-07 14:21:23 —   ❌ Screenshot quality failed: too small — likely bot challenge page (44KB) — minimum is 60KB
+2026-03-07 14:21:23 —   Screenshot failed — trying press kit fallback for Otter.ai
+2026-03-07 14:21:23 —   No press kit URL for Otter.ai — skipping press kit fallback
+2026-03-07 14:21:23 —   ❌ Screenshot + press kit both failed for Otter.ai — retrying next run
+2026-03-07 14:21:23 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 14:21:23 — Processing: Later | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 14:21:27 —   Fetching logo: https://logo.clearbit.com/later.com
+2026-03-07 14:21:27 —   Logo fetch failed for Later: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /later.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 14:21:27 —   ⚠️  Logo not found for Later — article still fine without it
+2026-03-07 14:21:27 —   Screenshotting: https://app.later.com
+2026-03-07 14:21:44 —   ❌ Screenshot quality failed: too small — likely bot challenge page (36KB) — minimum is 60KB
+2026-03-07 14:21:44 —   Screenshot failed — trying press kit fallback for Later
+2026-03-07 14:21:44 —   Trying press kit: https://later.com/press/
+2026-03-07 14:21:45 —   Press kit page returned 404
+2026-03-07 14:21:45 —   ❌ Screenshot + press kit both failed for Later — retrying next run
+2026-03-07 14:21:45 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 14:21:45 — Processing: Typeform | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 14:21:48 —   Fetching logo: https://logo.clearbit.com/typeform.com
+2026-03-07 14:21:48 —   Logo fetch failed for Typeform: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /typeform.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 14:21:48 —   ⚠️  Logo not found for Typeform — article still fine without it
+2026-03-07 14:21:48 —   Screenshotting: https://www.typeform.com/templates/
+2026-03-07 14:21:56 —   ✅ Screenshot quality: passed (88KB)
+2026-03-07 14:21:58 —   Uploaded → WordPress media ID: 135
+2026-03-07 14:21:58 —   ✅ Tool image uploaded (screenshot) — media ID: 135
+2026-03-07 14:21:58 —   ℹ️  No wp_post_id yet — injection queued for publish time
+2026-03-07 14:21:58 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 14:21:58 — Processing: Metricool | hero: ✅ | screenshot: ❌ | logo: ❌
+2026-03-07 14:22:01 —   Fetching logo: https://logo.clearbit.com/metricool.com
+2026-03-07 14:22:01 —   Logo fetch failed for Metricool: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /metricool.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 14:22:01 —   ⚠️  Logo not found for Metricool — article still fine without it
+2026-03-07 14:22:01 —   Screenshotting: https://app.metricool.com
+2026-03-07 14:22:29 —   ❌ Screenshot quality failed: too small — likely bot challenge page (52KB) — minimum is 60KB
+2026-03-07 14:22:29 —   Screenshot failed — trying press kit fallback for Metricool
+2026-03-07 14:22:29 —   No press kit URL for Metricool — skipping press kit fallback
+2026-03-07 14:22:29 —   ❌ Screenshot + press kit both failed for Metricool — retrying next run
+2026-03-07 14:22:29 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 14:22:29 — Image Agent complete — Complete: 5 | Partial: 0 | Failed: 0
+2026-03-07 14:23:25 — Image Agent starting
+2026-03-07 14:23:25 — Found 0 articles needing images (including partials)
+2026-03-07 14:23:25 — Nothing to process — exiting
+2026-03-07 14:30:40 — Image Agent starting
+2026-03-07 14:30:40 —   🔁 Queuing ElevenLabs — screenshot needs injection into post 16
+2026-03-07 14:30:40 — Found 1 articles needing images (including partials and pending injections)
+2026-03-07 14:30:40 — Processing: ElevenLabs | hero: ❌ | screenshot: ✅ | logo: ❌ | injected: ❌
+2026-03-07 14:30:44 —   Trying Pexels: 'podcaster recording studio microphone'
+2026-03-07 14:30:46 —   Pexels: got image (73KB) for 'podcaster recording studio microphone'
+2026-03-07 14:30:46 —   ✅ Hero quality check: passed (73KB from Pexels)
+2026-03-07 14:30:49 —   Uploaded → WordPress media ID: 136
+2026-03-07 14:30:50 —   ✅ Featured image set on post 16
+2026-03-07 14:30:50 —   Fetching logo: https://logo.clearbit.com/elevenlabs.io
+2026-03-07 14:30:50 —   Logo fetch failed for ElevenLabs: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /elevenlabs.io (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 14:30:50 —   ⚠️  Logo not found for ElevenLabs — article still fine without it
+2026-03-07 14:30:54 —   ✅ Image injected into article body (post 16)
+2026-03-07 14:30:54 —   ✅ COMPLETE — hero + tool image (no logo)
+2026-03-07 14:30:54 — Image Agent complete — Complete: 1 | Partial: 0 | Failed: 0
+2026-03-07 14:31:46 — Image Agent starting
+2026-03-07 14:31:46 — Found 0 articles needing images (including partials and pending injections)
+2026-03-07 14:31:46 — Nothing to process — exiting
+2026-03-07 14:33:31 — Image Agent starting
+2026-03-07 14:33:31 — Found 2 articles needing images (including partials and pending injections)
+2026-03-07 14:33:31 — Processing: Jasper AI | hero: ❌ | screenshot: ❌ | logo: ❌ | injected: ❌
+2026-03-07 14:33:35 —   Trying Pexels: 'email marketer laptop writing'
+2026-03-07 14:33:38 —   Pexels: got image (156KB) for 'email marketer laptop writing'
+2026-03-07 14:33:38 —   ✅ Hero quality check: passed (156KB from Pexels)
+2026-03-07 14:33:45 —   Uploaded → WordPress media ID: 139
+2026-03-07 14:33:50 —   ✅ Featured image set on post 132
+2026-03-07 14:33:50 —   Fetching logo: https://logo.clearbit.com/jasper.ai
+2026-03-07 14:33:50 —   Logo fetch failed for Jasper AI: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /jasper.ai (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 14:33:50 —   ⚠️  Logo not found for Jasper AI — article still fine without it
+2026-03-07 14:33:50 —   Screenshotting: https://app.jasper.ai
+2026-03-07 14:34:37 —   ❌ Screenshot quality failed: too small — likely bot challenge page (28KB) — minimum is 60KB
+2026-03-07 14:34:37 —   Screenshot failed — trying press kit fallback for Jasper AI
+2026-03-07 14:34:37 —   Trying press kit: https://www.jasper.ai/press
+2026-03-07 14:34:39 —   Found 35 candidate image URLs on press kit page
+2026-03-07 14:34:49 —   ✅ Press kit image found: passed (2744KB) — https://cdn.prod.website-files.com/6807f44ec8a964d38a705332/...
+2026-03-07 14:35:19 —   WordPress upload error: ('Connection aborted.', TimeoutError('The write operation timed out'))
+2026-03-07 14:35:19 —   ✅ COMPLETE — hero image ready (screenshot optional)
+2026-03-07 14:35:19 — Processing: Trimmr | hero: ❌ | screenshot: ❌ | logo: ❌ | injected: ❌
+2026-03-07 14:35:23 —   Trying Pexels: 'video creator editing shorts'
+2026-03-07 14:35:31 —   Pexels: got image (138KB) for 'video creator editing shorts'
+2026-03-07 14:35:31 —   ✅ Hero quality check: passed (138KB from Pexels)
+2026-03-07 14:36:10 —   WordPress upload error: HTTPSConnectionPool(host='creatorsmusthave.com', port=443): Read timed out. (read timeout=10)
+2026-03-07 14:36:10 —   Fetching logo: https://logo.clearbit.com/trimmr.ai
+2026-03-07 14:36:10 —   Logo fetch failed for Trimmr: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /trimmr.ai (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 14:36:10 —   ⚠️  Logo not found for Trimmr — article still fine without it
+2026-03-07 14:36:10 —   Screenshotting: https://trimmr.ai
+2026-03-07 14:36:13 —   Screenshot failed for Trimmr: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://trimmr.ai/
+Call log:
+  - navigating to "https://trimmr.ai/", waiting until "domcontentloaded"
+
+2026-03-07 14:36:13 —   Screenshot failed — trying press kit fallback for Trimmr
+2026-03-07 14:36:13 —   Trying press kit: https://trimmr.ai
+2026-03-07 14:36:13 —   Press kit fetch failed for Trimmr: HTTPSConnectionPool(host='trimmr.ai', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("HTTPSConnection(host='trimmr.ai', port=443): Failed to resolve 'trimmr.ai' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-07 14:36:13 —   ❌ Screenshot + press kit both failed for Trimmr — retrying next run
+2026-03-07 14:36:13 —   ❌ FAILED — no images added — retrying next run
+2026-03-07 14:36:13 — Image Agent complete — Complete: 1 | Partial: 0 | Failed: 1

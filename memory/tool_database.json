@@ -129,7 +129,7 @@
   },
   "claude-cowork": {
     "name": "Claude Cowork",
-    "description": "An AI agent from Anthropic that automates file-based tasks for non-technical users directly in Claude Desktop.",
+    "description": "AI agent from Anthropic that automates file-based workflows in Claude Desktop without requiring coding skills.",
     "category": "productivity",
     "score": 65,
     "confidence": "high",
@@ -139,7 +139,7 @@
     "has_affiliate_potential": false,
     "source": "VentureBeat AI",
     "source_url": "https://venturebeat.com/technology/anthropic-launches-cowork-a-claude-desktop-agent-that-works-in-your-files-no",
-    "discovered_date": "2026-03-06",
+    "discovered_date": "2026-03-07",
     "status": "discovered"
   },
   "kodo": {
@@ -201,7 +201,7 @@
   },
   "trimmr": {
     "name": "Trimmr",
-    "description": "AI tool that converts long-form videos into short clips for social media platforms",
+    "description": "AI tool that automatically converts long-form videos into short clips for social media platforms",
     "category": "video",
     "score": 62,
     "confidence": "medium",
@@ -211,12 +211,12 @@
     "has_affiliate_potential": true,
     "source": "Hacker News - AI Launches",
     "source_url": "https://www.trimmr.ai",
-    "discovered_date": "2026-03-06",
+    "discovered_date": "2026-03-07",
     "status": "discovered"
   },
   "gpt-5.4": {
     "name": "GPT-5.4",
-    "description": "OpenAI's latest frontier AI model for professional work including writing, coding, and content creation tasks",
+    "description": "OpenAI's latest frontier AI model for professional work including content creation, writing, and research tasks.",
     "category": "writing",
     "score": 65,
     "confidence": "high",
@@ -226,7 +226,7 @@
     "has_affiliate_potential": false,
     "source": "TechCrunch AI",
     "source_url": "https://techcrunch.com/2026/03/05/openai-launches-gpt-5-4-with-pro-and-thinking-versions/",
-    "discovered_date": "2026-03-06",
+    "discovered_date": "2026-03-07",
     "status": "discovered"
   },
   "canva": {
@@ -572,6 +572,68 @@
     "source": "Manual List",
     "source_url": "https://gumroad.com",
     "discovered_date": "2026-03-06",
+    "status": "discovered"
+  },
+  "chatgpt-for-excel": {
+    "name": "ChatGPT for Excel",
+    "description": "AI-powered tool that enables real-time spreadsheet building and updating using ChatGPT within Excel",
+    "category": "productivity",
+    "score": 62,
+    "confidence": "medium",
+    "article_type": "authority_article",
+    "fast_growing_category": false,
+    "is_major_platform": true,
+    "has_affiliate_potential": false,
+    "source": "Product Hunt - AI",
+    "source_url": "https://www.producthunt.com/products/chatgpt",
+    "discovered_date": "2026-03-07",
+    "status": "discovered"
+  },
+  "claude": {
+    "name": "Claude",
+    "description": "AI assistant from Anthropic that helps creators write, research, and brainstorm content across multiple formats.",
+    "category": "writing",
+    "score": 65,
+    "confidence": "high",
+    "article_type": "authority_article",
+    "fast_growing_category": true,
+    "is_major_platform": true,
+    "has_affiliate_potential": false,
+    "source": "TechCrunch AI",
+    "source_url": "https://techcrunch.com/2026/03/06/claudes-consumer-growth-surge-continues-after-pentagon-deal-debacle/",
+    "discovered_date": "2026-03-07",
+    "status": "discovered"
+  },
+  "luma-agents": {
+    "name": "Luma Agents",
+    "description": "AI agents that coordinate multiple AI systems to generate end-to-end creative work across text, images, video and audio.",
+    "category": "video",
+    "score": 62,
+    "confidence": "medium",
+    "article_type": "affiliate_review",
+    "fast_growing_category": true,
+    "is_major_platform": false,
+    "has_affiliate_potential": true,
+    "source": "TechCrunch AI",
+    "source_url": "https://techcrunch.com/2026/03/05/exclusive-luma-launches-creative-ai-agents-powered-by-its-new-unified-intelligence-models/",
+    "discovered_date": "2026-03-07",
+    "status": "discovered"
+  },
+  "vois": {
+    "name": "Vois",
+    "description": "Studio-quality AI voice generation software that runs locally on desktop for creators needing voice-overs and audio content.",
+    "category": "audio",
+    "score": 62,
+    "confidence": "medium",
+    "article_type": "affiliate_review",
+    "fast_growing_category": true,
+    "is_major_platform": false,
+    "has_affiliate_potential": true,
+    "source": "Product Hunt - Productivity",
+    "source_url": "https://www.producthunt.com/products/vois",
+    "discovered_date": "2026-03-05",
+    "promoted_from_watchlist": true,
+    "days_to_promote": 2,
     "status": "discovered"
   }
 }
