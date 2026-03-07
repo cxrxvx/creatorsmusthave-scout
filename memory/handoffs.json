@@ -18,8 +18,9 @@
     "wp_preview_url": "https://creatorsmusthave.com/?p=10&preview=true",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 20,
-      "hero_alt_text": "Course creator using laptop for Coursekit review 2026 showcasing AI tools for online education"
+      "hero_media_id": 208,
+      "hero_alt_text": "Coursekit review for course creators 2026 - instructor teaching online students via webcam",
+      "hero_source": "Pexels \u2014 'online course creator teaching students'"
     },
     "images_date": "2026-03-07",
     "seo_done": true,
@@ -67,11 +68,11 @@
     "wp_preview_url": "https://creatorsmusthave.com/?p=11&preview=true",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 22,
-      "hero_alt_text": "Podcaster recording with professional microphone setup for Krisp accent conversion review",
-      "screenshot_media_id": 79,
-      "screenshot_alt_text": "Krisp accent conversion interface showing voice enhancement settings for podcasters",
-      "screenshot_source": "screenshot",
+      "screenshot_media_id": 209,
+      "screenshot_alt_text": "Krisp accent conversion dashboard showing real-time audio processing for podcasters",
+      "screenshot_source": "homepage_screenshot",
+      "hero_media_id": 209,
+      "hero_source": "homepage_screenshot",
       "screenshot_injected": true
     },
     "images_date": "2026-03-07",
@@ -123,12 +124,9 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 24,
-      "hero_alt_text": "Willow Voice for Teams review 2026: AI transcription tool for collaborative meetings",
-      "screenshot_media_id": 81,
-      "screenshot_alt_text": "Willow Voice for Teams dashboard interface showing new AI transcription features in 2026",
-      "screenshot_source": "screenshot",
-      "screenshot_injected": true
+      "hero_media_id": 211,
+      "hero_alt_text": "Willow Voice for Teams review 2026 - AI transcription tool for remote team collaboration meetings",
+      "hero_source": "Pexels \u2014 'remote team collaboration meeting'"
     },
     "images_date": "2026-03-07",
     "seo_done": true,
@@ -190,9 +188,9 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 26,
-      "hero_alt_text": "Person using Spoke voice to text macOS review - dictating content on MacBook with microphone",
-      "screenshot_alt_text": "Spoke voice-to-text software interface on macOS showing transcription features and controls"
+      "hero_media_id": 212,
+      "hero_alt_text": "Professional using Spoke voice to text on macOS for efficient dictation and transcription",
+      "hero_source": "Pexels \u2014 'professional dictating voice notes phone'"
     },
     "images_date": "2026-03-07",
     "seo_done": true,
@@ -246,10 +244,9 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 76,
-      "hero_alt_text": "Social media manager using Canva review interface to create engaging content in 2026",
-      "hero_source": "Pexels \u2014 'social media manager designing'",
-      "screenshot_alt_text": "Canva dashboard interface showing design tools for social media managers"
+      "hero_media_id": 213,
+      "hero_alt_text": "Social media manager using Canva to create engaging Instagram posts and brand content in 2026",
+      "hero_source": "Pexels \u2014 'graphic designer creating social media post'"
     },
     "images_date": "2026-03-07",
     "seo_done": true,
@@ -308,9 +305,9 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 32,
-      "hero_alt_text": "Content creator editing video for Descript review for YouTube creators 2026",
-      "screenshot_alt_text": "Descript interface showing video editing features for YouTube creators in 2026"
+      "hero_media_id": 214,
+      "hero_alt_text": "YouTube creator using Descript review interface for video editing with transcript-based timeline",
+      "hero_source": "Pexels \u2014 'video editor working timeline editing'"
     },
     "images_date": "2026-03-07",
     "seo_done": true,
@@ -364,11 +361,11 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "screenshot_media_id": 35,
-      "screenshot_alt_text": "ElevenLabs AI voice interface dashboard showing podcast voiceover generation features",
-      "hero_media_id": 136,
-      "hero_alt_text": "Podcaster using ElevenLabs review for podcast voiceovers 2026 with professional microphone setup",
-      "hero_source": "Pexels \u2014 'podcaster recording studio microphone'",
+      "screenshot_media_id": 215,
+      "screenshot_alt_text": "ElevenLabs AI voice generation interface dashboard showing podcast voiceover options",
+      "screenshot_source": "homepage_screenshot",
+      "hero_media_id": 215,
+      "hero_source": "homepage_screenshot",
       "screenshot_injected": true
     },
     "images_date": "2026-03-07",
@@ -423,11 +420,11 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 36,
-      "hero_alt_text": "Podcaster recording episode for Riverside.fm review 2026 with professional microphone setup",
-      "screenshot_media_id": 83,
-      "screenshot_alt_text": "Riverside.fm dashboard interface showing podcast recording and editing features",
-      "screenshot_source": "screenshot",
+      "screenshot_media_id": 217,
+      "screenshot_alt_text": "Riverside.fm dashboard interface showing podcast recording features",
+      "screenshot_source": "homepage_screenshot",
+      "hero_media_id": 217,
+      "hero_source": "homepage_screenshot",
       "screenshot_injected": true
     },
     "images_date": "2026-03-07",
@@ -479,12 +476,9 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 38,
-      "hero_alt_text": "Small creator writing email newsletter for ConvertKit review 2026",
-      "screenshot_alt_text": "ConvertKit dashboard interface showing email marketing features for small creators",
-      "screenshot_media_id": 85,
-      "screenshot_source": "screenshot",
-      "screenshot_injected": true
+      "hero_media_id": 219,
+      "hero_alt_text": "Small creator writing email campaign in ConvertKit for their subscriber list in 2026",
+      "hero_source": "Pexels \u2014 'email campaign creator laptop coffee'"
     },
     "images_date": "2026-03-07",
     "seo_done": true,
@@ -535,9 +529,12 @@
     "published_date": "2026-03-06",
     "images_added": true,
     "image_data": {
-      "hero_media_id": 41,
-      "hero_alt_text": "Newsletter creator working on Beehiiv review 2026 at desk with laptop and coffee",
-      "screenshot_alt_text": "Beehiiv platform dashboard interface showing newsletter creation tools for creators"
+      "screenshot_media_id": 220,
+      "screenshot_alt_text": "Beehiiv newsletter platform dashboard showing creator tools and analytics interface",
+      "screenshot_source": "homepage_screenshot",
+      "hero_media_id": 220,
+      "hero_source": "homepage_screenshot",
+      "screenshot_injected": true
     },
     "images_date": "2026-03-07",
     "seo_done": true,
@@ -1116,9 +1113,9 @@
     "wp_preview_url": "https://creatorsmusthave.com/?p=132&preview=true",
     "published_date": "2026-03-07",
     "image_data": {
-      "hero_media_id": 139,
-      "hero_alt_text": "Email marketer testing Jasper AI review for email marketers 2026 on laptop",
-      "hero_source": "Pexels \u2014 'email marketer laptop writing'"
+      "hero_media_id": 222,
+      "hero_alt_text": "Email marketer using Jasper AI to write marketing campaigns in 2026",
+      "hero_source": "Pexels \u2014 'copywriter writing marketing content'"
     },
     "images_added": true,
     "images_date": "2026-03-07",
@@ -1165,8 +1162,12 @@
     "wp_post_url": "https://creatorsmusthave.com/trimmr-ai-review-youtube-creators/",
     "wp_preview_url": "https://creatorsmusthave.com/?p=133&preview=true",
     "published_date": "2026-03-07",
-    "image_data": {},
-    "images_added": false,
+    "image_data": {
+      "hero_media_id": 223,
+      "hero_alt_text": "YouTube creator using Trimmr AI to edit short-form video content in 2026",
+      "hero_source": "Pexels \u2014 'youtube creator editing video shorts'"
+    },
+    "images_added": true,
     "images_date": "2026-03-07",
     "seo_done": true,
     "meta_title": "Trimmr AI Review for YouTube Creators 2026 | Honest Test",
