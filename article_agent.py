@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from datetime import datetime
 from anthropic import Anthropic
 from config import ANTHROPIC_API_KEY, CLAUDE_MODEL
@@ -56,6 +57,7 @@ TOOL_URLS = {
     "krisp": "https://krisp.ai",
     "krisp accent conversion": "https://krisp.ai",
     "willow voice": "https://willow.voice",
+    "willow voice for teams": "https://willow.voice",
     "spoke": "https://www.spoke.app",
     "substack": "https://substack.com",
     "writesonic": "https://writesonic.com",
@@ -68,12 +70,8 @@ TOOL_URLS = {
 
 def check_url_live(url: str, timeout: int = 8) -> bool:
     """
-    Check if a URL is reachable and returns a real page (not a DNS error or
-    Cloudflare block). Returns True if the URL is usable, False if broken.
-
-    Uses HEAD first (fast), falls back to GET if HEAD is rejected.
-    Accepts any 2xx or 3xx response — redirects are fine (tool may redirect
-    to /app or /home). Only rejects connection errors and DNS failures.
+    Check if a URL is reachable and returns a real page.
+    Returns True if the URL is usable, False if broken.
     """
     import requests as _requests
     headers = {
@@ -86,31 +84,23 @@ def check_url_live(url: str, timeout: int = 8) -> bool:
                            allow_redirects=True)
         if r.status_code < 500:
             return True
-        # HEAD returned 5xx — try GET
         r = _requests.get(url, headers=headers, timeout=timeout,
                           allow_redirects=True, stream=True)
         r.close()
         return r.status_code < 500
     except Exception:
-        # DNS failure, connection refused, timeout — URL is broken
         return False
 
 
 def get_tool_url(tool_name: str) -> str:
     """
     Get the homepage URL for a tool.
-
     Priority:
-      1. Known URL from TOOL_URLS dict — verified live before use
-      2. Partial name match in TOOL_URLS — verified live before use
-      3. Common domain guesses (tool_name.com / .ai / .io) — each checked live
-      4. Google search fallback — always works, affiliate_manager replaces later
-
-    The live check prevents dead links ending up in published articles.
-    Adds ~2-5 seconds per article but saves embarrassing broken links.
+      1. Known URL from TOOL_URLS dict — verified live
+      2. Partial name match in TOOL_URLS — verified live
+      3. Common domain guesses — each checked live
+      4. Google search fallback
     """
-    import re as _re
-
     key = tool_name.lower().strip()
 
     # ── Step 1: exact match ───────────────────────────────────────────────────
@@ -128,7 +118,7 @@ def get_tool_url(tool_name: str) -> str:
                 return v
 
     # ── Step 3: guess common domains ─────────────────────────────────────────
-    slug = _re.sub(r"[^a-z0-9]", "", key)   # strip spaces/special chars
+    slug = re.sub(r"[^a-z0-9]", "", key)
     guesses = [
         f"https://www.{slug}.com",
         f"https://{slug}.ai",
@@ -141,10 +131,136 @@ def get_tool_url(tool_name: str) -> str:
             print(f"   ✅ Verified URL for {tool_name}: {url}")
             return url
 
-    # ── Step 4: safe fallback — Google search ─────────────────────────────────
-    # Article still publishes. affiliate_manager.py will add real link later.
+    # ── Step 4: safe fallback ─────────────────────────────────────────────────
     print(f"   ⚠️  Could not verify a live URL for {tool_name} — using search fallback")
     return f"https://www.google.com/search?q={tool_name.replace(' ', '+')}+official+website"
+
+
+# ─────────────────────────────────────────
+# POST-PROCESSING — enforce rules Claude misses
+# ─────────────────────────────────────────
+
+def enforce_tool_url(html: str, tool_url: str, tool_name: str) -> str:
+    """
+    Aggressively replace ALL placeholder patterns with the real tool URL.
+    Claude sometimes leaves [TOOL_URL], [AFFILIATE_LINK], or writes
+    'https://example.com' as a dummy. This catches all of them.
+    """
+    replacements = [
+        "[TOOL_URL]",
+        "[AFFILIATE_LINK]",
+        "[tool_url]",
+        "[affiliate_link]",
+        "https://example.com",
+        "https://www.example.com",
+        "http://example.com",
+        "[INSERT_AFFILIATE_LINK]",
+        "[INSERT_TOOL_URL]",
+        "[URL]",
+    ]
+    for placeholder in replacements:
+        if placeholder in html:
+            html = html.replace(placeholder, tool_url)
+            print(f"   🔧 Replaced placeholder '{placeholder}' with {tool_url}")
+
+    # Also catch href="" (empty links) and fill them
+    empty_href_count = html.count('href=""')
+    if empty_href_count:
+        html = html.replace('href=""', f'href="{tool_url}"')
+        print(f"   🔧 Filled {empty_href_count} empty href(s) with {tool_url}")
+
+    # Verify no placeholders remain
+    remaining = [p for p in replacements if p in html]
+    if remaining:
+        print(f"   ⚠️  WARNING: {len(remaining)} placeholder(s) still in HTML after replacement")
+
+    return html
+
+
+def enforce_disclosure_position(html: str, article_type: str) -> str:
+    """
+    Ensure the affiliate disclosure appears AFTER the opening hook,
+    not as the very first element in the article.
+
+    The hook is the first <p> tag in the article (before any heading or div).
+    We move the disclosure to sit directly after that first paragraph.
+
+    authority_article type: no disclosure needed — remove if present.
+    """
+    disclosure_pattern = re.compile(
+        r'<div class="affiliate-disclosure">.*?</div>',
+        re.DOTALL | re.IGNORECASE
+    )
+
+    # For authority articles — remove any disclosure that crept in
+    if article_type == "authority_article":
+        if disclosure_pattern.search(html):
+            html = disclosure_pattern.sub('', html)
+            print(f"   🔧 Removed disclosure from authority_article")
+        return html
+
+    # Check if disclosure exists at all
+    disclosure_match = disclosure_pattern.search(html)
+    if not disclosure_match:
+        # No disclosure — add one after the first paragraph
+        disclosure_html = (
+            '\n<div class="affiliate-disclosure">\n'
+            '<p><strong>Disclosure:</strong> This article contains affiliate links. '
+            'If you purchase through our links, we may earn a commission at no extra '
+            'cost to you. We only recommend tools we\'ve genuinely evaluated.</p>\n'
+            '</div>\n'
+        )
+        first_p = html.find('</p>')
+        if first_p != -1:
+            html = html[:first_p + 4] + disclosure_html + html[first_p + 4:]
+            print(f"   🔧 Added missing disclosure after first paragraph")
+        return html
+
+    disclosure_html = disclosure_match.group(0)
+
+    # Find position of first <p> tag close (end of opening hook)
+    first_p_end = html.find('</p>')
+    disclosure_pos = disclosure_match.start()
+
+    if first_p_end == -1:
+        # No paragraph found — leave as is
+        return html
+
+    # If disclosure is BEFORE the first paragraph ends, it's in the wrong place
+    if disclosure_pos < first_p_end:
+        # Remove it from current position
+        html = disclosure_pattern.sub('', html, count=1)
+        # Re-find first paragraph end after removal
+        first_p_end = html.find('</p>')
+        if first_p_end != -1:
+            html = html[:first_p_end + 4] + '\n' + disclosure_html + html[first_p_end + 4:]
+            print(f"   🔧 Moved disclosure to after opening hook")
+
+    return html
+
+
+def enforce_cta_limit(html: str, tool_url: str, tool_name: str) -> str:
+    """
+    Ensure no more than 3 CTAs in the article.
+    If more than 3 cta-button links exist, remove the extras (keep first 3).
+    """
+    cta_pattern = re.compile(
+        r'<a[^>]+class="cta-button"[^>]*>.*?</a>',
+        re.DOTALL | re.IGNORECASE
+    )
+    ctas = cta_pattern.findall(html)
+    if len(ctas) > 3:
+        # Remove CTAs beyond the first 3
+        count = 0
+        def replace_extra(m):
+            nonlocal count
+            count += 1
+            if count <= 3:
+                return m.group(0)
+            return f'<a href="{tool_url}">{tool_name} →</a>'  # plain link, no button class
+        html = cta_pattern.sub(replace_extra, html)
+        print(f"   🔧 Reduced CTAs from {len(ctas)} to 3")
+    return html
 
 
 # ─────────────────────────────────────────
@@ -188,12 +304,11 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
    2-3 sentences maximum. Open with the specific pain point this tool solves.
    Do NOT start with "In today's world" or "Are you looking for".
    Start with the problem or a surprising fact.
-   Example opening style: "Editing a 30-minute podcast used to mean 2 hours of work.
-   Krisp's new accent conversion feature changes that for non-native English speakers
-   who want to sound more natural on air."
+   Example: "Editing a 30-minute podcast used to mean 2 hours of work.
+   Descript cuts that to 20 minutes by letting you edit audio like a Word doc."
 
-3. AFFILIATE DISCLOSURE
-   Place this AFTER the opening hook — not before it.
+3. AFFILIATE DISCLOSURE — MUST come immediately after the opening hook paragraphs
+   Place this HERE, after the hook, before the Key Takeaways box.
    <div class="affiliate-disclosure">
    <p><strong>Disclosure:</strong> This article contains affiliate links.
    If you purchase through our links, we may earn a commission at no extra
@@ -201,7 +316,6 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
    </div>
 
 4. KEY TAKEAWAYS BOX
-   HTML format:
    <div class="key-takeaways">
    <h3>Key Takeaways</h3>
    <ul>
@@ -209,203 +323,108 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
    <li><strong>Pricing:</strong> [starting price or free tier]</li>
    <li><strong>Standout feature:</strong> [one thing it does better than alternatives]</li>
    <li><strong>Verdict:</strong> [one sentence — buy it or skip it and why]</li>
-   <li><strong>Try it:</strong> <a href="[TOOL_URL]">Visit [Tool Name] →</a></li>
+   <li><strong>Try it:</strong> <a href="REPLACE_WITH_TOOL_URL">Visit [Tool Name] →</a></li>
    </ul>
    </div>
 
 5. IS IT RIGHT FOR YOU? (quick decision table)
-   HTML table with two columns: "Choose [Tool] if..." and "Skip [Tool] if..."
-   3 rows each. Specific, honest, not generic.
    <table class="decision-table">
    <thead><tr><th>✅ Choose [Tool] if...</th><th>❌ Skip [Tool] if...</th></tr></thead>
    <tbody>
-   <tr><td>[specific reason to buy]</td><td>[specific reason to skip]</td></tr>
+   <tr><td>[specific reason]</td><td>[specific reason]</td></tr>
    </tbody>
    </table>
 
 6. TABLE OF CONTENTS
-   HTML anchor links to each H2 section in the article.
    <nav class="toc"><h3>In This Review</h3><ul>
    <li><a href="#what-is">What Is [Tool]?</a></li>
-   ... etc
    </ul></nav>
 
 7. WHAT IS [TOOL NAME]? (H2, id="what-is")
-   2 paragraphs. What it does, who built it, what problem it was designed to solve.
-   Mention the primary keyword naturally here.
+   2 paragraphs. What it does, who built it, what problem it solves.
+   Mention primary keyword naturally here.
 
 8. KEY FEATURES (3-5 H2 sections, each with id attribute)
-   One H2 per major feature. Each section: 2-3 paragraphs of real detail.
-   Use H3 for any sub-points within a feature.
+   One H2 per major feature. 2-3 paragraphs of real detail per section.
    Be specific — name the actual feature, explain how it works, give a real use case.
    No marketing language. Write like you tested it.
 
 9. PRICING (H2, id="pricing")
-   Always include. HTML table format:
    <table class="pricing-table">
    <thead><tr><th>Plan</th><th>Price</th><th>Best For</th></tr></thead>
    <tbody>...</tbody>
    </table>
-   Use EXACT plan names and prices from the tool's website (e.g. "Creator — $29/month").
-   Never write vague ranges like "starts at around $X" — use real numbers.
-   If exact pricing is unavailable: "Pricing starts at approximately $X/month —
-   verify current pricing at [TOOL_URL] as plans may have changed."
-   Always mention if there is a free trial or free tier.
-   Always note if annual billing gives a significant discount.
+   Use EXACT plan names and prices. Never vague ranges.
+   If pricing unavailable: "verify current pricing at [tool URL]"
+   Always mention free trial or free tier if available.
 
 10. PROS AND CONS (H2, id="pros-cons")
-    Two HTML lists:
-    <div class="pros"><h3>✅ Pros</h3><ul>...</ul></div>
-    <div class="cons"><h3>❌ Cons</h3><ul>...</ul></div>
-    Be honest. At least 3 pros and 3 real cons.
-    Cons must be specific and documented — not vague:
-    BAD: "Learning curve for new users"
-    GOOD: "No native mobile app — desktop only"
-    BAD: "Can be expensive"
-    GOOD: "Free plan limited to 3 projects — most creators need the $29/month tier"
-    BAD: "Some features missing"
-    GOOD: "Cannot export to .mp4 on the basic plan — requires Pro tier"
-    Each con must reflect a real, verifiable limitation of the tool.
+    <div class="pros"><h3>Pros</h3><ul>...</ul></div>
+    <div class="cons"><h3>Cons</h3><ul>...</ul></div>
+    IMPORTANT: The h3 tags inside pros/cons divs must use plain text — no emojis.
+    At least 3 pros and 3 specific cons.
+    BAD con: "Learning curve" | GOOD con: "No mobile app — desktop only"
+    BAD con: "Can be expensive" | GOOD con: "Free plan limited to 3 projects"
 
 11. WHO IS [TOOL] FOR? (H2, id="who-is-it-for")
-    Concrete creator types. Not "content creators" — name them specifically:
-    "YouTubers who upload 2+ times per week", "podcast editors working with
-    non-native English speakers", "solo course creators on a budget".
-
-    Structure this section as TWO clear parts:
-    Part 1 — WHO IT IS FOR: 3-4 specific creator types with specific reasons
-    Part 2 — WHO IT IS NOT FOR: 2-3 specific creator types with specific reasons
-    Example of good "NOT for":
-    - Creators on a tight budget who only need basic trimming (free tools do this)
-    - Teams needing real-time collaboration (no multi-user editing)
-    - Creators who primarily work on mobile (desktop-only workflow)
-    This honesty builds trust and actually improves conversions — readers who
-    stay are the right buyers.
+    TWO clear parts:
+    Part 1 — WHO IT IS FOR: 3-4 specific creator types with reasons
+    Part 2 — WHO IT IS NOT FOR: 2-3 specific creator types with reasons
 
 12. HOW IT COMPARES (H2, id="alternatives")
-    1-2 paragraphs. Compare to 1-2 real alternatives by name.
-    Do not write a full comparison table — keep it brief.
-    Add internal link placeholder: [INTERNAL_LINK: full comparison article topic]
+    1-2 paragraphs comparing to 1-2 real alternatives.
+    Add ONE internal link placeholder — ONLY if it fits naturally in the text flow.
+    The internal link must make sense in context. If it feels forced, skip it.
+    Format: [INTERNAL_LINK: descriptive topic]
 
 13. THE VERDICT (H2, id="verdict")
-    Must answer all three of these explicitly:
-    — Who should buy it? (specific)
-    — Who should skip it? (specific)
-    — What is the one reason to choose it over alternatives?
-    End with CTA: <a href="[TOOL_URL]" class="cta-button">Try [Tool Name] →</a>
+    Answer all three:
+    — Who should buy it?
+    — Who should skip it?
+    — One reason to choose it over alternatives?
+    End with: <a href="REPLACE_WITH_TOOL_URL" class="cta-button">Try [Tool Name] →</a>
 
 14. FAQ (H2, id="faq")
-    4-5 questions people actually search for about this tool.
-    Format each answer as 40-60 words in a single paragraph directly below the H3.
-    This format helps Google pull featured snippets.
-    <h3>Is [Tool] worth it?</h3>
-    <p>[40-60 word direct answer]</p>
+    4-5 questions people actually search. Each answer: 40-60 words below H3.
+    One FAQ CTA is allowed if it fits naturally — not forced.
 """,
 
         "alert": """
-ARTICLE STRUCTURE — follow this exactly, in this order:
+ARTICLE STRUCTURE — follow this exactly:
 
-1. H1 TITLE
-   Use the exact article title provided. Do not change it.
-
-2. OPENING HOOK (no heading)
-   2-3 sentences. What just launched and why creators should pay attention.
-   Create urgency without hype. Facts only.
-
-3. AFFILIATE DISCLOSURE
-   Place this AFTER the opening hook — not before it.
+1. H1 TITLE (exact title provided)
+2. OPENING HOOK (2-3 sentences, no heading)
+3. AFFILIATE DISCLOSURE (immediately after hook)
    <div class="affiliate-disclosure">
    <p><strong>Disclosure:</strong> This article contains affiliate links.
    If you purchase through our links, we may earn a commission at no extra
    cost to you. We only recommend tools we've genuinely evaluated.</p>
    </div>
-
 4. KEY TAKEAWAYS BOX
-   <div class="key-takeaways">
-   <h3>Quick Summary</h3>
-   <ul>
-   <li><strong>What launched:</strong> [one sentence]</li>
-   <li><strong>Best for:</strong> [specific creator type]</li>
-   <li><strong>Pricing:</strong> [starting price or free tier]</li>
-   <li><strong>Why it matters:</strong> [one sentence]</li>
-   <li><strong>Try it:</strong> <a href="[TOOL_URL]">Visit [Tool Name] →</a></li>
-   </ul>
-   </div>
-
 5. TABLE OF CONTENTS
-   HTML anchor links to each H2 section.
-
 6. WHAT JUST LAUNCHED (H2, id="what-launched")
-   2 paragraphs. What is this tool, what does it do, who built it.
-   Mention primary keyword naturally.
-
 7. KEY FEATURES (3-4 H2 sections)
-   The most important capabilities. Real detail, not a feature list.
-   Each feature: what it does + why a creator would care.
-
 8. PRICING (H2, id="pricing")
-   HTML pricing table. Note if early-bird pricing or launch discount applies.
-
 9. WHO IS IT FOR? (H2, id="who-is-it-for")
-   Specific creator types. Also note who should wait for a full review.
-
 10. EARLY VERDICT (H2, id="verdict")
-    Honest assessment based on launch information.
-    Be clear this is an early look, not a full tested review.
-    Answer: is it worth trying now or waiting?
-    CTA: <a href="[TOOL_URL]" class="cta-button">Try [Tool Name] →</a>
-
-11. FAQ (H2, id="faq")
-    3-4 questions early adopters would actually ask.
-    Each answer: 40-60 words directly below the H3.
+    CTA: <a href="REPLACE_WITH_TOOL_URL" class="cta-button">Try [Tool Name] →</a>
+11. FAQ (3-4 questions, 40-60 word answers)
 """,
 
         "authority_article": """
-ARTICLE STRUCTURE — follow this exactly, in this order:
+ARTICLE STRUCTURE — follow this exactly:
 
-NO affiliate disclosure in this article type — this is an informational
-authority piece, not a product review with affiliate links.
+NO affiliate disclosure — this is informational content, not a review.
+NO CTA buttons.
 
-1. H1 TITLE
-   Use the exact article title provided. Do not change it.
-
-2. OPENING HOOK (no heading)
-   2-3 sentences. State the problem or knowledge gap this article solves.
-   Do NOT start with "In today's world" or "Are you looking for".
-   Start with a surprising fact, a common misconception, or the exact
-   question the reader typed into Google.
-
+1. H1 TITLE (exact title provided)
+2. OPENING HOOK (2-3 sentences, no heading)
 3. KEY TAKEAWAYS BOX
-   <div class="key-takeaways">
-   <h3>Key Takeaways</h3>
-   <ul>
-   <li><strong>Bottom line:</strong> [one sentence summary of the answer]</li>
-   <li>[Key point 1]</li>
-   <li>[Key point 2]</li>
-   <li>[Key point 3]</li>
-   </ul>
-   </div>
-
 4. TABLE OF CONTENTS
-   HTML anchor links to each H2 section.
-
-5. MAIN BODY (4-6 H2 sections, each with id attribute)
-   Each section covers one key sub-topic. Be comprehensive and specific.
-   Use H3 for sub-points. Include at least one table, list, or visual
-   break per H2 section.
-
-6. WHO THIS IS FOR (H2, id="who-this-is-for")
-   Specific creator types who would benefit from this information.
-   Keep this brief — 1 paragraph maximum.
-
-7. THE VERDICT / SUMMARY (H2, id="verdict")
-   Concrete takeaway. What should the reader do with this information?
-   No CTA button — this is not a product review.
-   Add 1-2 relevant internal links here.
-
-8. FAQ (H2, id="faq")
-   4-5 questions people actually search for on this topic.
-   Each answer: 40-60 words in a single paragraph directly below the H3.
+5. MAIN BODY (4-6 H2 sections with id attributes)
+6. WHO THIS IS FOR (H2, id="who-this-is-for") — 1 paragraph
+7. SUMMARY (H2, id="verdict") — concrete takeaway, 1-2 internal links
+8. FAQ (4-5 questions, 40-60 word answers)
 """
     }
     return structures.get(article_type, structures["review"])
@@ -422,18 +441,30 @@ def build_prompt(tool_data, published_slugs=None):
     secondary = ", ".join(tool_data.get("secondary_keywords", []))
     tool_url = get_tool_url(tool_data.get("tool_name", ""))
 
-    # Build internal link context from already-published articles
+    # Build internal link context
     if published_slugs:
         slug_list = "\n".join(f"  - {s}" for s in published_slugs[:20])
         internal_link_context = f"""
 EXISTING ARTICLES ON THIS SITE (use for internal link placeholders):
 {slug_list}
-→ Where relevant, reference these real slugs in [INTERNAL_LINK: slug] placeholders
-→ Example: [INTERNAL_LINK: krisp-accent-conversion-review-podcasters]
-→ If none are relevant, use descriptive topic placeholders as normal
+
+INTERNAL LINK RULES — read carefully:
+→ Add 2-3 [INTERNAL_LINK: description] placeholders ONLY where they flow naturally
+→ A link is natural when: you mention a related tool by name, or directly
+   compare this tool to another, or reference a related topic the reader
+   would genuinely want to read next
+→ A link is FORCED when: you insert it at the end of a sentence that has
+   nothing to do with the linked topic, or tack it on as an afterthought
+→ GOOD example: "...similar to what Krisp does for real-time calls.
+   [INTERNAL_LINK: krisp-accent-conversion-review-podcasters]"
+→ BAD example: "Dragon NaturallySpeaking has a steeper learning curve.
+   [INTERNAL_LINK: best-voice-to-text-tools]" ← forced, doesn't flow
+→ If you can't find a genuinely natural place for a link — skip it
+→ Never add a link placeholder as the last sentence of a paragraph
+   unless that sentence is genuinely about the linked topic
 """
     else:
-        internal_link_context = "→ Use descriptive topic placeholders: [INTERNAL_LINK: best AI podcast tools comparison]\n"
+        internal_link_context = "→ Use 2-3 descriptive topic placeholders where they flow naturally: [INTERNAL_LINK: best AI podcast tools comparison]\n→ Only add them where the link would genuinely help the reader\n"
 
     return f"""You are a world-class SEO article writer specialising in affiliate content for creator tools.
 
@@ -455,161 +486,114 @@ Category:       {tool_data.get('tool_category', 'AI tool')}
 Article type:   {article_type}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SEO REQUIREMENTS — NON-NEGOTIABLE
+SEO REQUIREMENTS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Article title (use exactly):  {tool_data['article_title']}
 URL slug (do not change):      {tool_data['url_slug']}
-
 Primary keyword:   "{tool_data['primary_keyword']}"
-→ Must appear in the first 100 words
-→ Use naturally 3-4 times total — never stuffed
-→ Use in at least one H2 heading
-
-Secondary keywords (use each at least once):
-{secondary}
-
-Keyword cluster (weave throughout naturally):
-{keyword_cluster}
-
-Target word count:   {tool_data['recommended_word_count']} words
-Search intent:       {tool_data.get('search_intent', 'buyer')}
+Secondary keywords: {secondary}
+Keyword cluster:    {keyword_cluster}
+Target word count:  {tool_data['recommended_word_count']} words
+Search intent:      {tool_data.get('search_intent', 'buyer')}
 
 SERP GAP — your content advantage:
 "{tool_data.get('serp_gap', '')}"
-→ This is what NO other article on page 1 covers
-→ Build an entire section or subsection around this
-→ This is why our article will outrank the competition
+→ Build an entire section around this — it's why our article outranks the competition
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-IMPORTANT: LINKS IN THIS ARTICLE
+⚠️  CRITICAL: TOOL URL — READ THIS CAREFULLY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-The tool URL for ALL CTAs and links in this article is:
-{tool_url}
+The real URL for {tool_data['tool_name']} is: {tool_url}
 
-Replace every instance of [TOOL_URL] with: {tool_url}
+You MUST use this exact URL everywhere in the article:
+- In the Key Takeaways "Try it" link
+- In the Verdict CTA button
+- In any FAQ CTA
+- In the pricing section reference
 
-This is a direct homepage link — not an affiliate link yet.
-Affiliate tracking will be added later by our affiliate manager.
-Every CTA button must link to this URL — never leave [TOOL_URL] as a placeholder.
+FORBIDDEN — never use these in the HTML you return:
+✗ [TOOL_URL]
+✗ [AFFILIATE_LINK]
+✗ https://example.com
+✗ href=""
+✗ Any placeholder text instead of the real URL
+
+If you are unsure of the URL — use exactly this: {tool_url}
+This is a plain homepage link. Affiliate tracking is added later automatically.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-AFFILIATE DISCLOSURE RULES
+AFFILIATE DISCLOSURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{"NO disclosure needed — this is an authority_article (informational content, no affiliate links). Do NOT include any affiliate disclosure anywhere in this article." if article_type == "authority_article" else """This article needs an affiliate disclosure. Follow the ARTICLE STRUCTURE section exactly for placement — the disclosure goes AFTER the opening hook, not before the H1 title.
+{"NO disclosure needed — authority_article type. Do NOT include any disclosure." if article_type == "authority_article" else f"""REQUIRED for this article type. Place it AFTER the opening hook paragraphs.
+NOT before the H1. NOT as the very first element. AFTER the hook.
 
-Use this exact wording — do not modify it:
-
+Use this exact HTML:
 <div class="affiliate-disclosure">
 <p><strong>Disclosure:</strong> This article contains affiliate links.
 If you purchase through our links, we may earn a commission at no extra
 cost to you. We only recommend tools we've genuinely evaluated.</p>
-</div>
-
-This is a legal requirement."""}
+</div>"""}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 WRITING RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-VOICE & TONE:
-- Write like a knowledgeable friend who tested this tool, not a marketer
-- Direct, honest, specific — if something is limited, say so
-- Conversational but authoritative — Grade 7 readability target
-- Short sentences. Maximum 3 sentences per paragraph.
-- Use "you" and "your" — write directly to the reader
+VOICE: Write like a knowledgeable friend who tested this tool, not a marketer.
+Direct, honest, specific. Grade 7 readability. Short sentences. Max 3 per paragraph.
+Use "you" and "your". Conversational but authoritative.
 
-BANNED PHRASES — never use these under any circumstances:
-- "game-changer", "revolutionary", "cutting-edge", "state-of-the-art"
-- "powerful tool", "robust features", "seamless integration"
-- "in today's digital world", "in the fast-paced world of"
-- "in conclusion", "to summarize", "it goes without saying"
-- "leverage", "utilize", "synergy"
-- Any phrase that sounds like it came from a press release
+BANNED PHRASES — never use:
+"game-changer", "revolutionary", "cutting-edge", "state-of-the-art",
+"powerful tool", "robust features", "seamless integration",
+"in today's digital world", "in the fast-paced world of",
+"in conclusion", "to summarize", "leverage", "utilize", "synergy"
 
-FACTUAL ACCURACY RULES — critical:
+FACTUAL ACCURACY:
 - Never present unverified statistics as fact
-- If a claim is unverified use: "according to their website" or
-  "based on launch information" — never invent numbers
-- If pricing is unknown: "Pricing starts at approximately $X/month —
-  verify at {tool_url} as this may have changed since publishing"
-- Never invent user testimonials, case studies, or usage statistics
-- If you are uncertain about a feature, say "according to [tool name]'s
-  website" — never state uncertain things as confirmed facts
+- Unverified claims: "according to their website" or "based on launch information"
+- Unknown pricing: "verify at {tool_url} as this may have changed"
+- Never invent testimonials, case studies, or usage statistics
 
-NO FAKE SOCIAL PROOF — strictly forbidden:
+NO FAKE SOCIAL PROOF:
 - Never write "thousands of creators use this"
-- Never write "users report X% improvement" unless you have a verified source
-- Never write "early users say..." for a brand new tool with no users yet
-- Never write "creators report saving X hours" without a real attributed source
-- Never invent reviews, testimonials, or word-of-mouth claims
-- In the Pros section: if you include a performance claim, it MUST be attributed
-- If there are no real user reports yet — say the tool is new and
-  real-world results aren't available yet. That's honest and builds trust.
+- Never write "users report X% improvement" without a verified source
+- Never invent reviews or word-of-mouth claims
 
-EVERGREEN LANGUAGE RULES:
-- Never write "this tool just launched last week"
-- Never write "as of this morning" or "just announced"
-- For time references use: "as of [month year]" or "at launch" or
-  "verify current pricing" — articles stay live for years
-- Never reference current events that will date the article
+EVERGREEN LANGUAGE:
+- Never write "just launched", "this morning", "last week"
+- Use: "as of [month year]" or "at launch" or "verify current pricing"
 
-META-COMMENTARY BAN — never break the fourth wall:
-- Never write "since no reviews exist yet, we..."
-- Never write "we're the first to cover this tool"
-- Never write "since this is one of the first comprehensive reviews..."
+META-COMMENTARY BAN:
 - Never reference your SEO strategy inside the article
 - Never explain why you chose this topic
-- Just write the article as if you're a journalist who tested the tool
+- Write as if you're a journalist who tested the tool
 
-BRAND VOICE — Creators Must Have:
-Good: "Coursekit cuts student support time in half for course creators who've scaled past 50 students."
-Bad: "Coursekit is a powerful, revolutionary tool that leverages AI to seamlessly transform the way course creators interact with students."
+CTA RULES:
+- Maximum 3 CTAs in the entire article
+- One in Key Takeaways, one in Verdict, one in FAQ only if natural
+- All CTAs must use the real URL: {tool_url}
+- CTA text must be specific: "Try [Tool Name] →" or "Start free with [Tool Name] →"
+- NEVER use generic text like "Check availability here" or "Click here"
 
-CTA PLACEMENT RULES:
-- One CTA in the Key Takeaways box
-- One CTA at the end of the Verdict section
-- One CTA in the FAQ if it fits naturally — not forced
-- No more than 3 CTAs total in the entire article
-- Never add CTAs mid-article after every section
-- All CTAs must use the real tool URL: {tool_url}
-
-CONVERSION RULES:
-- Put the decision-making tools (Key Takeaways, Is It Right For You table) EARLY
-- The verdict must be specific — not "it depends"
-- Pros must be specific benefits, not feature names
-- Cons must be real and honest — vague cons destroy trust
-
-FEATURED SNIPPET RULES:
-- FAQ answers must be 40-60 words in a single paragraph below the H3
-- Write FAQ answers as direct, complete responses
+PROS/CONS HEADING RULE:
+- Inside <div class="pros"> use: <h3>Pros</h3>
+- Inside <div class="cons"> use: <h3>Cons</h3>
+- Plain text only in h3 — no emojis, no checkmarks
 
 INTERNAL LINKS:
-- Add 2-3 [INTERNAL_LINK: ...] placeholders where related articles fit naturally
 {internal_link_context}
 
-SCANNING STRUCTURE RULE:
-- Every H2 section must contain at least one visual break
-- Visual breaks are: bullet list, numbered list, table, or a <strong> callout sentence
-- Pure paragraph walls are not acceptable — readers scan on mobile before they read
+SCANNING STRUCTURE: Every H2 needs at least one visual break (list, table, or bold callout).
 
-PEOPLE ALSO ASK — FAQ TARGETING:
-- FAQ questions must mirror how people actually type into Google
-- Good: "Is Coursekit worth it for small course creators?"
-- Bad: "What are the benefits of using Coursekit?"
-- Every FAQ question should start with: Is, Can, Does, How, What, Why, or How much
+FAQ FORMAT: Questions start with Is/Can/Does/How/What/Why. Answers: 40-60 words, single paragraph below H3.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 HTML FORMATTING
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - Return clean HTML only — no markdown, no code fences, no preamble
-- Every H2 needs an id attribute for the table of contents
+- Every H2 needs an id attribute
 - Use: <h1>, <h2>, <h3>, <p>, <ul>, <ol>, <table>, <strong>, <em>
 - Tables must have <thead> and <tbody>
 - CTAs: <a href="{tool_url}" class="cta-button">text →</a>
-- Key Takeaways: <div class="key-takeaways">
-- Decision table: <table class="decision-table">
-- Pricing table: <table class="pricing-table">
-- Pros: <div class="pros"> | Cons: <div class="cons">
-- Disclosure: <div class="affiliate-disclosure"> (after opening hook, review/alert only)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ARTICLE STRUCTURE
@@ -619,26 +603,21 @@ ARTICLE STRUCTURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SELF-CHECK BEFORE SUBMITTING
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Before returning the article, silently verify:
-✓ Affiliate disclosure placed AFTER the opening hook (review/alert only — not in authority articles)
-✓ Primary keyword appears in the first 100 words
-✓ Target word count reached: {tool_data['recommended_word_count']} words
-✓ Pricing table is included
-✓ No banned phrases used anywhere
+✓ ALL links use the real URL: {tool_url} — zero placeholders remain
+✓ Disclosure placed AFTER opening hook (review/alert only)
+✓ Primary keyword in first 100 words
+✓ Target word count: {tool_data['recommended_word_count']} words
+✓ Pricing table with exact plan names and prices
+✓ No banned phrases
 ✓ No fake social proof or invented statistics
-✓ No meta-commentary about SEO or article strategy
-✓ No time-sensitive language that will date the article
 ✓ FAQ answers are 40-60 words each
-✓ Maximum 3 CTAs in the entire article
-✓ All CTAs link to: {tool_url} — NO [TOOL_URL] placeholders left in the HTML
-✓ 2-3 internal link placeholders included
+✓ Maximum 3 CTAs total
 ✓ Verdict answers: who should buy, who should skip, one reason to choose it
-✓ Pricing table has EXACT plan names and prices — not vague ranges
-✓ At least 3 cons — each one specific and verifiable, not generic
-✓ "Who it is NOT for" section has at least 2 specific creator types with reasons
-✓ No section sounds like a brochure — every claim is grounded in specifics
-
-If any check fails, fix it before returning.
+✓ At least 3 specific cons — not generic
+✓ "Who it is NOT for" section with 2-3 specific creator types
+✓ Internal links flow naturally — not tacked on at sentence ends
+✓ No h3 headings with emoji characters inside pros/cons divs
+✓ CTA text is specific — never "Check availability here" or "Click here"
 
 Write the complete article now.
 Return ONLY the HTML — no explanation, no preamble, no markdown fences.
@@ -652,6 +631,8 @@ Return ONLY the HTML — no explanation, no preamble, no markdown fences.
 def write_article(tool_data, published_slugs=None):
     """Send to Claude and get back a full HTML article."""
     prompt = build_prompt(tool_data, published_slugs)
+    tool_url = get_tool_url(tool_data.get("tool_name", ""))
+    article_type = tool_data.get("article_type", "review")
 
     print(f"   ✍️  Sending to Claude... (target: {tool_data['recommended_word_count']} words)")
 
@@ -663,15 +644,22 @@ def write_article(tool_data, published_slugs=None):
 
     article_html = response.content[0].text.strip()
 
-    # Strip markdown fences if Claude added them anyway
+    # Strip markdown fences if Claude added them
     if article_html.startswith("```"):
         lines = article_html.split("\n")
         article_html = "\n".join(lines[1:-1]).strip()
 
-    # Safety net — replace any leftover [TOOL_URL] placeholders
-    tool_url = get_tool_url(tool_data.get("tool_name", ""))
-    article_html = article_html.replace("[TOOL_URL]", tool_url)
-    article_html = article_html.replace("[AFFILIATE_LINK]", tool_url)
+    # ── Post-processing: enforce rules Python-side ────────────────────────────
+    tool_name = tool_data.get("tool_name", "")
+
+    # 1. Replace all URL placeholders with the real tool URL
+    article_html = enforce_tool_url(article_html, tool_url, tool_name)
+
+    # 2. Fix disclosure position (after hook, not before it)
+    article_html = enforce_disclosure_position(article_html, article_type)
+
+    # 3. Enforce max 3 CTAs
+    article_html = enforce_cta_limit(article_html, tool_url, tool_name)
 
     word_count = len(article_html.split())
 
@@ -723,7 +711,7 @@ def run():
 
     for tool_key, tool_data in pending:
         if written >= DAILY_CAP:
-            print(f"\n⏸️  Daily cap of {DAILY_CAP} reached. Remaining tools queued for next run.")
+            print(f"\n⏸️  Daily cap of {DAILY_CAP} reached.")
             write_log(f"Daily cap reached after {written} articles.")
             break
 
@@ -742,7 +730,7 @@ def run():
             print(f"   ✅ Done — {word_count} words")
             write_log(f"Written: {word_count} words")
 
-            # Save to handoffs for Editor Agent / Publisher Agent
+            # Save to handoffs
             handoff_key = tool_data.get("url_slug", tool_key)
             handoffs[handoff_key] = {
                 "tool_name": tool_name,
@@ -764,7 +752,7 @@ def run():
             keyword_data[tool_key]["status"] = "article_written"
             keyword_data[tool_key]["article_written_date"] = datetime.now().strftime("%Y-%m-%d")
 
-            # Track topic so we never repeat it
+            # Track topic
             slug = tool_data.get("url_slug", "")
             if slug and slug not in topics_used:
                 topics_used.append(slug)
@@ -789,7 +777,7 @@ def run():
 
     if written > 0:
         remaining = len(pending) - written
-        print(f"\n📬 Next step: run publisher_agent.py to save as WordPress drafts.")
+        print(f"\n📬 Next step: run editor_agent.py → image_agent.py → publisher_agent.py")
         if remaining > 0:
             print(f"   {remaining} tool(s) still queued — run again tomorrow or increase DAILY_CAP.")
 
