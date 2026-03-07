@@ -119,8 +119,8 @@ REDDIT_DELAY = 1.5
 #   0-39  → rejected permanently
 # =============================================================================
 
-FULL_REVIEW_THRESHOLD = 60
-WATCHLIST_THRESHOLD = 40
+FULL_REVIEW_THRESHOLD = 55
+WATCHLIST_THRESHOLD = 35
 
 MEMORY_FILE = "memory/tool_database.json"
 WATCHLIST_FILE = "memory/watchlist.json"
@@ -394,23 +394,21 @@ Reject immediately if the tool is ANY of these:
 Start at 50. Add or subtract based on these signals:
 
 POSITIVE signals (add points):
-+20  Established SaaS with clear monthly/annual subscription pricing
++25  Has a visible /affiliates or /partners program page — this is the #1 money signal
 +15  Directly helps creators produce content faster or better
-+10  Has a visible /affiliates or /partners program page
-+10  Has launched publicly with real paying users
-+8   Has 1000+ users, Product Hunt upvotes, or App Store reviews
-+7   Operates in fast-growing category: AI video, AI voice, AI agents, AI avatar
++15  Just launched publicly — first-mover advantage means zero competition for review keywords
++10  Clear monthly/annual subscription pricing visible on the website
++8   Solves one very specific creator problem extremely well
++7   Operates in fast-growing category: AI video, AI voice, AI writing, AI avatar, AI agents
 +5   Has a free trial (not just freemium — an actual time-limited trial)
-+5   Has positive reviews or press coverage from credible sources
-+5   Solves one very specific creator problem extremely well
++5   Has paying users, press coverage, or Product Hunt upvotes (bonus signal, not a requirement)
 
 NEGATIVE signals (subtract points):
--15  Is a ChatGPT wrapper but specific enough use case to not auto-reject
--10  Just launched — very limited information available to verify claims
--10  Free tier only with no clear path to paid upgrade
--8   Category is extremely saturated (basic AI writing assistants, chatbots)
--5   No social proof — no reviews, no users mentioned, no press
--5   Pricing seems very high with no clear justification
+-20  No paid tier and no affiliate program — earns nothing, skip it
+-15  Pure ChatGPT wrapper with no unique value or differentiation
+-10  Category is extremely saturated with no clear differentiation from existing tools
+-8   Enterprise-only with no self-serve signup — can't review what creators can't buy
+-5   Pricing extremely high with no justification for the price point
 
 MAJOR PLATFORM RULE:
 If article_type is "authority_article", cap score at 70 maximum.

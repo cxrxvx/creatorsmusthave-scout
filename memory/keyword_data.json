@@ -64,14 +64,15 @@
     "serp_gap": "Zero existing reviews for this brand new tool - first-mover advantage with no competition, opportunity to rank for brand terms immediately and capture early adopter searches before established review sites cover it",
     "reasoning": "Brand new tool launched 0 days ago means zero existing reviews, giving us immediate ranking opportunity for branded review terms with virtually no competition while search demand builds.",
     "urgency": "high",
-    "tool_name": "Krisp Accent Conversion",
+    "tool_name": "Krisp",
     "tool_category": "audio",
     "tool_score": 72,
     "researched_date": "2026-03-05",
     "days_since_launch": 0,
-    "status": "draft_live",
-    "article_written_date": "2026-03-05",
-    "wp_post_id": 11
+    "status": "article_written",
+    "article_written_date": "2026-03-07",
+    "wp_post_id": 11,
+    "tool_description": "Krisp is an AI audio tool for professionals. Accent Conversion is one of its features \u2014 it converts the speaker accent in real time during calls and recordings. The article should make clear this is a Krisp feature, not a standalone product."
   },
   "willow-voice-for-teams": {
     "primary_keyword": "Willow Voice for Teams review new AI transcription tool 2026",
@@ -439,8 +440,10 @@
     "tool_score": 85,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "article_written",
-    "article_written_date": "2026-03-06"
+    "status": "publish",
+    "article_written_date": "2026-03-06",
+    "wp_post_id": 229,
+    "published_at": "2026-03-07T21:35:02.885043"
   },
   "notion": {
     "primary_keyword": "notion review for content creators 2026",
@@ -475,8 +478,10 @@
     "tool_score": 85,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "article_written",
-    "article_written_date": "2026-03-06"
+    "status": "publish",
+    "article_written_date": "2026-03-06",
+    "wp_post_id": 230,
+    "published_at": "2026-03-07T21:35:05.504587"
   },
   "loom": {
     "primary_keyword": "loom review for content creators 2026",
@@ -528,8 +533,10 @@
     "tool_score": 85,
     "researched_date": "2026-03-06",
     "days_since_launch": 0,
-    "status": "article_written",
-    "article_written_date": "2026-03-06"
+    "status": "publish",
+    "article_written_date": "2026-03-06",
+    "wp_post_id": 231,
+    "published_at": "2026-03-07T21:35:19.292042"
   },
   "opus-clip": {
     "primary_keyword": "opus clip review for youtube shorts creators",
