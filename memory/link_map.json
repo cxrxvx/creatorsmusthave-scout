@@ -1,0 +1,77 @@
+{
+  "outbound": {
+    "krisp-accent-conversion-review-podcasters": [
+      "descript-review-youtube-creators"
+    ],
+    "willow-voice-for-teams-review-new-ai-transcription-2026": [
+      "spoke-voice-to-text-macos-review",
+      "descript-review-youtube-creators",
+      "riverside-fm-review-podcasters-2026"
+    ],
+    "spoke-voice-to-text-macos-review": [
+      "krisp-accent-conversion-review-podcasters",
+      "willow-voice-for-teams-review-new-ai-transcription-2026"
+    ],
+    "canva-review-social-media-managers-2026": [
+      "jasper-ai-review-email-marketers-2026",
+      "trimmr-ai-review-youtube-creators"
+    ],
+    "descript-review-youtube-creators": [
+      "krisp-accent-conversion-review-podcasters",
+      "trimmr-ai-review-youtube-creators"
+    ],
+    "elevenlabs-review-podcast-voiceovers": [
+      "descript-review-youtube-creators",
+      "riverside-fm-review-podcasters-2026"
+    ],
+    "riverside-fm-review-podcasters-2026": [
+      "krisp-accent-conversion-review-podcasters"
+    ],
+    "convertkit-review-small-creators-2026": [
+      "canva-review-social-media-managers-2026"
+    ],
+    "beehiiv-review-newsletter-creators": [
+      "convertkit-review-small-creators-2026"
+    ],
+    "trimmr-ai-review-youtube-creators": [
+      "riverside-fm-review-podcasters-2026"
+    ]
+  },
+  "inbound": {
+    "descript-review-youtube-creators": [
+      "elevenlabs-review-podcast-voiceovers",
+      "krisp-accent-conversion-review-podcasters",
+      "willow-voice-for-teams-review-new-ai-transcription-2026"
+    ],
+    "riverside-fm-review-podcasters-2026": [
+      "elevenlabs-review-podcast-voiceovers",
+      "trimmr-ai-review-youtube-creators",
+      "willow-voice-for-teams-review-new-ai-transcription-2026"
+    ],
+    "spoke-voice-to-text-macos-review": [
+      "willow-voice-for-teams-review-new-ai-transcription-2026"
+    ],
+    "krisp-accent-conversion-review-podcasters": [
+      "spoke-voice-to-text-macos-review",
+      "descript-review-youtube-creators",
+      "riverside-fm-review-podcasters-2026"
+    ],
+    "willow-voice-for-teams-review-new-ai-transcription-2026": [
+      "spoke-voice-to-text-macos-review"
+    ],
+    "jasper-ai-review-email-marketers-2026": [
+      "canva-review-social-media-managers-2026"
+    ],
+    "trimmr-ai-review-youtube-creators": [
+      "descript-review-youtube-creators",
+      "canva-review-social-media-managers-2026"
+    ],
+    "canva-review-social-media-managers-2026": [
+      "convertkit-review-small-creators-2026"
+    ],
+    "convertkit-review-small-creators-2026": [
+      "beehiiv-review-newsletter-creators"
+    ]
+  },
+  "last_updated": "2026-03-07T18:12:54.983758"
+}

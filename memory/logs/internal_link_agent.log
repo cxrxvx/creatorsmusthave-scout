@@ -1,0 +1,373 @@
+[2026-03-07 18:05:48] ============================================================
+[2026-03-07 18:05:48] Internal Link Agent starting — DRY RUN MODE
+[2026-03-07 18:08:51] ============================================================
+[2026-03-07 18:08:51] Internal Link Agent starting — DRY RUN MODE
+[2026-03-07 18:08:51] Keyword clusters loaded: 30 articles
+[2026-03-07 18:08:51] Published articles available for linking: 12
+[2026-03-07 18:08:51] Articles needing internal links: 12
+[2026-03-07 18:08:51] Daily cap: 20
+[2026-03-07 18:08:51] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 18:08:51]   Keywords: Coursekit vs traditional course platforms, Coursekit embeddable AI agents review, how Coursekit works for content creators...
+[2026-03-07 18:08:51]   Found 2 placeholder(s)
+[2026-03-07 18:08:51]   Fetching live content from WordPress...
+[2026-03-07 18:08:52]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:08:52]   Position split: 0 first half, 2 second half
+[2026-03-07 18:08:52]   Matching placeholders via Claude...
+[2026-03-07 18:08:55]   Tokens: 2796 in / 200 out | Cost: $0.00001
+[2026-03-07 18:08:55]   [DRY RUN] Planned replacements:
+[2026-03-07 18:08:55]     REMOVE: [INTERNAL_LINK: best WordPress plugins f — No available articles cover WordPress plugins or course platform infrastructure topics
+[2026-03-07 18:08:55]     REMOVE: [INTERNAL_LINK: best course platforms wi — No available articles review course platforms or AI-powered educational tools
+[2026-03-07 18:08:55] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 18:08:55]   Keywords: Krisp accent conversion pricing, Krisp accent conversion vs alternatives, how Krisp accent conversion works...
+[2026-03-07 18:08:55]   Found 2 placeholder(s)
+[2026-03-07 18:08:55]   Fetching live content from WordPress...
+[2026-03-07 18:08:56]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:08:56]   Position split: 0 first half, 2 second half
+[2026-03-07 18:08:56]   Matching placeholders via Claude...
+[2026-03-07 18:09:01]   Tokens: 2808 in / 266 out | Cost: $0.00001
+[2026-03-07 18:09:01]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:01]     REMOVE: [INTERNAL_LINK: best-microphones-podcast — No article available about microphones for podcasters; no suitable match in available articles
+[2026-03-07 18:09:01]     LINK (78% [topical]): [INTERNAL_LINK: best-audio-editing-softw → 'audio editing software for creators' (descript-review-youtube-creators)
+[2026-03-07 18:09:01] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 18:09:01]   Keywords: Willow Voice for Teams honest review, Willow Voice for Teams free trial available, best AI transcription for content creators 2026...
+[2026-03-07 18:09:01]   Found 3 placeholder(s)
+[2026-03-07 18:09:01]   Fetching live content from WordPress...
+[2026-03-07 18:09:01]   Live content confirmed — 3 placeholder(s) to replace
+[2026-03-07 18:09:01]   Position split: 2 first half, 1 second half
+[2026-03-07 18:09:01]   Matching placeholders via Claude...
+[2026-03-07 18:09:08]   Tokens: 2838 in / 451 out | Cost: $0.00002
+[2026-03-07 18:09:08]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:08]     LINK (72% [topical]): [INTERNAL_LINK: best collaboration tools → 'remote collaboration tools' (riverside-fm-review-podcasters-2026)
+[2026-03-07 18:09:08]     LINK (88% [topical]): [INTERNAL_LINK: AI tools for video editi → 'AI video editing tools' (descript-review-youtube-creators)
+[2026-03-07 18:09:08]     LINK (78% [topical]): [INTERNAL_LINK: comparison of AI meeting → 'voice-to-text tools for remote work' (spoke-voice-to-text-macos-review)
+[2026-03-07 18:09:08] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 18:09:08]   Keywords: Spoke voice dictation Mac, Spoke app pricing 2026, Spoke vs Mac dictation...
+[2026-03-07 18:09:08]   Found 2 placeholder(s)
+[2026-03-07 18:09:08]   Fetching live content from WordPress...
+[2026-03-07 18:09:09]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:09:09]   Position split: 1 first half, 1 second half
+[2026-03-07 18:09:09]   Matching placeholders via Claude...
+[2026-03-07 18:09:15]   Tokens: 2811 in / 335 out | Cost: $0.00001
+[2026-03-07 18:09:15]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:15]     LINK (75% [topical]): [INTERNAL_LINK: krisp-noise-cancellation → 'Krisp's noise cancellation features' (krisp-accent-conversion-review-podcasters)
+[2026-03-07 18:09:15]     LINK (82% [topical]): [INTERNAL_LINK: best-voice-to-text-tools → 'AI transcription tools for creators' (willow-voice-for-teams-review-new-ai-transcription-2026)
+[2026-03-07 18:09:15] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 18:09:15]   Keywords: canva pricing plans comparison 2026, canva free vs pro for content creators, canva templates for social media managers...
+[2026-03-07 18:09:15]   Found 3 placeholder(s)
+[2026-03-07 18:09:15]   Fetching live content from WordPress...
+[2026-03-07 18:09:16]   Live content confirmed — 3 placeholder(s) to replace
+[2026-03-07 18:09:16]   Position split: 1 first half, 2 second half
+[2026-03-07 18:09:16]   Matching placeholders via Claude...
+[2026-03-07 18:09:22]   Tokens: 2843 in / 436 out | Cost: $0.00002
+[2026-03-07 18:09:22]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:22]     LINK (65%): [INTERNAL_LINK: best AI copywriting tool → 'AI copywriting tools' (jasper-ai-review-email-marketers-2026)
+[2026-03-07 18:09:22]     LINK (85% [topical]): [INTERNAL_LINK: best video editing tools → 'video editing tools for short-form content' (trimmr-ai-review-youtube-creators)
+[2026-03-07 18:09:22]     REMOVE: [INTERNAL_LINK: Canva vs. Adobe Express  — No comparison article available between Canva and Adobe Express; no suitable alternative match exists
+[2026-03-07 18:09:22] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 18:09:22]   Keywords: Descript pricing for content creators, Descript vs traditional video editing, Descript text-based editing tutorial...
+[2026-03-07 18:09:22]   Found 2 placeholder(s)
+[2026-03-07 18:09:22]   Fetching live content from WordPress...
+[2026-03-07 18:09:23]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:09:23]   Position split: 1 first half, 1 second half
+[2026-03-07 18:09:23]   Matching placeholders via Claude...
+[2026-03-07 18:09:29]   Tokens: 2806 in / 332 out | Cost: $0.00001
+[2026-03-07 18:09:29]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:29]     LINK (75% [topical]): [INTERNAL_LINK:krisp-noise-cancellation- → 'Krisp's noise cancellation features' (krisp-accent-conversion-review-podcasters)
+[2026-03-07 18:09:29]     LINK (82% [topical]): [INTERNAL_LINK: best-video-editing-softw → 'alternative video editing tools' (trimmr-ai-review-youtube-creators)
+[2026-03-07 18:09:29] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 18:09:29]   Keywords: ElevenLabs voice quality review, ElevenLabs vs human voiceover cost, how to use ElevenLabs for audiobooks...
+[2026-03-07 18:09:29]   Found 2 placeholder(s)
+[2026-03-07 18:09:29]   Fetching live content from WordPress...
+[2026-03-07 18:09:30]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:09:30]   Position split: 1 first half, 0 second half
+[2026-03-07 18:09:30]   Matching placeholders via Claude...
+[2026-03-07 18:09:35]   Tokens: 2803 in / 300 out | Cost: $0.00001
+[2026-03-07 18:09:35]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:35]     LINK (90% [topical]): [INTERNAL_LINK: descript-review-youtube- → 'Descript for podcast editing' (descript-review-youtube-creators)
+[2026-03-07 18:09:35]     LINK (88% [topical]): [INTERNAL_LINK: descript-review-youtube- → 'remote podcast recording tools' (riverside-fm-review-podcasters-2026)
+[2026-03-07 18:09:35] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 18:09:35]   Keywords: riverside.fm honest review, riverside.fm local recording quality, riverside.fm free trial experience...
+[2026-03-07 18:09:35]   Found 2 placeholder(s)
+[2026-03-07 18:09:35]   Fetching live content from WordPress...
+[2026-03-07 18:09:36]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:09:36]   Position split: 1 first half, 1 second half
+[2026-03-07 18:09:36]   Matching placeholders via Claude...
+[2026-03-07 18:09:41]   Tokens: 2806 in / 263 out | Cost: $0.00001
+[2026-03-07 18:09:41]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:41]     LINK (90% [topical]): [INTERNAL_LINK: descript-review-youtube- → 'Descript for podcasters' (descript-review-youtube-creators)
+[2026-03-07 18:09:41]     REMOVE: [INTERNAL_LINK: best-remote-podcast-reco — No comparison article available in the list - placeholder requests a comparison roundup that doesn't exist in available articles
+[2026-03-07 18:09:41] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 18:09:41]   Keywords: convertkit free plan limitations, convertkit landing pages review, convertkit email automation for freelancers...
+[2026-03-07 18:09:41]   Found 2 placeholder(s)
+[2026-03-07 18:09:41]   Fetching live content from WordPress...
+[2026-03-07 18:09:41]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:09:41]   Position split: 1 first half, 1 second half
+[2026-03-07 18:09:41]   Matching placeholders via Claude...
+[2026-03-07 18:09:47]   Tokens: 2810 in / 303 out | Cost: $0.00001
+[2026-03-07 18:09:47]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:47]     LINK (75% [topical]): [INTERNAL_LINK: canva-review-social-medi → 'Canva for content creators' (canva-review-social-media-managers-2026)
+[2026-03-07 18:09:47]     LINK (90% [topical]): [INTERNAL_LINK: descript-review-youtube- → 'Beehiiv newsletter platform' (beehiiv-review-newsletter-creators)
+[2026-03-07 18:09:47] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 18:09:47]   Keywords: beehiiv vs substack for beginners, beehiiv monetization features review, beehiiv free plan limitations...
+[2026-03-07 18:09:47]   Found 1 placeholder(s)
+[2026-03-07 18:09:47]   Fetching live content from WordPress...
+[2026-03-07 18:09:48]   Live content confirmed — 1 placeholder(s) to replace
+[2026-03-07 18:09:48]   Position split: 0 first half, 1 second half
+[2026-03-07 18:09:48]   Matching placeholders via Claude...
+[2026-03-07 18:09:51]   Tokens: 2767 in / 165 out | Cost: $0.00001
+[2026-03-07 18:09:51]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:51]     LINK (95% [topical]): [INTERNAL_LINK: convertkit-review-small- → 'ConvertKit for small creators' (convertkit-review-small-creators-2026)
+[2026-03-07 18:09:51] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 18:09:51]   Keywords: jasper ai pricing for small business 2026, jasper ai vs copy ai for email marketing, jasper ai free trial limitations...
+[2026-03-07 18:09:51]   Found 2 placeholder(s)
+[2026-03-07 18:09:51]   Fetching live content from WordPress...
+[2026-03-07 18:09:52]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:09:52]   Position split: 0 first half, 2 second half
+[2026-03-07 18:09:52]   Matching placeholders via Claude...
+[2026-03-07 18:09:56]   Tokens: 2797 in / 228 out | Cost: $0.00001
+[2026-03-07 18:09:56]   [DRY RUN] Planned replacements:
+[2026-03-07 18:09:56]     REMOVE: [INTERNAL_LINK: metricool-review-content — No article available matches 'metricool' — target does not exist in available links
+[2026-03-07 18:09:56]     REMOVE: [INTERNAL_LINK: surfer-seo-review-blogge — No article available matches 'surfer-seo' — target does not exist in available links
+[2026-03-07 18:09:56] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 18:09:56]   Keywords: Trimmr AI video editor review, Trimmr for YouTube Shorts creators, Trimmr vs manual video editing...
+[2026-03-07 18:09:56]   Found 3 placeholder(s)
+[2026-03-07 18:09:56]   Fetching live content from WordPress...
+[2026-03-07 18:09:57]   Live content confirmed — 3 placeholder(s) to replace
+[2026-03-07 18:09:57]   Position split: 1 first half, 2 second half
+[2026-03-07 18:09:57]   Matching placeholders via Claude...
+[2026-03-07 18:10:05]   Tokens: 2841 in / 467 out | Cost: $0.00002
+[2026-03-07 18:10:05]   [DRY RUN] Planned replacements:
+[2026-03-07 18:10:05]     LINK (85% [topical]): [INTERNAL_LINK: pictory-ai-review-youtub → 'Descript for YouTube creators' (descript-review-youtube-creators)
+[2026-03-07 18:10:05]     LINK (75% [topical]): [INTERNAL_LINK: buzzsprout-review-beginn → 'Riverside.fm for podcasters' (riverside-fm-review-podcasters-2026)
+[2026-03-07 18:10:05]     LINK (72% [topical]): [INTERNAL_LINK: opus-clip-review-youtube → 'Canva's video editor' (canva-review-social-media-managers-2026)
+[2026-03-07 18:10:05] 
+  ⚠️  ORPHAN ARTICLES (no inbound links yet):
+[2026-03-07 18:10:05]     - coursekit-review-course-creators: Coursekit Review 2026: AI Agents for Course Creators
+[2026-03-07 18:10:05]     - krisp-accent-conversion-review-podcasters: Krisp Accent Conversion Review: Best for Podcasters?
+[2026-03-07 18:10:05]     - willow-voice-for-teams-review-new-ai-transcription-2026: Willow Voice for Teams Review: New AI Tool Alert (2026)
+[2026-03-07 18:10:05]     - spoke-voice-to-text-macos-review: Spoke Review 2026: Best Voice-to-Text Tool for Mac?
+[2026-03-07 18:10:05]     - canva-review-social-media-managers-2026: Canva Review 2026: Best Tool for Social Media Managers?
+[2026-03-07 18:10:05]     - descript-review-youtube-creators: Descript Review 2026: Best for YouTube Creators?
+[2026-03-07 18:10:05]     - elevenlabs-review-podcast-voiceovers: ElevenLabs Review 2026: Best AI Voice for Podcasters?
+[2026-03-07 18:10:05]     - riverside-fm-review-podcasters-2026: Riverside.fm Review 2026: Worth It for Podcasters?
+[2026-03-07 18:10:05]     - convertkit-review-small-creators-2026: ConvertKit Review for Small Creators (2026): Worth It?
+[2026-03-07 18:10:05]     - beehiiv-review-newsletter-creators: Beehiiv Review 2026: Best Newsletter Platform for Creators?
+[2026-03-07 18:10:05]     - jasper-ai-review-email-marketers-2026: Jasper AI Review for Email Marketers (2026 Test Results)
+[2026-03-07 18:10:05]     - trimmr-ai-review-youtube-creators: Trimmr AI Review 2026: Worth It for YouTube Creators?
+[2026-03-07 18:10:05] 
+============================================================
+[2026-03-07 18:10:05] Internal Link Agent complete
+[2026-03-07 18:10:05]   ✓ Success:             12
+[2026-03-07 18:10:05]   ✗ Failed:              0
+[2026-03-07 18:10:05]   ⏭  Skipped:             0
+[2026-03-07 18:10:05]   🔗 Links added:        0
+[2026-03-07 18:10:05]   🌐 Topical links:      0
+[2026-03-07 18:10:05]   🗑  Links removed:      0
+[2026-03-07 18:10:05]   💰 Run cost:           $0.0002
+[2026-03-07 18:10:05] ============================================================
+
+[2026-03-07 18:11:25] ============================================================
+[2026-03-07 18:11:25] Internal Link Agent starting
+[2026-03-07 18:11:25] Keyword clusters loaded: 30 articles
+[2026-03-07 18:11:25] Published articles available for linking: 12
+[2026-03-07 18:11:25] Articles needing internal links: 12
+[2026-03-07 18:11:25] Daily cap: 20
+[2026-03-07 18:11:25] 
+→ Processing: Coursekit (post ID 10)
+[2026-03-07 18:11:25]   Keywords: Coursekit vs traditional course platforms, Coursekit embeddable AI agents review, how Coursekit works for content creators...
+[2026-03-07 18:11:25]   Found 2 placeholder(s)
+[2026-03-07 18:11:25]   Fetching live content from WordPress...
+[2026-03-07 18:11:26]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:11:26]   Position split: 0 first half, 2 second half
+[2026-03-07 18:11:26]   Rollback stored
+[2026-03-07 18:11:26]   Matching placeholders via Claude...
+[2026-03-07 18:11:31]   Tokens: 2796 in / 232 out | Cost: $0.00001
+[2026-03-07 18:11:31]     ✗ Removed: [INTERNAL_LINK: best WordPress plugins for co (confidence: 0)
+[2026-03-07 18:11:31]     ✗ Removed: [INTERNAL_LINK: best course platforms with AI (confidence: 0)
+[2026-03-07 18:11:31]   Pushing to WordPress (0 links added, 2 removed)...
+[2026-03-07 18:11:32]   ✓ Internal links done for: Coursekit (0 linked [0 topical], 2 removed)
+[2026-03-07 18:11:32] 
+→ Processing: Krisp Accent Conversion (post ID 11)
+[2026-03-07 18:11:32]   Keywords: Krisp accent conversion pricing, Krisp accent conversion vs alternatives, how Krisp accent conversion works...
+[2026-03-07 18:11:32]   Found 2 placeholder(s)
+[2026-03-07 18:11:32]   Fetching live content from WordPress...
+[2026-03-07 18:11:33]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:11:33]   Position split: 0 first half, 2 second half
+[2026-03-07 18:11:33]   Rollback stored
+[2026-03-07 18:11:33]   Matching placeholders via Claude...
+[2026-03-07 18:11:38]   Tokens: 2808 in / 262 out | Cost: $0.00001
+[2026-03-07 18:11:38]     ✗ Removed: [INTERNAL_LINK: best-microphones-podcasters-2 (confidence: 0)
+[2026-03-07 18:11:38]     ✓ Linked: [INTERNAL_LINK: best-audio-editing-software-p → audio editing software for podcasters [topical]
+[2026-03-07 18:11:38]   Pushing to WordPress (1 links added, 1 removed)...
+[2026-03-07 18:11:39]   ✓ Internal links done for: Krisp Accent Conversion (1 linked [1 topical], 1 removed)
+[2026-03-07 18:11:39] 
+→ Processing: Willow Voice for Teams (post ID 12)
+[2026-03-07 18:11:39]   Keywords: Willow Voice for Teams honest review, Willow Voice for Teams free trial available, best AI transcription for content creators 2026...
+[2026-03-07 18:11:39]   Found 3 placeholder(s)
+[2026-03-07 18:11:39]   Fetching live content from WordPress...
+[2026-03-07 18:11:39]   Live content confirmed — 3 placeholder(s) to replace
+[2026-03-07 18:11:39]   Position split: 2 first half, 1 second half
+[2026-03-07 18:11:39]   Rollback stored
+[2026-03-07 18:11:39]   Matching placeholders via Claude...
+[2026-03-07 18:11:46]   Tokens: 2838 in / 442 out | Cost: $0.00002
+[2026-03-07 18:11:46]     ✓ Linked: [INTERNAL_LINK: best collaboration tools for  → remote collaboration tools [topical]
+[2026-03-07 18:11:46]     ✓ Linked: [INTERNAL_LINK: AI tools for video editing an → AI video editing tools [topical]
+[2026-03-07 18:11:46]     ✓ Linked: [INTERNAL_LINK: comparison of AI meeting note → voice-to-text tools for Mac [topical]
+[2026-03-07 18:11:46]   Pushing to WordPress (3 links added, 0 removed)...
+[2026-03-07 18:11:47]   ✓ Internal links done for: Willow Voice for Teams (3 linked [3 topical], 0 removed)
+[2026-03-07 18:11:47] 
+→ Processing: Spoke (post ID 13)
+[2026-03-07 18:11:47]   Keywords: Spoke voice dictation Mac, Spoke app pricing 2026, Spoke vs Mac dictation...
+[2026-03-07 18:11:47]   Found 2 placeholder(s)
+[2026-03-07 18:11:47]   Fetching live content from WordPress...
+[2026-03-07 18:11:48]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:11:48]   Position split: 1 first half, 1 second half
+[2026-03-07 18:11:48]   Rollback stored
+[2026-03-07 18:11:48]   Matching placeholders via Claude...
+[2026-03-07 18:11:54]   Tokens: 2811 in / 325 out | Cost: $0.00001
+[2026-03-07 18:11:54]     ✓ Linked: [INTERNAL_LINK: krisp-noise-cancellation-revi → Krisp's audio enhancement features [topical]
+[2026-03-07 18:11:54]     ✓ Linked: [INTERNAL_LINK: best-voice-to-text-tools-mac- → other AI transcription tools [topical]
+[2026-03-07 18:11:54]   Pushing to WordPress (2 links added, 0 removed)...
+[2026-03-07 18:11:55]   ✓ Internal links done for: Spoke (2 linked [2 topical], 0 removed)
+[2026-03-07 18:11:55] 
+→ Processing: Canva (post ID 14)
+[2026-03-07 18:11:55]   Keywords: canva pricing plans comparison 2026, canva free vs pro for content creators, canva templates for social media managers...
+[2026-03-07 18:11:55]   Found 3 placeholder(s)
+[2026-03-07 18:11:55]   Fetching live content from WordPress...
+[2026-03-07 18:11:56]   Live content confirmed — 3 placeholder(s) to replace
+[2026-03-07 18:11:56]   Position split: 1 first half, 2 second half
+[2026-03-07 18:11:56]   Rollback stored
+[2026-03-07 18:11:56]   Matching placeholders via Claude...
+[2026-03-07 18:12:03]   Tokens: 2843 in / 436 out | Cost: $0.00002
+[2026-03-07 18:12:03]     ✓ Linked: [INTERNAL_LINK: best AI copywriting tools for → AI copywriting tools
+[2026-03-07 18:12:03]     ✓ Linked: [INTERNAL_LINK: best video editing tools for  → video editing tools for short-form content [topical]
+[2026-03-07 18:12:03]     ✗ Removed: [INTERNAL_LINK: Canva vs. Adobe Express compa (confidence: 0)
+[2026-03-07 18:12:03]   Pushing to WordPress (2 links added, 1 removed)...
+[2026-03-07 18:12:04]   ✓ Internal links done for: Canva (2 linked [1 topical], 1 removed)
+[2026-03-07 18:12:04] 
+→ Processing: Descript (post ID 15)
+[2026-03-07 18:12:04]   Keywords: Descript pricing for content creators, Descript vs traditional video editing, Descript text-based editing tutorial...
+[2026-03-07 18:12:04]   Found 2 placeholder(s)
+[2026-03-07 18:12:04]   Fetching live content from WordPress...
+[2026-03-07 18:12:05]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:12:05]   Position split: 1 first half, 1 second half
+[2026-03-07 18:12:05]   Rollback stored
+[2026-03-07 18:12:05]   Matching placeholders via Claude...
+[2026-03-07 18:12:10]   Tokens: 2806 in / 326 out | Cost: $0.00001
+[2026-03-07 18:12:10]     ✓ Linked: [INTERNAL_LINK:krisp-noise-cancellation-revie → Krisp's noise cancellation features [topical]
+[2026-03-07 18:12:10]     ✓ Linked: [INTERNAL_LINK: best-video-editing-software-y → other AI video editors [topical]
+[2026-03-07 18:12:10]   Pushing to WordPress (2 links added, 0 removed)...
+[2026-03-07 18:12:11]   ✓ Internal links done for: Descript (2 linked [2 topical], 0 removed)
+[2026-03-07 18:12:11] 
+→ Processing: ElevenLabs (post ID 16)
+[2026-03-07 18:12:11]   Keywords: ElevenLabs voice quality review, ElevenLabs vs human voiceover cost, how to use ElevenLabs for audiobooks...
+[2026-03-07 18:12:11]   Found 2 placeholder(s)
+[2026-03-07 18:12:11]   Fetching live content from WordPress...
+[2026-03-07 18:12:12]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:12:12]   Position split: 1 first half, 0 second half
+[2026-03-07 18:12:12]   Rollback stored
+[2026-03-07 18:12:12]   Matching placeholders via Claude...
+[2026-03-07 18:12:17]   Tokens: 2803 in / 303 out | Cost: $0.00001
+[2026-03-07 18:12:17]     ✓ Linked: [INTERNAL_LINK: descript-review-youtube-creat → Descript for podcast editing [topical]
+[2026-03-07 18:12:17]     ✓ Linked: [INTERNAL_LINK: descript-review-youtube-creat → Riverside.fm for podcast recording [topical]
+[2026-03-07 18:12:17]   Pushing to WordPress (2 links added, 0 removed)...
+[2026-03-07 18:12:18]   ✓ Internal links done for: ElevenLabs (2 linked [2 topical], 0 removed)
+[2026-03-07 18:12:18] 
+→ Processing: Riverside.fm (post ID 17)
+[2026-03-07 18:12:18]   Keywords: riverside.fm honest review, riverside.fm local recording quality, riverside.fm free trial experience...
+[2026-03-07 18:12:18]   Found 2 placeholder(s)
+[2026-03-07 18:12:18]   Fetching live content from WordPress...
+[2026-03-07 18:12:19]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:12:19]   Position split: 1 first half, 1 second half
+[2026-03-07 18:12:19]   Rollback stored
+[2026-03-07 18:12:19]   Matching placeholders via Claude...
+[2026-03-07 18:12:24]   Tokens: 2806 in / 260 out | Cost: $0.00001
+[2026-03-07 18:12:24]     ✗ Removed: [INTERNAL_LINK: descript-review-youtube-creat (confidence: 0)
+[2026-03-07 18:12:24]     ✓ Linked: [INTERNAL_LINK: best-remote-podcast-recording → Krisp accent conversion tool [topical]
+[2026-03-07 18:12:24]   Pushing to WordPress (1 links added, 1 removed)...
+[2026-03-07 18:12:25]   ✓ Internal links done for: Riverside.fm (1 linked [1 topical], 1 removed)
+[2026-03-07 18:12:25] 
+→ Processing: ConvertKit (post ID 18)
+[2026-03-07 18:12:25]   Keywords: convertkit free plan limitations, convertkit landing pages review, convertkit email automation for freelancers...
+[2026-03-07 18:12:25]   Found 2 placeholder(s)
+[2026-03-07 18:12:25]   Fetching live content from WordPress...
+[2026-03-07 18:12:26]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:12:26]   Position split: 1 first half, 1 second half
+[2026-03-07 18:12:26]   Rollback stored
+[2026-03-07 18:12:26]   Matching placeholders via Claude...
+[2026-03-07 18:12:31]   Tokens: 2810 in / 263 out | Cost: $0.00001
+[2026-03-07 18:12:31]     ✓ Linked: [INTERNAL_LINK: canva-review-social-media-man → Canva for content creators [topical]
+[2026-03-07 18:12:31]     ✗ Removed: [INTERNAL_LINK: descript-review-youtube-creat (confidence: 0)
+[2026-03-07 18:12:31]   Pushing to WordPress (1 links added, 1 removed)...
+[2026-03-07 18:12:32]   ✓ Internal links done for: ConvertKit (1 linked [1 topical], 1 removed)
+[2026-03-07 18:12:32] 
+→ Processing: Beehiiv (post ID 19)
+[2026-03-07 18:12:32]   Keywords: beehiiv vs substack for beginners, beehiiv monetization features review, beehiiv free plan limitations...
+[2026-03-07 18:12:32]   Found 1 placeholder(s)
+[2026-03-07 18:12:32]   Fetching live content from WordPress...
+[2026-03-07 18:12:33]   Live content confirmed — 1 placeholder(s) to replace
+[2026-03-07 18:12:33]   Position split: 0 first half, 1 second half
+[2026-03-07 18:12:33]   Rollback stored
+[2026-03-07 18:12:33]   Matching placeholders via Claude...
+[2026-03-07 18:12:36]   Tokens: 2767 in / 166 out | Cost: $0.00001
+[2026-03-07 18:12:36]     ✓ Linked: [INTERNAL_LINK: convertkit-review-small-creat → ConvertKit for small creators [topical]
+[2026-03-07 18:12:36]   Pushing to WordPress (1 links added, 0 removed)...
+[2026-03-07 18:12:38]   ✓ Internal links done for: Beehiiv (1 linked [1 topical], 0 removed)
+[2026-03-07 18:12:38] 
+→ Processing: Jasper AI (post ID 132)
+[2026-03-07 18:12:38]   Keywords: jasper ai pricing for small business 2026, jasper ai vs copy ai for email marketing, jasper ai free trial limitations...
+[2026-03-07 18:12:38]   Found 2 placeholder(s)
+[2026-03-07 18:12:38]   Fetching live content from WordPress...
+[2026-03-07 18:12:39]   Live content confirmed — 2 placeholder(s) to replace
+[2026-03-07 18:12:39]   Position split: 0 first half, 2 second half
+[2026-03-07 18:12:39]   Rollback stored
+[2026-03-07 18:12:39]   Matching placeholders via Claude...
+[2026-03-07 18:12:43]   Tokens: 2797 in / 215 out | Cost: $0.00001
+[2026-03-07 18:12:43]     ✗ Removed: [INTERNAL_LINK: metricool-review-content-crea (confidence: 0)
+[2026-03-07 18:12:43]     ✗ Removed: [INTERNAL_LINK: surfer-seo-review-bloggers-20 (confidence: 0)
+[2026-03-07 18:12:43]   Pushing to WordPress (0 links added, 2 removed)...
+[2026-03-07 18:12:46]   ✓ Internal links done for: Jasper AI (0 linked [0 topical], 2 removed)
+[2026-03-07 18:12:46] 
+→ Processing: Trimmr (post ID 133)
+[2026-03-07 18:12:46]   Keywords: Trimmr AI video editor review, Trimmr for YouTube Shorts creators, Trimmr vs manual video editing...
+[2026-03-07 18:12:46]   Found 3 placeholder(s)
+[2026-03-07 18:12:46]   Fetching live content from WordPress...
+[2026-03-07 18:12:46]   Live content confirmed — 3 placeholder(s) to replace
+[2026-03-07 18:12:46]   Position split: 1 first half, 2 second half
+[2026-03-07 18:12:46]   Rollback stored
+[2026-03-07 18:12:46]   Matching placeholders via Claude...
+[2026-03-07 18:12:51]   Tokens: 2841 in / 340 out | Cost: $0.00001
+[2026-03-07 18:12:51]     ✗ Removed: [INTERNAL_LINK: pictory-ai-review-youtube-cre (confidence: 0)
+[2026-03-07 18:12:51]     ✓ Linked: [INTERNAL_LINK: buzzsprout-review-beginner-po → podcast recording software
+[2026-03-07 18:12:51]     ✗ Removed: [INTERNAL_LINK: opus-clip-review-youtube-shor (confidence: 0)
+[2026-03-07 18:12:51]   Pushing to WordPress (1 links added, 2 removed)...
+[2026-03-07 18:12:54]   ✓ Internal links done for: Trimmr (1 linked [0 topical], 2 removed)
+[2026-03-07 18:12:54] 
+  ⚠️  ORPHAN ARTICLES (no inbound links yet):
+[2026-03-07 18:12:54]     - coursekit-review-course-creators: Coursekit Review 2026: AI Agents for Course Creators
+[2026-03-07 18:12:54]     - elevenlabs-review-podcast-voiceovers: ElevenLabs Review 2026: Best AI Voice for Podcasters?
+[2026-03-07 18:12:54]     - beehiiv-review-newsletter-creators: Beehiiv Review 2026: Best Newsletter Platform for Creators?
+[2026-03-07 18:12:54] 
+============================================================
+[2026-03-07 18:12:54] Internal Link Agent complete
+[2026-03-07 18:12:54]   ✓ Success:             12
+[2026-03-07 18:12:54]   ✗ Failed:              0
+[2026-03-07 18:12:54]   ⏭  Skipped:             0
+[2026-03-07 18:12:54]   🔗 Links added:        16
+[2026-03-07 18:12:54]   🌐 Topical links:      14
+[2026-03-07 18:12:54]   🗑  Links removed:      10
+[2026-03-07 18:12:54]   💰 Run cost:           $0.0002
+[2026-03-07 18:12:54] ============================================================
+

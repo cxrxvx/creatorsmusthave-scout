@@ -20,9 +20,11 @@ from config import (
 #   Tier 3: No affiliate link + score 75+  → HOT → publish after monetised
 #   Tier 4: Everything else                → FIFO (oldest written date first)
 #
+# HANDLES TWO CASES:
+#   New articles    — no wp_post_id → creates new WordPress post
+#   Existing drafts — has wp_post_id but WP status is "draft" → updates to publish
+#
 # The goal: every slot in the daily publish cap earns money if possible.
-# Authority-only articles still publish — they build domain trust that
-# makes ALL affiliate articles rank higher. They just go last.
 # =============================================================================
 
 HANDOFFS_FILE     = "memory/handoffs.json"
@@ -30,13 +32,8 @@ KEYWORD_DATA_FILE = "memory/keyword_data.json"
 AFFILIATE_FILE    = "memory/affiliate_links.json"
 LOG_FILE          = "memory/logs/publisher_agent.log"
 
-# Cap is injected dynamically by scheduler.py based on site age.
-# Fallback if run standalone:
-#   Month 0-2:  3/day
-#   Month 3-5:  5/day
-#   Month 6+:  uncapped (99)
 DAILY_PUBLISH_CAP      = 3
-URGENT_SCORE_THRESHOLD = 75   # score 75+ = hot tool, jumps queue
+URGENT_SCORE_THRESHOLD = 75
 
 
 # =============================================================================
@@ -85,9 +82,6 @@ def load_affiliate_links() -> dict:
             "status": "active"
         }
     }
-
-    affiliate_manager.py (Phase 6) manages this file automatically.
-    Until then — add entries manually when you get affiliate approvals.
     """
     return load_json(AFFILIATE_FILE, {})
 
@@ -96,15 +90,10 @@ def get_affiliate_url(tool_name: str, tool_key: str, affiliate_links: dict) -> s
     """
     Look up the affiliate URL for a tool.
     Returns the affiliate URL string if found and active, or None if not.
-
-    Tries multiple key formats because tool names aren't consistent:
-      "Beehiiv" → tries "beehiiv", "beehiiv", "beehiiv"
-      "ConvertKit" → tries "convertkit", "convert_kit", "convertkit"
     """
     if not affiliate_links:
         return None
 
-    # Build a list of possible lookup keys
     candidates = set()
     for raw in (tool_name, tool_key):
         if not raw:
@@ -132,25 +121,16 @@ def get_affiliate_url(tool_name: str, tool_key: str, affiliate_links: dict) -> s
 def get_publish_priority(article: dict, affiliate_links: dict) -> tuple:
     """
     Calculate the sort key for a single article.
-    Lower tuple value = publishes sooner (Python sorts ascending).
+    Lower tuple value = publishes sooner.
 
     Returns: (tier, -score, written_date)
-
-    tier 1 = affiliate link exists AND score 75+  → HOT + MONETISED
-    tier 2 = affiliate link exists AND score 60+  → MONETISED
-    tier 3 = no link AND score 75+               → HOT, authority value
-    tier 4 = everything else                      → FIFO queue
-
-    Within the same tier:
-      - Highest score publishes first (-score sorts descending within tier)
-      - Oldest written date breaks ties (FIFO within same score)
     """
-    tool_name  = article.get("tool_name", "")
-    tool_key   = article.get("tool_key", "")
-    score      = article.get("tool_score", 0) or 0
-    written    = article.get("written_date", "2026-01-01")
+    tool_name = article.get("tool_name", "")
+    tool_key  = article.get("tool_key", "")
+    score     = article.get("tool_score", 0) or 0
+    written   = article.get("written_date", "2026-01-01")
 
-    aff_url = get_affiliate_url(tool_name, tool_key, affiliate_links)
+    aff_url  = get_affiliate_url(tool_name, tool_key, affiliate_links)
     has_link = aff_url is not None
 
     if has_link and score >= URGENT_SCORE_THRESHOLD:
@@ -168,11 +148,6 @@ def get_publish_priority(article: dict, affiliate_links: dict) -> tuple:
 def sort_for_publishing(pending: list, affiliate_links: dict) -> list:
     """
     Sort pending articles into publish order using affiliate priority.
-
-    This replaces the old simple urgency sort. Strictly better:
-    - Monetised articles always go before non-monetised
-    - Hot tools (75+) still get same-day publishing within their tier
-    - FIFO preserved as tiebreaker within each tier
     """
     tier_labels = {
         1: "T1 HOT+💰",
@@ -188,17 +163,18 @@ def sort_for_publishing(pending: list, affiliate_links: dict) -> list:
 
     print(f"\n   📋 Publish queue ({len(sorted_articles)} articles ready):")
     for i, article in enumerate(sorted_articles, 1):
-        tool   = article.get("tool_name", "?")
-        score  = article.get("tool_score", 0) or 0
-        tier   = get_publish_priority(article, affiliate_links)[0]
-        badge  = tier_labels[tier]
-        aff    = get_affiliate_url(
+        tool     = article.get("tool_name", "?")
+        score    = article.get("tool_score", 0) or 0
+        tier     = get_publish_priority(article, affiliate_links)[0]
+        badge    = tier_labels[tier]
+        aff      = get_affiliate_url(
             article.get("tool_name", ""),
             article.get("tool_key", ""),
             affiliate_links
         )
+        existing = " [existing draft]" if article.get("wp_post_id") else ""
         aff_note = f" → {aff[:45]}..." if aff else ""
-        print(f"      {i:2}. [{badge}] score={score:3} — {tool}{aff_note}")
+        print(f"      {i:2}. [{badge}] score={score:3} — {tool}{existing}{aff_note}")
 
     return sorted_articles
 
@@ -208,29 +184,20 @@ def sort_for_publishing(pending: list, affiliate_links: dict) -> list:
 # =============================================================================
 
 def strip_h1(html: str) -> str:
-    """
-    Remove the H1 tag from article HTML.
-    WordPress adds its own post title above content — having an H1 in the
-    content body creates duplicate H1s which hurt SEO.
-    """
+    """Remove H1 from article HTML — WordPress adds its own title."""
     return re.sub(r'<h1[^>]*>.*?</h1>', '', html, flags=re.IGNORECASE | re.DOTALL)
 
 
 def strip_emojis(html: str) -> str:
-    """
-    Remove emoji characters from article HTML.
-    Safety net — the article writer shouldn't include emojis in body content,
-    but this catches any that slip through.
-    Preserves HTML entities and standard punctuation.
-    """
+    """Remove emoji characters from article HTML."""
     emoji_pattern = re.compile(
         "["
-        "\U0001F600-\U0001F64F"   # emoticons
-        "\U0001F300-\U0001F5FF"   # symbols & pictographs
-        "\U0001F680-\U0001F6FF"   # transport & map
-        "\U0001F1E0-\U0001F1FF"   # flags
-        "\U00002702-\U000027B0"   # dingbats
-        "\U000024C2-\U0001F251"   # enclosed chars
+        "\U0001F600-\U0001F64F"
+        "\U0001F300-\U0001F5FF"
+        "\U0001F680-\U0001F6FF"
+        "\U0001F1E0-\U0001F1FF"
+        "\U00002702-\U000027B0"
+        "\U000024C2-\U0001F251"
         "]+",
         flags=re.UNICODE
     )
@@ -241,16 +208,7 @@ def inject_affiliate_links(html: str, tool_name: str, tool_key: str,
                             affiliate_links: dict, tool_url: str) -> tuple[str, bool]:
     """
     Replace plain tool URLs with affiliate tracking URLs in article HTML.
-
-    When an article is first written, all CTAs point to the plain homepage.
-    At publish time, if we have an affiliate link approved, we swap it in.
-    This means:
-      - Articles published before approval: earn nothing initially
-      - Once approved: new articles get affiliate links at publish time
-      - Old articles: affiliate_manager.py (Phase 6) retroactively updates them
-
     Returns: (modified_html, did_inject)
-    did_inject = True if we swapped at least one link
     """
     aff_url = get_affiliate_url(tool_name, tool_key, affiliate_links)
     if not aff_url:
@@ -259,8 +217,6 @@ def inject_affiliate_links(html: str, tool_name: str, tool_key: str,
     if not tool_url or tool_url == aff_url:
         return html, False
 
-    # Replace the plain tool URL with affiliate URL in href attributes
-    # Handles both quoted and unquoted hrefs, with or without trailing slash
     plain_variants = [
         tool_url.rstrip("/"),
         tool_url.rstrip("/") + "/",
@@ -280,26 +236,60 @@ def inject_affiliate_links(html: str, tool_name: str, tool_key: str,
 # WORDPRESS REST API
 # =============================================================================
 
-def post_to_wordpress(article: dict, html_content: str) -> int | None:
+def check_wp_post_status(post_id: int) -> str | None:
     """
-    Send a single article to WordPress via REST API.
+    Check the actual WordPress status of an existing post.
+    Returns 'publish', 'draft', 'private', etc. or None if not found.
+    """
+    auth     = (WP_USERNAME, WP_APP_PASSWORD)
+    endpoint = f"{WP_URL}/wp-json/wp/v2/posts/{post_id}"
+    try:
+        resp = requests.get(endpoint, auth=auth, timeout=30)
+        if resp.status_code == 200:
+            return resp.json().get("status")
+    except Exception:
+        pass
+    return None
+
+
+def publish_existing_draft(post_id: int, html_content: str) -> bool:
+    """
+    Update an existing WordPress draft to published status.
+    Also updates the content with latest version (affiliate links injected).
+    Returns True on success.
+    """
+    auth     = (WP_USERNAME, WP_APP_PASSWORD)
+    endpoint = f"{WP_URL}/wp-json/wp/v2/posts/{post_id}"
+
+    payload = {
+        "status":  PUBLISH_MODE,
+        "content": html_content,
+    }
+
+    try:
+        resp = requests.post(endpoint, auth=auth, json=payload, timeout=60)
+        resp.raise_for_status()
+        return True
+    except requests.exceptions.HTTPError as e:
+        status = e.response.status_code if e.response else "?"
+        body   = e.response.text[:200] if e.response else ""
+        print(f"   ❌ WordPress update HTTP {status}: {body}")
+        return False
+    except Exception as e:
+        print(f"   ❌ WordPress update failed: {e}")
+        return False
+
+
+def create_new_post(article: dict, html_content: str) -> int | None:
+    """
+    Create a brand new WordPress post.
     Returns the WordPress post ID on success, or None on failure.
-
-    PUBLISH_MODE (from config.py):
-      "draft"   → saves as draft (invisible to visitors)
-      "publish" → goes live immediately
-
-    WordPress adds its own H1 from the post title, so we've already
-    stripped the H1 from the HTML content before calling this function.
     """
     endpoint = f"{WP_URL}/wp-json/wp/v2/posts"
     auth     = (WP_USERNAME, WP_APP_PASSWORD)
 
-    # Map our internal category names to WordPress category IDs
-    # Add your WordPress category IDs here once you've created them
-    # WordPress admin → Posts → Categories → hover = see ID in URL
     CATEGORY_MAP = {
-        "writing":      None,   # add WordPress category ID when created
+        "writing":      None,
         "video":        None,
         "image":        None,
         "audio":        None,
@@ -322,15 +312,9 @@ def post_to_wordpress(article: dict, html_content: str) -> int | None:
     }
 
     try:
-        response = requests.post(
-            endpoint,
-            auth=auth,
-            json=payload,
-            timeout=60
-        )
+        response = requests.post(endpoint, auth=auth, json=payload, timeout=60)
         response.raise_for_status()
-        post_id = response.json().get("id")
-        return post_id
+        return response.json().get("id")
 
     except requests.exceptions.HTTPError as e:
         status = e.response.status_code if e.response else "?"
@@ -344,7 +328,7 @@ def post_to_wordpress(article: dict, html_content: str) -> int | None:
         return None
 
     except requests.exceptions.Timeout:
-        print(f"   ❌ WordPress request timed out — post may be large, try again")
+        print(f"   ❌ WordPress request timed out — try again")
         return None
 
     except Exception as e:
@@ -358,13 +342,11 @@ def post_to_wordpress(article: dict, html_content: str) -> int | None:
 
 def run(daily_cap: int = DAILY_PUBLISH_CAP):
     """
-    Main publisher run — called by scheduler.py.
-    Also callable standalone: python3 publisher_agent.py
+    Main publisher run — called by scheduler.py or standalone.
 
-    daily_cap is injected by scheduler.py based on site age:
-      Month 0-2:  3/day
-      Month 3-5:  5/day
-      Month 6+:  99 (uncapped)
+    Handles two cases:
+    1. New articles (no wp_post_id) → creates new WordPress post
+    2. Existing drafts (has wp_post_id, WP status = draft) → updates to publish
     """
     print(f"\n📤 Publisher Agent starting...")
     print(f"   Mode: {PUBLISH_MODE.upper()} | Daily cap: {daily_cap}")
@@ -378,23 +360,44 @@ def run(daily_cap: int = DAILY_PUBLISH_CAP):
         print(f"   💰 {len(aff_links)} affiliate link(s) loaded — monetised articles get priority")
     else:
         print(f"   ℹ️  No affiliate_links.json yet — score-only sorting")
-        print(f"      Create memory/affiliate_links.json when your first program approves you")
 
     # ── Find articles ready to publish ───────────────────────────────────────
-    # Eligible statuses:
-    #   pending_publish  — editor approved, images done
-    #   published        — already live (skip — already has wp_post_id)
-    # We include "published" in the status check so we can skip duplicates.
+    # Eligible:
+    #   status = "pending_publish" AND no wp_post_id  → brand new article
+    #   status = "pending_publish" AND has wp_post_id → existing draft to publish
+    #
+    # NOT eligible:
+    #   status = "draft_live" or "published" → already live, skip
 
-    pending = [
-        article for article in handoffs.values()
-        if article.get("status") == "pending_publish"
-        and not article.get("wp_post_id")   # not already posted
-    ]
+    pending = []
+    for article in handoffs.values():
+        if article.get("status") != "pending_publish":
+            continue
+
+        existing_id = article.get("wp_post_id")
+
+        if existing_id:
+            # Has a wp_post_id — check if it's actually still a draft in WordPress
+            wp_status = check_wp_post_status(existing_id)
+            if wp_status == "publish":
+                # Already live — just fix our status and skip
+                slug = article.get("url_slug", "")
+                if slug in handoffs:
+                    handoffs[slug]["status"] = "draft_live"
+                continue
+            elif wp_status == "draft":
+                # Existing draft — eligible to publish
+                pending.append(article)
+            else:
+                # Unknown status or post not found — treat as new
+                article["wp_post_id"] = None
+                pending.append(article)
+        else:
+            # Brand new article — eligible
+            pending.append(article)
 
     if not pending:
         print(f"\n   ℹ️  No articles ready to publish.")
-        print(f"      Run editor_agent.py and image_agent.py first.")
         write_log("No pending articles found.")
         return
 
@@ -402,8 +405,6 @@ def run(daily_cap: int = DAILY_PUBLISH_CAP):
 
     # ── Sort by affiliate priority ────────────────────────────────────────────
     sorted_queue = sort_for_publishing(pending, aff_links)
-
-    # Apply daily cap — the rest wait for tomorrow
     to_publish   = sorted_queue[:daily_cap]
     held_over    = sorted_queue[daily_cap:]
 
@@ -411,19 +412,22 @@ def run(daily_cap: int = DAILY_PUBLISH_CAP):
         print(f"\n   ⏸️  Cap of {daily_cap}/day reached — {len(held_over)} article(s) held for tomorrow")
 
     # ── Publish each article ──────────────────────────────────────────────────
-    published_count   = 0
-    affiliate_count   = 0
-    plain_link_count  = 0
+    published_count  = 0
+    affiliate_count  = 0
+    plain_link_count = 0
 
     for article in to_publish:
-        tool_name  = article.get("tool_name", "?")
-        tool_key   = article.get("tool_key", "")
-        url_slug   = article.get("url_slug", "")
-        tool_url   = article.get("tool_url", "")
-        score      = article.get("tool_score", 0) or 0
-        html       = article.get("article_html", "")
+        tool_name = article.get("tool_name", "?")
+        tool_key  = article.get("tool_key", "")
+        url_slug  = article.get("url_slug", "")
+        tool_url  = article.get("tool_url", "")
+        score     = article.get("tool_score", 0) or 0
+        html      = article.get("article_html", "")
+        existing_id = article.get("wp_post_id")
 
         print(f"\n   🔧 Processing: {tool_name} (score {score})")
+        if existing_id:
+            print(f"   📝 Existing draft — post ID {existing_id} — updating to {PUBLISH_MODE.upper()}")
 
         if not html:
             print(f"   ⚠️  No article HTML — skipping {tool_name}")
@@ -442,28 +446,35 @@ def run(daily_cap: int = DAILY_PUBLISH_CAP):
             print(f"   🔗 No affiliate link yet — using plain homepage URL")
             plain_link_count += 1
 
-        # ── Step 2: strip H1 (WordPress adds its own title) ──────────────
+        # ── Step 2: strip H1 ─────────────────────────────────────────────
         html = strip_h1(html)
 
-        # ── Step 3: strip any stray emojis ───────────────────────────────
+        # ── Step 3: strip emojis ─────────────────────────────────────────
         html = strip_emojis(html)
 
-        # ── Step 4: post to WordPress ─────────────────────────────────────
+        # ── Step 4: post or update WordPress ─────────────────────────────
         print(f"   📤 Posting to WordPress as {PUBLISH_MODE.upper()}...")
-        post_id = post_to_wordpress(article, html)
+
+        if existing_id:
+            # Update existing draft → publish
+            ok = publish_existing_draft(existing_id, html)
+            post_id = existing_id if ok else None
+        else:
+            # Create brand new post
+            post_id = create_new_post(article, html)
 
         if not post_id:
-            print(f"   ❌ Failed to post {tool_name} — skipping")
-            write_log(f"FAIL {tool_name}: WordPress post failed")
+            print(f"   ❌ Failed to publish {tool_name} — skipping")
+            write_log(f"FAIL {tool_name}: WordPress failed")
             continue
 
         # ── Step 5: update handoffs.json ──────────────────────────────────
         slug = article.get("url_slug", "")
         if slug in handoffs:
-            handoffs[slug]["status"]       = "published"
-            handoffs[slug]["wp_post_id"]   = post_id
-            handoffs[slug]["published_at"] = datetime.now().isoformat()
-            handoffs[slug]["publish_mode"] = PUBLISH_MODE
+            handoffs[slug]["status"]             = "draft_live"
+            handoffs[slug]["wp_post_id"]         = post_id
+            handoffs[slug]["published_at"]       = datetime.now().isoformat()
+            handoffs[slug]["publish_mode"]       = PUBLISH_MODE
             handoffs[slug]["affiliate_injected"] = did_inject
 
         # ── Step 6: update keyword_data.json ─────────────────────────────
@@ -478,7 +489,7 @@ def run(daily_cap: int = DAILY_PUBLISH_CAP):
 
         published_count += 1
         mode_label = "🟢 LIVE" if PUBLISH_MODE == "publish" else "📝 DRAFT"
-        wp_link = f"{WP_URL}/?p={post_id}"
+        wp_link    = f"{WP_URL}/?p={post_id}"
         print(f"   ✅ {mode_label} — {tool_name} → Post ID {post_id}")
         print(f"      {wp_link}")
         write_log(f"OK {tool_name}: post_id={post_id}, affiliate={did_inject}")

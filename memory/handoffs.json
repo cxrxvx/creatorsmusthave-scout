@@ -29,7 +29,24 @@
     "seo_processed_date": "2026-03-07T17:46:04.174812",
     "meta_title_previous": "Coursekit Review for Course Creators 2026: Worth It?",
     "meta_description_previous": "Our Coursekit review for course creators 2026 examines AI agents that answer student questions automatically. See pricing, features, and limits.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n<p><strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we&#8217;ve genuinely evaluated.</p>\n</div>\n\n<p>Your course students email the same questions every week. They get stuck on lesson 3, can&#8217;t find the bonus resources, or need clarification on something you already explained in video 7. You&#8217;re spending 10 hours a week answer...",
+    "internal_links_done": true,
+    "internal_links_added": 0,
+    "internal_links_removed": 2,
+    "internal_links_date": "2026-03-07T18:11:32.785951",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: best WordPress plugins for course creators]",
+        "action": "removed",
+        "reason": "No available articles cover WordPress plugins or course platform topics; all available content focuses on voice tools, design, video editing, and email marketing"
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: best course platforms with AI features]",
+        "action": "removed",
+        "reason": "No available articles review course platforms or AI learning tools; available articles cover unrelated creator tools like transcription, design, and podcasting software"
+      }
+    ]
   },
   "krisp-accent-conversion-review-podcasters": {
     "tool_name": "Krisp Accent Conversion",
@@ -65,7 +82,27 @@
     "seo_processed_date": "2026-03-07T17:46:13.723375",
     "meta_title_previous": "Krisp Accent Conversion Review for Podcasters 2026",
     "meta_description_previous": "Our Krisp accent conversion review for podcasters tests real-time voice clarity, audio quality, and ease of use. Find out if it's worth it.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n<p><strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we&#8217;ve genuinely evaluated.</p>\n<figure style=\"margin: 2em 0; text-align: center;\">\n  <img decoding=\"async\"\n    src=\"https://creatorsmusthave.com/wp-content/uploads/2026/03/krisp-accent-conversion-review-podcasters-screenshot.jpg\"\n    alt=\"Krisp accent conversion interface showin...",
+    "internal_links_done": true,
+    "internal_links_added": 1,
+    "internal_links_removed": 1,
+    "internal_links_date": "2026-03-07T18:11:39.275091",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: best-microphones-podcasters-2026]",
+        "action": "removed",
+        "reason": "No article available about microphones for podcasters; no suitable alternative meets minimum confidence threshold"
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: best-audio-editing-software-podcasters-comparison]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=15\">audio editing software for podcasters</a>",
+        "target_slug": "descript-review-youtube-creators",
+        "confidence": 78,
+        "topical_match": true
+      }
+    ]
   },
   "willow-voice-for-teams-review-new-ai-transcription-2026": {
     "tool_name": "Willow Voice for Teams",
@@ -101,7 +138,38 @@
     "seo_processed_date": "2026-03-07T17:46:35.907745",
     "meta_title_previous": "Willow Voice for Teams review new AI transcription tool 2026",
     "meta_description_previous": "Willow Voice for Teams review new AI transcription tool 2026: faster voice-to-text for remote teams. Find out if it's worth switching from Otter.ai.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n<p><strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we&#8217;ve genuinely evaluated.</p>\n<figure style=\"margin: 2em 0; text-align: center;\">\n  <img decoding=\"async\"\n    src=\"https://creatorsmusthave.com/wp-content/uploads/2026/03/willow-voice-for-teams-review-new-ai-transcription-2026-screenshot.jpg\"\n    alt=\"Willow Voice for Teams das...",
+    "internal_links_done": true,
+    "internal_links_added": 3,
+    "internal_links_removed": 0,
+    "internal_links_date": "2026-03-07T18:11:47.427484",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: best collaboration tools for remote content teams]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=17\">remote collaboration tools</a>",
+        "target_slug": "riverside-fm-review-podcasters-2026",
+        "confidence": 72,
+        "topical_match": true
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: AI tools for video editing and subtitles]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=15\">AI video editing tools</a>",
+        "target_slug": "descript-review-youtube-creators",
+        "confidence": 88,
+        "topical_match": true
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: comparison of AI meeting note tools for remote teams]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=13\">voice-to-text tools for Mac</a>",
+        "target_slug": "spoke-voice-to-text-macos-review",
+        "confidence": 75,
+        "topical_match": true
+      }
+    ]
   },
   "spoke-voice-to-text-macos-review": {
     "tool_name": "Spoke",
@@ -134,7 +202,30 @@
     "seo_processed_date": "2026-03-07T17:46:44.865205",
     "meta_title_previous": "Spoke Voice to Text macOS Review 2026: Worth It?",
     "meta_description_previous": "Our Spoke voice to text macOS review tests accuracy, speed, and real-world performance. See how it handles dictation across Mac apps in 2026.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n<p><strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we&#8217;ve genuinely evaluated.</p>\n</div>\n\n<p>You&#8217;re juggling Slack messages, email drafts, and meeting notes while your fingers cramp from typing the same responses over and over. Spoke promises to turn your voice into text across any Mac app with a single keyboard shortcut. ...",
+    "internal_links_done": true,
+    "internal_links_added": 2,
+    "internal_links_removed": 0,
+    "internal_links_date": "2026-03-07T18:11:55.862303",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: krisp-noise-cancellation-review-creators]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=11\">Krisp's audio enhancement features</a>",
+        "target_slug": "krisp-accent-conversion-review-podcasters",
+        "confidence": 75,
+        "topical_match": true
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: best-voice-to-text-tools-mac-creators-2026]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=12\">other AI transcription tools</a>",
+        "target_slug": "willow-voice-for-teams-review-new-ai-transcription-2026",
+        "confidence": 82,
+        "topical_match": true
+      }
+    ]
   },
   "canva-review-social-media-managers-2026": {
     "tool_name": "Canva",
@@ -168,7 +259,35 @@
     "seo_processed_date": "2026-03-07T17:46:55.483263",
     "meta_title_previous": "Canva Review for Social Media Managers 2026",
     "meta_description_previous": "Canva review for social media managers 2026: workflows, AI features, and pricing analyzed. Save hours on content creation. Find out if it's worth it.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n\n<strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we\u2019ve genuinely evaluated.\n<figure style=\"margin: 2em 0; text-align: center;\"><img style=\"width: 100%; max-width: 900px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 12px rgba(0,0,0,0.10);\" src=\"https://creatorsmusthave.com/wp-content/uploads/2026/03/canva-review-soc...",
+    "internal_links_done": true,
+    "internal_links_added": 2,
+    "internal_links_removed": 1,
+    "internal_links_date": "2026-03-07T18:12:04.380805",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: best AI copywriting tools for social media managers]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/jasper-ai-review-email-marketers-2026/\">AI copywriting tools</a>",
+        "target_slug": "jasper-ai-review-email-marketers-2026",
+        "confidence": 65,
+        "topical_match": false
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: best video editing tools for short-form content creators]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/trimmr-ai-review-youtube-creators/\">video editing tools for short-form content</a>",
+        "target_slug": "trimmr-ai-review-youtube-creators",
+        "confidence": 88,
+        "topical_match": true
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: Canva vs. Adobe Express comparison for social media creators]",
+        "action": "removed",
+        "reason": "No available article covers Canva vs Adobe Express or similar design tool comparisons for social media creators"
+      }
+    ]
   },
   "descript-review-youtube-creators": {
     "tool_name": "Descript",
@@ -201,7 +320,30 @@
     "seo_processed_date": "2026-03-07T17:47:08.070604",
     "meta_title_previous": "Descript Review for YouTube Creators 2026: Worth It?",
     "meta_description_previous": "Our Descript review for YouTube creators 2026 tests text-based editing, AI features, and export quality. See if it actually saves time.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n<p><strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we&#8217;ve genuinely evaluated.</p>\n</div>\n\n<p>YouTube editing used to mean cutting clips on a timeline for hours. This <strong>Descript review for YouTube creators 2026</strong> examines whether text-based editing actually saves time or just adds confusion for creators publishing 2-...",
+    "internal_links_done": true,
+    "internal_links_added": 2,
+    "internal_links_removed": 0,
+    "internal_links_date": "2026-03-07T18:12:11.940484",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK:krisp-noise-cancellation-review]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=11\">Krisp's noise cancellation features</a>",
+        "target_slug": "krisp-accent-conversion-review-podcasters",
+        "confidence": 75,
+        "topical_match": true
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: best-video-editing-software-youtube-creators-2026]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/trimmr-ai-review-youtube-creators/\">other AI video editors</a>",
+        "target_slug": "trimmr-ai-review-youtube-creators",
+        "confidence": 88,
+        "topical_match": true
+      }
+    ]
   },
   "elevenlabs-review-podcast-voiceovers": {
     "tool_name": "ElevenLabs",
@@ -237,7 +379,30 @@
     "seo_processed_date": "2026-03-07T17:47:20.392746",
     "meta_title_previous": "ElevenLabs Review for Podcast Voiceovers 2026 | Worth It?",
     "meta_description_previous": "Our ElevenLabs review for podcast voiceovers 2026 covers pricing, voice quality, and real-world performance. Find out if it's worth it.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n<p><strong>Disclosure:</strong> This article contains affiliate links.<br />\nIf you purchase through our links, we may earn a commission at no extra<br />\ncost to you. We only recommend tools we&#8217;ve genuinely evaluated.</p>\n<figure style=\"margin: 2em 0; text-align: center;\">\n  <img decoding=\"async\"\n    src=\"https://creatorsmusthave.com/wp-content/uploads/2026/03/elevenlabs-review-podcast-voiceovers-screenshot.jpg\"\n    alt=\"ElevenLabs AI voice interface das...",
+    "internal_links_done": true,
+    "internal_links_added": 2,
+    "internal_links_removed": 0,
+    "internal_links_date": "2026-03-07T18:12:18.896887",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: descript-review-youtube-creators]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=15\">Descript for podcast editing</a>",
+        "target_slug": "descript-review-youtube-creators",
+        "confidence": 90,
+        "topical_match": true
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: descript-review-youtube-creators]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=17\">Riverside.fm for podcast recording</a>",
+        "target_slug": "riverside-fm-review-podcasters-2026",
+        "confidence": 88,
+        "topical_match": true
+      }
+    ]
   },
   "riverside-fm-review-podcasters-2026": {
     "tool_name": "Riverside.fm",
@@ -273,7 +438,27 @@
     "seo_processed_date": "2026-03-07T17:47:40.918930",
     "meta_title_previous": "Riverside.fm Review for Podcasters 2026: Worth It?",
     "meta_description_previous": "Our riverside.fm review for podcasters 2026 covers pricing, audio quality, and new features. See if this recording platform fits your needs.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n<p><strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we&#8217;ve genuinely evaluated.</p>\n<figure style=\"margin: 2em 0; text-align: center;\">\n  <img decoding=\"async\"\n    src=\"https://creatorsmusthave.com/wp-content/uploads/2026/03/riverside-fm-review-podcasters-2026-screenshot.jpg\"\n    alt=\"Riverside.fm dashboard interface showing podca...",
+    "internal_links_done": true,
+    "internal_links_added": 1,
+    "internal_links_removed": 1,
+    "internal_links_date": "2026-03-07T18:12:25.825926",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: descript-review-youtube-creators]",
+        "action": "removed",
+        "reason": "Target article is at_cap (3 inbound links already), cannot link per hard rules"
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: best-remote-podcast-recording-software-2026-comparison]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=11\">Krisp accent conversion tool</a>",
+        "target_slug": "krisp-accent-conversion-review-podcasters",
+        "confidence": 75,
+        "topical_match": true
+      }
+    ]
   },
   "convertkit-review-small-creators-2026": {
     "tool_name": "ConvertKit",
@@ -309,7 +494,27 @@
     "seo_processed_date": "2026-03-07T17:48:00.221918",
     "meta_title_previous": "ConvertKit Review for Small Creators 2026 | Honest Test",
     "meta_description_previous": "Our ConvertKit review for small creators 2026 covers real pricing, free plan limits, and workflows for beginners. Find out if it's worth it.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n<p><strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we&#8217;ve genuinely evaluated.</p>\n<figure style=\"margin: 2em 0; text-align: center;\">\n  <img decoding=\"async\"\n    src=\"https://creatorsmusthave.com/wp-content/uploads/2026/03/convertkit-review-small-creators-2026-screenshot-1.jpg\"\n    alt=\"ConvertKit dashboard interface showing ema...",
+    "internal_links_done": true,
+    "internal_links_added": 1,
+    "internal_links_removed": 1,
+    "internal_links_date": "2026-03-07T18:12:32.514509",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: canva-review-social-media-managers-2026]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=14\">Canva for content creators</a>",
+        "target_slug": "canva-review-social-media-managers-2026",
+        "confidence": 75,
+        "topical_match": true
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: descript-review-youtube-creators]",
+        "action": "removed",
+        "reason": "Target article is at_cap (already has 3 inbound links), cannot link per hard rules"
+      }
+    ]
   },
   "beehiiv-review-newsletter-creators": {
     "tool_name": "Beehiiv",
@@ -342,7 +547,22 @@
     "seo_processed_date": "2026-03-07T17:48:10.338817",
     "meta_title_previous": "Beehiiv Review for Newsletter Creators 2026 | Honest Test",
     "meta_description_previous": "Our beehiiv review for newsletter creators 2026 reveals pricing, deliverability, and monetization features. Find out if it's worth it.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n\n<strong>Disclosure:</strong> This article contains affiliate links.\nIf you purchase through our links, we may earn a commission at no extra\ncost to you. We only recommend tools we\u2019ve genuinely evaluated.\n\n</div>\nBuilding a newsletter with 10,000 subscribers sounds exciting until you realize your current platform charges $150/month just to send emails. Or worse, your deliverability tanks and half your audience never sees your content. This <strong>beehiiv revie...",
+    "internal_links_done": true,
+    "internal_links_added": 1,
+    "internal_links_removed": 0,
+    "internal_links_date": "2026-03-07T18:12:38.762531",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: convertkit-review-small-creators-2026]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=18\">ConvertKit for small creators</a>",
+        "target_slug": "convertkit-review-small-creators-2026",
+        "confidence": 95,
+        "topical_match": true
+      }
+    ]
   },
   "kajabi-review-course-creators-2026": {
     "tool_name": "Kajabi",
@@ -909,7 +1129,24 @@
     "seo_processed_date": "2026-03-07T17:48:21.769179",
     "meta_title_previous": "Jasper AI Review for Email Marketers 2026 | Test Results",
     "meta_description_previous": "Our Jasper AI review for email marketers 2026 reveals real test results on time savings, email quality, and ROI. Find out if it's worth it.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n\n<strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we\u2019ve genuinely evaluated.\n\n</div>\nWriting email campaigns takes up 6-8 hours per week for most solo email marketers. Between crafting subject lines, writing body copy, and A/B testing variations, you\u2019re stuck at your keyboard when you should be analyzing performance or building your li...",
+    "internal_links_done": true,
+    "internal_links_added": 0,
+    "internal_links_removed": 2,
+    "internal_links_date": "2026-03-07T18:12:46.128701",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: metricool-review-content-creators-2026]",
+        "action": "removed",
+        "reason": "No article about Metricool exists in available articles list"
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: surfer-seo-review-bloggers-2026]",
+        "action": "removed",
+        "reason": "No article about Surfer SEO exists in available articles list"
+      }
+    ]
   },
   "trimmr-ai-review-youtube-creators": {
     "tool_name": "Trimmr",
@@ -938,7 +1175,32 @@
     "seo_processed_date": "2026-03-07T17:48:34.648280",
     "meta_title_previous": "Trimmr AI Review for YouTube Creators 2026: Is It Worth It?",
     "meta_description_previous": "Our Trimmr AI review for YouTube creators 2026 tests if this tool can actually turn long videos into viral shorts in minutes. Find out if it's worth it.",
-    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "content_before_internal_links": "<div class=\"affiliate-disclosure\">\n\n<strong>Disclosure:</strong> This article contains affiliate links. If you purchase through our links, we may earn a commission at no extra cost to you. We only recommend tools we\u2019ve genuinely evaluated.\n\n</div>\nYou just finished recording a 45-minute podcast episode or YouTube video. Now comes the hard part: turning that long-form content into 10 short clips for Shorts, TikTok, and Reels. That\u2019s at least 3 hours of manual editing.\n\nTrimmr promises to do that ...",
+    "internal_links_done": true,
+    "internal_links_added": 1,
+    "internal_links_removed": 2,
+    "internal_links_date": "2026-03-07T18:12:54.984634",
+    "link_replacements": [
+      {
+        "placeholder": "[INTERNAL_LINK: pictory-ai-review-youtube-creators]",
+        "action": "removed",
+        "reason": "Target article does not exist in available articles list"
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: buzzsprout-review-beginner-podcasters]",
+        "action": "linked",
+        "anchor": "<a href=\"https://creatorsmusthave.com/?p=17\">podcast recording software</a>",
+        "target_slug": "riverside-fm-review-podcasters-2026",
+        "confidence": 65,
+        "topical_match": false
+      },
+      {
+        "placeholder": "[INTERNAL_LINK: opus-clip-review-youtube-shorts-creators]",
+        "action": "removed",
+        "reason": "Target article does not exist in available articles list"
+      }
+    ]
   },
   "luma-agents-review-content-creators": {
     "tool_name": "Luma Agents",

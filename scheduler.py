@@ -1,6 +1,6 @@
 import schedule, time, sys, os, json
 from datetime import datetime, date
-import tool_scout, keyword_agent, article_agent, publisher_agent, health_monitor, seo_agent
+import tool_scout, keyword_agent, article_agent, publisher_agent, health_monitor, seo_agent, internal_link_agent
 
 SITE_LAUNCH = datetime(2026, 3, 5)
 SCAN_TIMES = ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]
@@ -116,8 +116,11 @@ def run_pipeline():
             article_agent.DAILY_CAP = 10
             publisher_agent.DAILY_PUBLISH_CAP = remaining
             _run_step("Article Writer", article_agent.run)
+            _run_step("Editor Agent", editor_agent.run)
+            _run_step("Image Agent", image_agent.run)
             _run_step("Publisher", publisher_agent.run)
             _run_step("SEO Agent", seo_agent.run)
+            _run_step("Internal Link Agent", internal_link_agent.run)
             try:
                 data = json.load(open("memory/keyword_data.json"))
                 now_pub = sum(1 for v in data.values() if v.get("status") in ("draft_live","published") and v.get("wp_post_id"))
