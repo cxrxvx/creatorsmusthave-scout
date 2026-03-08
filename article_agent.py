@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import random
 from datetime import datetime
 from anthropic import Anthropic
 from config import ANTHROPIC_API_KEY, CLAUDE_MODEL
@@ -8,10 +9,15 @@ from config import ANTHROPIC_API_KEY, CLAUDE_MODEL
 KEYWORD_DATA_FILE = "memory/keyword_data.json"
 HANDOFFS_FILE = "memory/handoffs.json"
 TOPICS_USED_FILE = "memory/topics_used.json"
+LEARNINGS_FILE = "memory/learnings.json"
+STYLE_TRACKER_FILE = "memory/.style_tracker.json"
 
 # Max articles per run — each costs ~$0.066
-# Increase this once you're happy with quality
+# Write-ahead cap in run() prevents overproduction
 DAILY_CAP = 10
+
+# Write-ahead cap — skip writing if this many drafts are queued
+WRITE_AHEAD_LIMIT = 21
 
 client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -103,7 +109,7 @@ def get_tool_url(tool_name: str) -> str:
     """
     key = tool_name.lower().strip()
 
-    # ── Step 1: exact match ───────────────────────────────────────────────────
+    # ── Step 1: exact match
     if key in TOOL_URLS:
         candidate = TOOL_URLS[key]
         if check_url_live(candidate):
@@ -111,13 +117,13 @@ def get_tool_url(tool_name: str) -> str:
         else:
             print(f"   ⚠️  Known URL for {tool_name} is unreachable ({candidate}) — trying alternatives")
 
-    # ── Step 2: partial match ─────────────────────────────────────────────────
+    # ── Step 2: partial match
     for k, v in TOOL_URLS.items():
         if k in key or key in k:
             if check_url_live(v):
                 return v
 
-    # ── Step 3: guess common domains ─────────────────────────────────────────
+    # ── Step 3: guess common domains
     slug = re.sub(r"[^a-z0-9]", "", key)
     guesses = [
         f"https://www.{slug}.com",
@@ -131,7 +137,7 @@ def get_tool_url(tool_name: str) -> str:
             print(f"   ✅ Verified URL for {tool_name}: {url}")
             return url
 
-    # ── Step 4: safe fallback ─────────────────────────────────────────────────
+    # ── Step 4: safe fallback
     print(f"   ⚠️  Could not verify a live URL for {tool_name} — using search fallback")
     return f"https://www.google.com/search?q={tool_name.replace(' ', '+')}+official+website"
 
@@ -143,33 +149,22 @@ def get_tool_url(tool_name: str) -> str:
 def enforce_tool_url(html: str, tool_url: str, tool_name: str) -> str:
     """
     Aggressively replace ALL placeholder patterns with the real tool URL.
-    Claude sometimes leaves [TOOL_URL], [AFFILIATE_LINK], or writes
-    'https://example.com' as a dummy. This catches all of them.
     """
     replacements = [
-        "[TOOL_URL]",
-        "[AFFILIATE_LINK]",
-        "[tool_url]",
-        "[affiliate_link]",
-        "https://example.com",
-        "https://www.example.com",
-        "http://example.com",
-        "[INSERT_AFFILIATE_LINK]",
-        "[INSERT_TOOL_URL]",
-        "[URL]",
+        "[TOOL_URL]", "[AFFILIATE_LINK]", "[tool_url]", "[affiliate_link]",
+        "https://example.com", "https://www.example.com", "http://example.com",
+        "[INSERT_AFFILIATE_LINK]", "[INSERT_TOOL_URL]", "[URL]",
     ]
     for placeholder in replacements:
         if placeholder in html:
             html = html.replace(placeholder, tool_url)
             print(f"   🔧 Replaced placeholder '{placeholder}' with {tool_url}")
 
-    # Also catch href="" (empty links) and fill them
     empty_href_count = html.count('href=""')
     if empty_href_count:
         html = html.replace('href=""', f'href="{tool_url}"')
         print(f"   🔧 Filled {empty_href_count} empty href(s) with {tool_url}")
 
-    # Verify no placeholders remain
     remaining = [p for p in replacements if p in html]
     if remaining:
         print(f"   ⚠️  WARNING: {len(remaining)} placeholder(s) still in HTML after replacement")
@@ -179,12 +174,7 @@ def enforce_tool_url(html: str, tool_url: str, tool_name: str) -> str:
 
 def enforce_disclosure_position(html: str, article_type: str) -> str:
     """
-    Ensure the affiliate disclosure appears AFTER the opening hook,
-    not as the very first element in the article.
-
-    The hook is the first <p> tag in the article (before any heading or div).
-    We move the disclosure to sit directly after that first paragraph.
-
+    Ensure the affiliate disclosure appears AFTER the opening hook.
     authority_article type: no disclosure needed — remove if present.
     """
     disclosure_pattern = re.compile(
@@ -192,17 +182,14 @@ def enforce_disclosure_position(html: str, article_type: str) -> str:
         re.DOTALL | re.IGNORECASE
     )
 
-    # For authority articles — remove any disclosure that crept in
     if article_type == "authority_article":
         if disclosure_pattern.search(html):
             html = disclosure_pattern.sub('', html)
             print(f"   🔧 Removed disclosure from authority_article")
         return html
 
-    # Check if disclosure exists at all
     disclosure_match = disclosure_pattern.search(html)
     if not disclosure_match:
-        # No disclosure — add one after the first paragraph
         disclosure_html = (
             '\n<div class="affiliate-disclosure">\n'
             '<p><strong>Disclosure:</strong> This article contains affiliate links. '
@@ -217,20 +204,14 @@ def enforce_disclosure_position(html: str, article_type: str) -> str:
         return html
 
     disclosure_html = disclosure_match.group(0)
-
-    # Find position of first <p> tag close (end of opening hook)
     first_p_end = html.find('</p>')
     disclosure_pos = disclosure_match.start()
 
     if first_p_end == -1:
-        # No paragraph found — leave as is
         return html
 
-    # If disclosure is BEFORE the first paragraph ends, it's in the wrong place
     if disclosure_pos < first_p_end:
-        # Remove it from current position
         html = disclosure_pattern.sub('', html, count=1)
-        # Re-find first paragraph end after removal
         first_p_end = html.find('</p>')
         if first_p_end != -1:
             html = html[:first_p_end + 4] + '\n' + disclosure_html + html[first_p_end + 4:]
@@ -241,8 +222,7 @@ def enforce_disclosure_position(html: str, article_type: str) -> str:
 
 def enforce_cta_limit(html: str, tool_url: str, tool_name: str) -> str:
     """
-    Ensure no more than 3 CTAs in the article.
-    If more than 3 cta-button links exist, remove the extras (keep first 3).
+    Ensure no more than 3 CTAs in the article (single-tool articles only).
     """
     cta_pattern = re.compile(
         r'<a[^>]+class="cta-button"[^>]*>.*?</a>',
@@ -250,16 +230,32 @@ def enforce_cta_limit(html: str, tool_url: str, tool_name: str) -> str:
     )
     ctas = cta_pattern.findall(html)
     if len(ctas) > 3:
-        # Remove CTAs beyond the first 3
         count = 0
         def replace_extra(m):
             nonlocal count
             count += 1
             if count <= 3:
                 return m.group(0)
-            return f'<a href="{tool_url}">{tool_name} →</a>'  # plain link, no button class
+            return f'<a href="{tool_url}">{tool_name} →</a>'
         html = cta_pattern.sub(replace_extra, html)
         print(f"   🔧 Reduced CTAs from {len(ctas)} to 3")
+    return html
+
+
+def enforce_roundup_urls(html: str, tools_data: list) -> str:
+    """
+    For roundup articles: replace each tool's placeholder with its real URL.
+    tools_data is a list of dicts with 'name' and 'url' keys.
+    """
+    for tool in tools_data:
+        name = tool.get("name", "")
+        url = tool.get("url", "")
+        if not name or not url:
+            continue
+        placeholder = f"[URL_{name.upper().replace(' ', '_')}]"
+        if placeholder in html:
+            html = html.replace(placeholder, url)
+            print(f"   🔧 Replaced {placeholder} with {url}")
     return html
 
 
@@ -289,26 +285,252 @@ def write_log(entry):
 
 
 # ─────────────────────────────────────────
+# SELF-LEARNING — reads past performance data
+# ─────────────────────────────────────────
+
+def get_learnings() -> str:
+    """
+    Read learnings.json if it exists and return formatted insights
+    for the writing prompt. This is how the system gets smarter over time.
+    
+    Phase 4 will auto-populate this from Google Analytics + Search Console.
+    For now, Alex can add learnings manually or weekly_digest can seed it.
+    
+    Expected format:
+    {
+        "seo_insights": ["longer articles rank better in AI tools niche"],
+        "avoid_patterns": ["long intros lose readers"],
+        "winning_hooks": ["problem-first openings get lowest bounce rate"],
+        "audience_preferences": ["podcasters engage most with tool comparisons"]
+    }
+    """
+    learnings = load_json(LEARNINGS_FILE, {})
+    if not learnings:
+        return ""
+    
+    parts = []
+    
+    if learnings.get("seo_insights"):
+        insights = "\n".join(f"  - {i}" for i in learnings["seo_insights"][:5])
+        parts.append(f"SEO INSIGHTS FROM PAST PERFORMANCE:\n{insights}")
+    
+    if learnings.get("avoid_patterns"):
+        avoids = "\n".join(f"  - {a}" for a in learnings["avoid_patterns"][:5])
+        parts.append(f"PATTERNS TO AVOID (underperformed):\n{avoids}")
+    
+    if learnings.get("winning_hooks"):
+        hooks = "\n".join(f"  - {h}" for h in learnings["winning_hooks"][:3])
+        parts.append(f"HOOK STYLES THAT PERFORMED WELL:\n{hooks}")
+    
+    if learnings.get("audience_preferences"):
+        prefs = "\n".join(f"  - {p}" for p in learnings["audience_preferences"][:3])
+        parts.append(f"AUDIENCE PREFERENCES:\n{prefs}")
+    
+    if not parts:
+        return ""
+    
+    return ("\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "LEARNINGS FROM PAST PERFORMANCE\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            + "\n\n".join(parts) + 
+            "\n→ Incorporate these insights naturally. Do not mention them in the article.\n")
+
+
+# ─────────────────────────────────────────
+# STYLE ROTATION — no two articles feel the same
+# ─────────────────────────────────────────
+
+WRITING_STYLES = {
+    "tester": {
+        "name": "The Hands-On Tester",
+        "voice": (
+            "Write as someone who personally tested this tool and is reporting back. "
+            "Use phrases like 'when I tried', 'the first thing I noticed', 'after a week of use'. "
+            "Be specific about what surprised you (good and bad). Share small details that "
+            "only someone who actually used the tool would know — menu locations, loading times, "
+            "the exact moment the tool clicked or frustrated. Tone: honest, slightly informal, "
+            "like a friend telling you about something they found."
+        ),
+        "opening_style": (
+            "Open with a specific moment during testing. What were you trying to do? "
+            "What happened? One concrete scene, 2 sentences max."
+        ),
+    },
+    "analyst": {
+        "name": "The Data-Driven Analyst",
+        "voice": (
+            "Write with analytical precision. Compare features methodically. "
+            "Use structured breakdowns, numbered criteria, clear scoring logic. "
+            "Tone: authoritative but accessible — like a Consumer Reports reviewer "
+            "who explains the methodology. Reference specific metrics: "
+            "response times, export quality, number of templates, API limits."
+        ),
+        "opening_style": (
+            "Open with a specific problem statement and a quantified claim. "
+            "Example structure: '[Task] takes the average creator [X hours]. "
+            "We tested [N] tools to find which actually cuts that time.'"
+        ),
+    },
+    "advisor": {
+        "name": "The Trusted Advisor",
+        "voice": (
+            "Write like a mentor helping a creator make the right choice. "
+            "Lead with the reader's situation, not the tool's features. "
+            "Frame every feature in terms of what it means for the reader's "
+            "workflow, income, or time savings. Tone: warm, knowledgeable, "
+            "slightly protective — you want to save them from a bad purchase."
+        ),
+        "opening_style": (
+            "Open by describing the reader's exact situation. "
+            "Paint the scene in 2 sentences, then name the solution."
+        ),
+    },
+    "strategist": {
+        "name": "The Business Strategist",
+        "voice": (
+            "Write from a business growth perspective. Frame every tool "
+            "as a business decision — what is the ROI? How does it fit into a "
+            "creator's stack? What does it replace? What is the cost of NOT using it? "
+            "Tone: confident and direct, like a consultant. "
+            "Use concrete money/time numbers wherever possible."
+        ),
+        "opening_style": (
+            "Open with a business reality check. Frame the problem in "
+            "dollars or hours lost, then offer the solution."
+        ),
+    },
+    "storyteller": {
+        "name": "The Storyteller",
+        "voice": (
+            "Write through the lens of a specific creator persona. "
+            "Introduce a character (a podcaster, course creator, YouTuber) "
+            "and weave their journey with the tool throughout. "
+            "Not a fictional testimonial — a representative scenario built from "
+            "real use cases. Tone: narrative and engaging, with concrete details."
+        ),
+        "opening_style": (
+            "Open with a mini-scenario. Quick character, quick result, "
+            "then reveal the tool. 2-3 sentences."
+        ),
+    },
+}
+
+OPENING_HOOKS = [
+    "problem_first",
+    "statistic_led",
+    "scenario",
+    "contrarian",
+    "result_first",
+    "question",
+]
+
+
+def get_next_style(article_type: str) -> dict:
+    """
+    Pick the next writing style from rotation.
+    Ensures no two consecutive articles use the same style.
+    """
+    tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
+    recent_styles = tracker.get("last_styles", [])[-4:]
+    recent_hooks = tracker.get("last_hooks", [])[-4:]
+    
+    style_preferences = {
+        "roundup": ["analyst", "advisor", "strategist"],
+        "comparison": ["analyst", "tester", "strategist"],
+        "review": list(WRITING_STYLES.keys()),
+        "affiliate_review": list(WRITING_STYLES.keys()),
+        "alert": ["tester", "analyst", "strategist"],
+        "authority_article": ["analyst", "strategist", "advisor"],
+    }
+    
+    available_styles = style_preferences.get(article_type, list(WRITING_STYLES.keys()))
+    
+    if recent_styles:
+        last_style = recent_styles[-1]
+        preferred = [s for s in available_styles if s != last_style]
+        if preferred:
+            available_styles = preferred
+    
+    chosen_style_key = random.choice(available_styles)
+    chosen_style = WRITING_STYLES[chosen_style_key].copy()
+    
+    available_hooks = OPENING_HOOKS.copy()
+    if recent_hooks:
+        last_hook = recent_hooks[-1]
+        preferred_hooks = [h for h in available_hooks if h != last_hook]
+        if preferred_hooks:
+            available_hooks = preferred_hooks
+    
+    chosen_hook = random.choice(available_hooks)
+    
+    recent_styles.append(chosen_style_key)
+    recent_hooks.append(chosen_hook)
+    tracker["last_styles"] = recent_styles[-10:]
+    tracker["last_hooks"] = recent_hooks[-10:]
+    save_json(STYLE_TRACKER_FILE, tracker)
+    
+    chosen_style["key"] = chosen_style_key
+    chosen_style["hook_type"] = chosen_hook
+    
+    return chosen_style
+
+
+def get_hook_instruction(hook_type: str, tool_name: str, category: str) -> str:
+    """Return specific opening hook instructions based on the chosen type."""
+    hooks = {
+        "problem_first": (
+            f"OPENING HOOK: Problem-First\n"
+            f"Start with the exact frustration or time-waste that {tool_name} solves. "
+            f"Be specific — name the task, the time it takes, the friction. "
+            f"2 sentences max. Then name {tool_name} as the solution."
+        ),
+        "statistic_led": (
+            f"OPENING HOOK: Statistic-Led\n"
+            f"Open with a surprising number related to {category} or the problem {tool_name} solves. "
+            f"Use 'according to' or 'based on' if the stat is not universally known. "
+            f"Follow with how {tool_name} addresses that reality. 2-3 sentences."
+        ),
+        "scenario": (
+            f"OPENING HOOK: Scenario\n"
+            f"Paint a 2-sentence scene of a creator in the middle of the exact workflow "
+            f"where {tool_name} helps. Be vivid — mention the specific task, the moment "
+            f"of frustration or need. Then pivot to the solution."
+        ),
+        "contrarian": (
+            f"OPENING HOOK: Contrarian\n"
+            f"Challenge a common belief about {category} tools. "
+            f"Pattern: 'Most people think X. They are wrong because Y.' "
+            f"Then introduce how {tool_name} proves the alternative. 2-3 sentences."
+        ),
+        "result_first": (
+            f"OPENING HOOK: Result-First\n"
+            f"Start with a concrete result from using {tool_name}. "
+            f"Time saved, money earned, quality improved — pick one, be specific. "
+            f"Then explain HOW the tool delivers that result. 2-3 sentences."
+        ),
+        "question": (
+            f"OPENING HOOK: Question\n"
+            f"Open with a question matching what the searcher is thinking. "
+            f"Follow immediately with a direct answer mentioning {tool_name}. "
+            f"Do NOT use 'Are you looking for' — that is banned."
+        ),
+    }
+    return hooks.get(hook_type, hooks["problem_first"])
+
+
+# ─────────────────────────────────────────
 # ARTICLE STRUCTURES BY TYPE
 # ─────────────────────────────────────────
 
-def get_structure(article_type):
-    structures = {
-        "review": """
-ARTICLE STRUCTURE — follow this exactly, in this order:
+def get_review_structure():
+    return """
+ARTICLE STRUCTURE — follow this exactly:
 
-1. H1 TITLE
-   Use the exact article title provided. Do not change it.
+1. H1 TITLE (exact title provided)
 
-2. OPENING HOOK (no heading)
-   2-3 sentences maximum. Open with the specific pain point this tool solves.
-   Do NOT start with "In today's world" or "Are you looking for".
-   Start with the problem or a surprising fact.
-   Example: "Editing a 30-minute podcast used to mean 2 hours of work.
-   Descript cuts that to 20 minutes by letting you edit audio like a Word doc."
+2. OPENING HOOK (no heading) — follow hook strategy above
 
-3. AFFILIATE DISCLOSURE — MUST come immediately after the opening hook paragraphs
-   Place this HERE, after the hook, before the Key Takeaways box.
+3. AFFILIATE DISCLOSURE — after the hook
    <div class="affiliate-disclosure">
    <p><strong>Disclosure:</strong> This article contains affiliate links.
    If you purchase through our links, we may earn a commission at no extra
@@ -316,311 +538,451 @@ ARTICLE STRUCTURE — follow this exactly, in this order:
    </div>
 
 4. KEY TAKEAWAYS BOX
-   <div class="key-takeaways">
-   <h3>Key Takeaways</h3>
-   <ul>
+   <div class="key-takeaways"><h3>Key Takeaways</h3><ul>
    <li><strong>Best for:</strong> [specific creator type]</li>
    <li><strong>Pricing:</strong> [starting price or free tier]</li>
-   <li><strong>Standout feature:</strong> [one thing it does better than alternatives]</li>
-   <li><strong>Verdict:</strong> [one sentence — buy it or skip it and why]</li>
-   <li><strong>Try it:</strong> <a href="REPLACE_WITH_TOOL_URL">Visit [Tool Name] →</a></li>
-   </ul>
-   </div>
+   <li><strong>Standout feature:</strong> [one differentiator]</li>
+   <li><strong>Verdict:</strong> [one sentence]</li>
+   <li><strong>Try it:</strong> <a href="REPLACE_WITH_TOOL_URL">Visit [Tool] →</a></li>
+   </ul></div>
 
 5. IS IT RIGHT FOR YOU? (quick decision table)
    <table class="decision-table">
-   <thead><tr><th>✅ Choose [Tool] if...</th><th>❌ Skip [Tool] if...</th></tr></thead>
-   <tbody>
-   <tr><td>[specific reason]</td><td>[specific reason]</td></tr>
-   </tbody>
+   <thead><tr><th>Choose [Tool] if...</th><th>Skip [Tool] if...</th></tr></thead>
+   <tbody><tr><td>[reason]</td><td>[reason]</td></tr></tbody>
    </table>
 
 6. TABLE OF CONTENTS
-   <nav class="toc"><h3>In This Review</h3><ul>
-   <li><a href="#what-is">What Is [Tool]?</a></li>
-   </ul></nav>
 
-7. WHAT IS [TOOL NAME]? (H2, id="what-is")
-   2 paragraphs. What it does, who built it, what problem it solves.
-   Mention primary keyword naturally here.
+7. WHAT IS [TOOL]? (H2, id="what-is") — 2 paragraphs
 
-8. KEY FEATURES (3-5 H2 sections, each with id attribute)
-   One H2 per major feature. 2-3 paragraphs of real detail per section.
-   Be specific — name the actual feature, explain how it works, give a real use case.
-   No marketing language. Write like you tested it.
+8. KEY FEATURES (3-5 H2 sections with id) — real detail, real use cases
 
-9. PRICING (H2, id="pricing")
-   <table class="pricing-table">
-   <thead><tr><th>Plan</th><th>Price</th><th>Best For</th></tr></thead>
-   <tbody>...</tbody>
-   </table>
-   Use EXACT plan names and prices. Never vague ranges.
-   If pricing unavailable: "verify current pricing at [tool URL]"
-   Always mention free trial or free tier if available.
+9. PRICING (H2, id="pricing") — exact plan names and prices in a table
 
 10. PROS AND CONS (H2, id="pros-cons")
     <div class="pros"><h3>Pros</h3><ul>...</ul></div>
     <div class="cons"><h3>Cons</h3><ul>...</ul></div>
-    IMPORTANT: The h3 tags inside pros/cons divs must use plain text — no emojis.
-    At least 3 pros and 3 specific cons.
-    BAD con: "Learning curve" | GOOD con: "No mobile app — desktop only"
-    BAD con: "Can be expensive" | GOOD con: "Free plan limited to 3 projects"
+    At least 3 specific cons. No generic "learning curve" or "can be expensive".
 
 11. WHO IS [TOOL] FOR? (H2, id="who-is-it-for")
-    TWO clear parts:
-    Part 1 — WHO IT IS FOR: 3-4 specific creator types with reasons
-    Part 2 — WHO IT IS NOT FOR: 2-3 specific creator types with reasons
+    WHO IT IS FOR: 3-4 specific creator types
+    WHO IT IS NOT FOR: 2-3 specific creator types with reasons
 
-12. HOW IT COMPARES (H2, id="alternatives")
-    1-2 paragraphs comparing to 1-2 real alternatives.
-    Add ONE internal link placeholder — ONLY if it fits naturally in the text flow.
-    The internal link must make sense in context. If it feels forced, skip it.
-    Format: [INTERNAL_LINK: descriptive topic]
+12. HOW IT COMPARES (H2, id="alternatives") — 1-2 real alternatives
 
 13. THE VERDICT (H2, id="verdict")
-    Answer all three:
-    — Who should buy it?
-    — Who should skip it?
-    — One reason to choose it over alternatives?
-    End with: <a href="REPLACE_WITH_TOOL_URL" class="cta-button">Try [Tool Name] →</a>
+    Who should buy, who should skip, one reason to choose it.
+    CTA: <a href="REPLACE_WITH_TOOL_URL" class="cta-button">Try [Tool] →</a>
 
-14. FAQ (H2, id="faq")
-    4-5 questions people actually search. Each answer: 40-60 words below H3.
-    One FAQ CTA is allowed if it fits naturally — not forced.
-""",
+14. FAQ (H2, id="faq") — 4-5 questions, 40-60 word answers below H3
+"""
 
-        "alert": """
-ARTICLE STRUCTURE — follow this exactly:
+
+def get_roundup_structure():
+    return """
+ARTICLE STRUCTURE — ROUNDUP FORMAT ("Best X for Y")
 
 1. H1 TITLE (exact title provided)
-2. OPENING HOOK (2-3 sentences, no heading)
-3. AFFILIATE DISCLOSURE (immediately after hook)
-   <div class="affiliate-disclosure">
-   <p><strong>Disclosure:</strong> This article contains affiliate links.
-   If you purchase through our links, we may earn a commission at no extra
-   cost to you. We only recommend tools we've genuinely evaluated.</p>
-   </div>
+
+2. OPENING HOOK — name the #1 pick immediately (featured snippet capture)
+
+3. AFFILIATE DISCLOSURE (after hook)
+
+4. QUICK PICKS TABLE — featured snippet target
+   <div class="quick-picks">
+   <h2 id="quick-picks">Quick Picks</h2>
+   <table class="comparison-table">
+   <thead><tr><th>Tool</th><th>Best For</th><th>Starting Price</th><th>Link</th></tr></thead>
+   <tbody>[one row per tool, 5-8 tools]</tbody>
+   </table></div>
+
+5. HOW WE CHOSE THESE TOOLS (H2, id="methodology") — 1-2 paragraphs, builds E-E-A-T
+
+6. INDIVIDUAL TOOL SECTIONS — one H2 per tool:
+   - H2: "[Tool] — Best for [Use Case]" (with id)
+   - 2-3 paragraphs: what it does, key strength, ideal user
+   - Quick pros/cons (2-3 each, inline)
+   - Pricing mention
+   - CTA: <a href="[TOOL_URL]" class="cta-button">Try [Tool] →</a>
+   
+   CRITICAL: Vary each section. Do NOT repeat the same template.
+   Tool 1: lead with standout feature
+   Tool 2: lead with pricing value
+   Tool 3: lead with ideal user profile
+   Tool 4: lead with a use case scenario
+   Tool 5: lead with what makes it unique
+
+7. COMPARISON TABLE (H2, id="comparison")
+   Rows: Free Plan, Starting Price, Best Feature, Learning Curve, Mobile App
+
+8. HOW TO CHOOSE (H2, id="how-to-choose")
+   Decision tree: "If you need X → choose Tool A"
+
+9. FAQ (H2, id="faq") — 5-6 questions including comparison questions
+"""
+
+
+def get_comparison_structure():
+    return """
+ARTICLE STRUCTURE — COMPARISON FORMAT ("X vs Y")
+
+1. H1 TITLE (exact title provided)
+
+2. OPENING HOOK — declare the winner upfront (featured snippet capture)
+   "[Tool A] wins for X. [Tool B] wins for Y. Here is the breakdown."
+
+3. AFFILIATE DISCLOSURE (after hook)
+
+4. QUICK VERDICT TABLE
+   <table class="verdict-table">
+   <thead><tr><th>Category</th><th>[Tool A]</th><th>[Tool B]</th><th>Winner</th></tr></thead>
+   <tbody>[5-6 comparison rows + overall winner row]</tbody>
+   </table>
+
+5. [TOOL A] OVERVIEW (H2) — what it is, core value. 2 paragraphs.
+
+6. [TOOL B] OVERVIEW (H2) — what it is, core value. 2 paragraphs.
+
+7. HEAD-TO-HEAD SECTIONS — 4-6 H2 sections comparing one dimension each:
+   Ease of Use, Features, Pricing, Output Quality, Integrations, Learning Curve
+   Each section: both tools discussed, clear winner declared.
+   ALTERNATE which tool you discuss first in each section.
+
+8. PRICING COMPARISON (H2, id="pricing") — side-by-side tables
+
+9. WHO SHOULD CHOOSE [TOOL A] (H2) — 3-4 creator profiles + CTA
+
+10. WHO SHOULD CHOOSE [TOOL B] (H2) — 3-4 creator profiles + CTA
+
+11. FINAL VERDICT (H2, id="verdict") — overall winner + when the other wins
+
+12. FAQ (H2, id="faq") — 5-6 questions including "Is [A] better than [B]?"
+"""
+
+
+def get_authority_structure():
+    return """
+ARTICLE STRUCTURE — NO disclosure, NO CTA buttons.
+
+1. H1 TITLE
+2. OPENING HOOK (2-3 sentences)
+3. KEY TAKEAWAYS BOX
+4. TABLE OF CONTENTS
+5. MAIN BODY (4-6 H2 sections with id)
+6. WHO THIS IS FOR (H2) — 1 paragraph
+7. SUMMARY (H2, id="verdict") — concrete takeaway
+8. FAQ (4-5 questions, 40-60 word answers)
+"""
+
+
+def get_alert_structure():
+    return """
+ARTICLE STRUCTURE:
+
+1. H1 TITLE
+2. OPENING HOOK (2-3 sentences)
+3. AFFILIATE DISCLOSURE (after hook)
 4. KEY TAKEAWAYS BOX
 5. TABLE OF CONTENTS
 6. WHAT JUST LAUNCHED (H2, id="what-launched")
 7. KEY FEATURES (3-4 H2 sections)
 8. PRICING (H2, id="pricing")
 9. WHO IS IT FOR? (H2, id="who-is-it-for")
-10. EARLY VERDICT (H2, id="verdict")
-    CTA: <a href="REPLACE_WITH_TOOL_URL" class="cta-button">Try [Tool Name] →</a>
-11. FAQ (3-4 questions, 40-60 word answers)
-""",
-
-        "authority_article": """
-ARTICLE STRUCTURE — follow this exactly:
-
-NO affiliate disclosure — this is informational content, not a review.
-NO CTA buttons.
-
-1. H1 TITLE (exact title provided)
-2. OPENING HOOK (2-3 sentences, no heading)
-3. KEY TAKEAWAYS BOX
-4. TABLE OF CONTENTS
-5. MAIN BODY (4-6 H2 sections with id attributes)
-6. WHO THIS IS FOR (H2, id="who-this-is-for") — 1 paragraph
-7. SUMMARY (H2, id="verdict") — concrete takeaway, 1-2 internal links
-8. FAQ (4-5 questions, 40-60 word answers)
+10. EARLY VERDICT (H2, id="verdict") + CTA
+11. FAQ (3-4 questions)
 """
+
+
+def get_structure(article_type: str) -> str:
+    structures = {
+        "review": get_review_structure(),
+        "affiliate_review": get_review_structure(),
+        "roundup": get_roundup_structure(),
+        "comparison": get_comparison_structure(),
+        "authority_article": get_authority_structure(),
+        "alert": get_alert_structure(),
     }
-    return structures.get(article_type, structures["review"])
+    return structures.get(article_type, get_review_structure())
 
 
 # ─────────────────────────────────────────
-# BUILD THE FULL WRITING PROMPT
+# BUILD PROMPTS — one per article type
 # ─────────────────────────────────────────
 
 def build_prompt(tool_data, published_slugs=None):
+    article_type = tool_data.get("article_type", "review")
+    if article_type == "roundup":
+        return build_roundup_prompt(tool_data, published_slugs)
+    elif article_type == "comparison":
+        return build_comparison_prompt(tool_data, published_slugs)
+    return build_single_tool_prompt(tool_data, published_slugs)
+
+
+def _build_internal_link_context(published_slugs):
+    if published_slugs:
+        slug_list = "\n".join(f"  - {s}" for s in published_slugs[:20])
+        return f"""EXISTING ARTICLES (for internal links):
+{slug_list}
+→ Add 2-3 [INTERNAL_LINK: slug] placeholders ONLY where natural
+→ Never force a link as an afterthought at a paragraph end
+"""
+    return "→ Use 2-3 descriptive placeholders: [INTERNAL_LINK: best AI podcast tools]\n"
+
+
+def build_single_tool_prompt(tool_data, published_slugs=None):
     article_type = tool_data.get("article_type", "review")
     structure = get_structure(article_type)
     keyword_cluster = ", ".join(tool_data.get("keyword_cluster", []))
     secondary = ", ".join(tool_data.get("secondary_keywords", []))
     tool_url = get_tool_url(tool_data.get("tool_name", ""))
+    tool_name = tool_data.get("tool_name", "")
+    category = tool_data.get("tool_category", "AI tool")
 
-    # Build internal link context
-    if published_slugs:
-        slug_list = "\n".join(f"  - {s}" for s in published_slugs[:20])
-        internal_link_context = f"""
-EXISTING ARTICLES ON THIS SITE (use for internal link placeholders):
-{slug_list}
+    style = get_next_style(article_type)
+    hook_instruction = get_hook_instruction(style["hook_type"], tool_name, category)
+    learnings_context = get_learnings()
+    internal_link_context = _build_internal_link_context(published_slugs)
 
-INTERNAL LINK RULES — read carefully:
-→ Add 2-3 [INTERNAL_LINK: description] placeholders ONLY where they flow naturally
-→ A link is natural when: you mention a related tool by name, or directly
-   compare this tool to another, or reference a related topic the reader
-   would genuinely want to read next
-→ A link is FORCED when: you insert it at the end of a sentence that has
-   nothing to do with the linked topic, or tack it on as an afterthought
-→ GOOD example: "...similar to what Krisp does for real-time calls.
-   [INTERNAL_LINK: krisp-accent-conversion-review-podcasters]"
-→ BAD example: "Dragon NaturallySpeaking has a steeper learning curve.
-   [INTERNAL_LINK: best-voice-to-text-tools]" ← forced, doesn't flow
-→ If you can't find a genuinely natural place for a link — skip it
-→ Never add a link placeholder as the last sentence of a paragraph
-   unless that sentence is genuinely about the linked topic
-"""
-    else:
-        internal_link_context = "→ Use 2-3 descriptive topic placeholders where they flow naturally: [INTERNAL_LINK: best AI podcast tools comparison]\n→ Only add them where the link would genuinely help the reader\n"
+    return f"""You are a world-class SEO article writer for affiliate content about creator tools.
 
-    return f"""You are a world-class SEO article writer specialising in affiliate content for creator tools.
+Best-in-class references: Brian Dean's structure, Ann Handley's voice,
+Gael Breton's conversion focus, Ryan Law's research depth.
 
-You write in the style of the best SEO content producers — Brian Dean's depth and structure,
-Ann Handley's human voice, Gael Breton's affiliate conversion focus, and Ryan Law's
-research-backed specificity. Your articles rank on page 1 and convert readers into buyers.
+Site: Creators Must Have (creatorsmusthave.com) — affiliate reviews for
+YouTubers, podcasters, bloggers, course creators, video editors, freelancers.
+Brand: "If it's on Creators Must Have, it's worth buying."
 
-You are writing for Creators Must Have (creatorsmusthave.com) — an affiliate review site
-for content creators: YouTubers, podcasters, bloggers, course creators, video editors,
-and freelancers who build online. Brand positioning: "If it's on Creators Must Have,
-it's worth buying." Every recommendation must feel earned, not paid for.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+YOUR WRITING PERSONA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Style: {style["name"]}
+{style["voice"]}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPENING HOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{hook_instruction}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TOOL DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Tool name:      {tool_data['tool_name']}
-Tool URL:       {tool_url}
-Category:       {tool_data.get('tool_category', 'AI tool')}
-Article type:   {article_type}
+Tool: {tool_name}  |  URL: {tool_url}  |  Category: {category}  |  Type: {article_type}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SEO REQUIREMENTS
+SEO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Article title (use exactly):  {tool_data['article_title']}
-URL slug (do not change):      {tool_data['url_slug']}
+Title (exact):     {tool_data['article_title']}
+Slug (exact):      {tool_data['url_slug']}
 Primary keyword:   "{tool_data['primary_keyword']}"
-Secondary keywords: {secondary}
-Keyword cluster:    {keyword_cluster}
-Target word count:  {tool_data['recommended_word_count']} words
-Search intent:      {tool_data.get('search_intent', 'buyer')}
+Secondary:         {secondary}
+Cluster:           {keyword_cluster}
+Word count:        {tool_data['recommended_word_count']}
+Intent:            {tool_data.get('search_intent', 'buyer')}
+SERP gap:          "{tool_data.get('serp_gap', '')}"
+→ Build a section around this gap — it is your ranking advantage
 
-SERP GAP — your content advantage:
-"{tool_data.get('serp_gap', '')}"
-→ Build an entire section around this — it's why our article outranks the competition
+FEATURED SNIPPET TIPS:
+→ Key Takeaways box and decision table are structured for snippet capture
+→ FAQ answers: exactly 40-60 words — ideal for Google FAQ snippets
+→ Start each FAQ answer with a direct answer in the first sentence
+
+PEOPLE ALSO ASK TARGETING:
+→ Use patterns: "Is [tool] worth it?", "How much does [tool] cost?",
+  "Is [tool] free?", "Is [tool] better than [competitor]?"
+{learnings_context}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TOOL URL — use this everywhere
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{tool_url}
+FORBIDDEN: [TOOL_URL], [AFFILIATE_LINK], https://example.com, href=""
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️  CRITICAL: TOOL URL — READ THIS CAREFULLY
+DISCLOSURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-The real URL for {tool_data['tool_name']} is: {tool_url}
-
-You MUST use this exact URL everywhere in the article:
-- In the Key Takeaways "Try it" link
-- In the Verdict CTA button
-- In any FAQ CTA
-- In the pricing section reference
-
-FORBIDDEN — never use these in the HTML you return:
-✗ [TOOL_URL]
-✗ [AFFILIATE_LINK]
-✗ https://example.com
-✗ href=""
-✗ Any placeholder text instead of the real URL
-
-If you are unsure of the URL — use exactly this: {tool_url}
-This is a plain homepage link. Affiliate tracking is added later automatically.
+{"NO disclosure — authority article." if article_type == "authority_article" else "REQUIRED — place AFTER opening hook, not before H1."}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-AFFILIATE DISCLOSURE
+RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{"NO disclosure needed — authority_article type. Do NOT include any disclosure." if article_type == "authority_article" else f"""REQUIRED for this article type. Place it AFTER the opening hook paragraphs.
-NOT before the H1. NOT as the very first element. AFTER the hook.
-
-Use this exact HTML:
-<div class="affiliate-disclosure">
-<p><strong>Disclosure:</strong> This article contains affiliate links.
-If you purchase through our links, we may earn a commission at no extra
-cost to you. We only recommend tools we've genuinely evaluated.</p>
-</div>"""}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-WRITING RULES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-VOICE: Write like a knowledgeable friend who tested this tool, not a marketer.
-Direct, honest, specific. Grade 7 readability. Short sentences. Max 3 per paragraph.
-Use "you" and "your". Conversational but authoritative.
-
-BANNED PHRASES — never use:
-"game-changer", "revolutionary", "cutting-edge", "state-of-the-art",
-"powerful tool", "robust features", "seamless integration",
-"in today's digital world", "in the fast-paced world of",
-"in conclusion", "to summarize", "leverage", "utilize", "synergy"
-
-FACTUAL ACCURACY:
-- Never present unverified statistics as fact
-- Unverified claims: "according to their website" or "based on launch information"
-- Unknown pricing: "verify at {tool_url} as this may have changed"
-- Never invent testimonials, case studies, or usage statistics
-
-NO FAKE SOCIAL PROOF:
-- Never write "thousands of creators use this"
-- Never write "users report X% improvement" without a verified source
-- Never invent reviews or word-of-mouth claims
-
-EVERGREEN LANGUAGE:
-- Never write "just launched", "this morning", "last week"
-- Use: "as of [month year]" or "at launch" or "verify current pricing"
-
-META-COMMENTARY BAN:
-- Never reference your SEO strategy inside the article
-- Never explain why you chose this topic
-- Write as if you're a journalist who tested the tool
-
-CTA RULES:
-- Maximum 3 CTAs in the entire article
-- One in Key Takeaways, one in Verdict, one in FAQ only if natural
-- All CTAs must use the real URL: {tool_url}
-- CTA text must be specific: "Try [Tool Name] →" or "Start free with [Tool Name] →"
-- NEVER use generic text like "Check availability here" or "Click here"
-
-PROS/CONS HEADING RULE:
-- Inside <div class="pros"> use: <h3>Pros</h3>
-- Inside <div class="cons"> use: <h3>Cons</h3>
-- Plain text only in h3 — no emojis, no checkmarks
+- Stay in your persona: {style["name"]}. Grade 7 readability. Short sentences.
+- Max 3 sentences per paragraph. Use "you" and "your".
+- BANNED: "game-changer", "revolutionary", "cutting-edge", "state-of-the-art",
+  "powerful tool", "robust features", "seamless integration", "in today's digital world",
+  "in conclusion", "leverage", "utilize", "synergy", "dive in", "look no further",
+  "it's worth noting", "without further ado", "buckle up"
+- No fake statistics or invented testimonials
+- Unknown pricing: "verify at {tool_url}"
+- Max 3 CTAs. Specific text only: "Try [Tool] →" — never "Click here"
+- Pros/cons h3 tags: plain text only, no emojis
 
 INTERNAL LINKS:
 {internal_link_context}
 
-SCANNING STRUCTURE: Every H2 needs at least one visual break (list, table, or bold callout).
-
-FAQ FORMAT: Questions start with Is/Can/Does/How/What/Why. Answers: 40-60 words, single paragraph below H3.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-HTML FORMATTING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Return clean HTML only — no markdown, no code fences, no preamble
-- Every H2 needs an id attribute
-- Use: <h1>, <h2>, <h3>, <p>, <ul>, <ol>, <table>, <strong>, <em>
-- Tables must have <thead> and <tbody>
-- CTAs: <a href="{tool_url}" class="cta-button">text →</a>
+HTML: Clean HTML only. No markdown. Every H2 needs id. Tables need thead/tbody.
+CTAs: <a href="{tool_url}" class="cta-button">text →</a>
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ARTICLE STRUCTURE
+STRUCTURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {structure}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SELF-CHECK BEFORE SUBMITTING
+SELF-CHECK
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✓ ALL links use the real URL: {tool_url} — zero placeholders remain
-✓ Disclosure placed AFTER opening hook (review/alert only)
+✓ All links use {tool_url} — zero placeholders
+✓ Persona: {style["name"]} | Hook: {style["hook_type"]}
 ✓ Primary keyword in first 100 words
-✓ Target word count: {tool_data['recommended_word_count']} words
-✓ Pricing table with exact plan names and prices
-✓ No banned phrases
-✓ No fake social proof or invented statistics
-✓ FAQ answers are 40-60 words each
-✓ Maximum 3 CTAs total
-✓ Verdict answers: who should buy, who should skip, one reason to choose it
-✓ At least 3 specific cons — not generic
-✓ "Who it is NOT for" section with 2-3 specific creator types
-✓ Internal links flow naturally — not tacked on at sentence ends
-✓ No h3 headings with emoji characters inside pros/cons divs
-✓ CTA text is specific — never "Check availability here" or "Click here"
+✓ Word count target: {tool_data['recommended_word_count']}
+✓ Exact pricing in table | 3+ specific cons | "Not for" section
+✓ FAQ answers 40-60 words | Max 3 CTAs | No banned phrases
 
-Write the complete article now.
-Return ONLY the HTML — no explanation, no preamble, no markdown fences.
+Write the complete article now. Return ONLY HTML.
+"""
+
+
+def build_roundup_prompt(tool_data, published_slugs=None):
+    structure = get_structure("roundup")
+    keyword_cluster = ", ".join(tool_data.get("keyword_cluster", []))
+    secondary = ", ".join(tool_data.get("secondary_keywords", []))
+    category = tool_data.get("tool_category", "AI tool")
+    
+    tools_to_cover = tool_data.get("tools_to_cover", [])
+    tool_lines = []
+    for i, tool in enumerate(tools_to_cover, 1):
+        if isinstance(tool, str):
+            t_name, t_url = tool, get_tool_url(tool)
+        else:
+            t_name = tool.get("name", f"Tool {i}")
+            t_url = tool.get("url") or get_tool_url(t_name)
+        tool_lines.append(f"  {i}. {t_name} — {t_url}")
+    tools_block = "\n".join(tool_lines) if tool_lines else "  (Use your knowledge of the best tools in this category — cover 5-8)"
+    
+    style = get_next_style("roundup")
+    hook_instruction = get_hook_instruction(style["hook_type"], "these tools", category)
+    learnings_context = get_learnings()
+    internal_link_context = _build_internal_link_context(published_slugs)
+
+    return f"""You are a world-class SEO writer creating a "Best X for Y" roundup — the highest-converting affiliate format. Each tool gets its own CTA = 5-8 affiliate links per article.
+
+Site: Creators Must Have (creatorsmusthave.com). Brand: "If it's on Creators Must Have, it's worth buying."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PERSONA: {style["name"]}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{style["voice"]}
+
+HOOK: {hook_instruction}
+CRITICAL: Name your #1 pick in the opening — captures featured snippets.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ARTICLE DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Title (exact):   {tool_data['article_title']}
+Slug (exact):    {tool_data['url_slug']}
+Keyword:         "{tool_data['primary_keyword']}"
+Secondary:       {secondary}
+Cluster:         {keyword_cluster}
+Word count:      {tool_data.get('recommended_word_count', 3500)}
+Category:        {category}
+SERP gap:        "{tool_data.get('serp_gap', '')}"
+
+TOOLS TO COVER (use each tool's actual URL):
+{tools_block}
+{learnings_context}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ROUNDUP RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. 5-8 tools. Each gets H2 + CTA with its own URL.
+2. VARY each section — different lead: feature, pricing, user profile, scenario, uniqueness.
+3. Quick Picks table at top — featured snippet target.
+4. Decision tree at bottom: "If you need X → choose Y"
+5. Declare a #1 overall pick. Readers want a clear recommendation.
+6. 150-250 words per tool. Comparison table with 5-6 feature rows.
+7. BANNED: "game-changer", "revolutionary", "cutting-edge", "seamless", etc.
+8. No fake stats. Specific pricing.
+
+HTML: Clean HTML. H2s need id. Tables need thead/tbody.
+CTAs: <a href="[TOOL_URL]" class="cta-button">Try [Tool] →</a>
+INTERNAL LINKS:
+{internal_link_context}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{structure}
+
+Write the complete article. Return ONLY HTML.
+"""
+
+
+def build_comparison_prompt(tool_data, published_slugs=None):
+    structure = get_structure("comparison")
+    keyword_cluster = ", ".join(tool_data.get("keyword_cluster", []))
+    secondary = ", ".join(tool_data.get("secondary_keywords", []))
+    category = tool_data.get("tool_category", "AI tool")
+    
+    tool_a = tool_data.get("tool_a", tool_data.get("tool_name", "Tool A"))
+    tool_b = tool_data.get("tool_b", "")
+    tool_a_url = get_tool_url(tool_a)
+    tool_b_url = get_tool_url(tool_b) if tool_b else ""
+    
+    style = get_next_style("comparison")
+    hook_instruction = get_hook_instruction(style["hook_type"], f"{tool_a} vs {tool_b}", category)
+    learnings_context = get_learnings()
+    internal_link_context = _build_internal_link_context(published_slugs)
+
+    return f"""You are a world-class SEO writer creating an "X vs Y" comparison — ranks for BOTH tool names, doubling traffic.
+
+Site: Creators Must Have (creatorsmusthave.com). Brand: "If it's on Creators Must Have, it's worth buying."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PERSONA: {style["name"]}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{style["voice"]}
+
+HOOK: {hook_instruction}
+CRITICAL: Declare the winner upfront — captures featured snippets.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMPARISON DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Title (exact):   {tool_data['article_title']}
+Slug (exact):    {tool_data['url_slug']}
+Keyword:         "{tool_data['primary_keyword']}"
+Secondary:       {secondary}
+Cluster:         {keyword_cluster}
+Word count:      {tool_data.get('recommended_word_count', 3000)}
+Category:        {category}
+SERP gap:        "{tool_data.get('serp_gap', '')}"
+
+Tool A: {tool_a} — {tool_a_url}
+Tool B: {tool_b} — {tool_b_url}
+{learnings_context}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMPARISON RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Quick Verdict table at top — featured snippet target.
+2. 4-6 head-to-head dimension sections (each H2).
+3. ALTERNATE which tool is discussed first in each section.
+4. Each tool gets "Who should choose" section with CTA.
+5. Declare overall winner but acknowledge when the other wins.
+6. Side-by-side pricing.
+7. FAQ must include "{tool_a} vs {tool_b}" questions.
+8. FAIRNESS: Equal word count and depth for both tools.
+9. BANNED phrases: "game-changer", "revolutionary", etc.
+10. {tool_a} links → {tool_a_url} | {tool_b} links → {tool_b_url}
+
+HTML: Clean HTML. H2s need id. Tables need thead/tbody.
+INTERNAL LINKS:
+{internal_link_context}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{structure}
+
+Write the complete article. Return ONLY HTML.
 """
 
 
@@ -631,10 +993,11 @@ Return ONLY the HTML — no explanation, no preamble, no markdown fences.
 def write_article(tool_data, published_slugs=None):
     """Send to Claude and get back a full HTML article."""
     prompt = build_prompt(tool_data, published_slugs)
-    tool_url = get_tool_url(tool_data.get("tool_name", ""))
+    tool_name = tool_data.get("tool_name", "")
+    tool_url = get_tool_url(tool_name)
     article_type = tool_data.get("article_type", "review")
 
-    print(f"   ✍️  Sending to Claude... (target: {tool_data['recommended_word_count']} words)")
+    print(f"   ✍️  Sending to Claude... (target: {tool_data.get('recommended_word_count', 2500)} words)")
 
     response = client.messages.create(
         model=CLAUDE_MODEL,
@@ -644,22 +1007,39 @@ def write_article(tool_data, published_slugs=None):
 
     article_html = response.content[0].text.strip()
 
-    # Strip markdown fences if Claude added them
     if article_html.startswith("```"):
         lines = article_html.split("\n")
         article_html = "\n".join(lines[1:-1]).strip()
 
-    # ── Post-processing: enforce rules Python-side ────────────────────────────
-    tool_name = tool_data.get("tool_name", "")
+    # ── Post-processing ──────────────────────────────────────────────────────
 
-    # 1. Replace all URL placeholders with the real tool URL
     article_html = enforce_tool_url(article_html, tool_url, tool_name)
 
-    # 2. Fix disclosure position (after hook, not before it)
+    if article_type == "roundup":
+        tools_to_cover = tool_data.get("tools_to_cover", [])
+        tools_data = []
+        for tool in tools_to_cover:
+            if isinstance(tool, str):
+                tools_data.append({"name": tool, "url": get_tool_url(tool)})
+            else:
+                tools_data.append({
+                    "name": tool.get("name", ""),
+                    "url": tool.get("url") or get_tool_url(tool.get("name", ""))
+                })
+        article_html = enforce_roundup_urls(article_html, tools_data)
+
+    if article_type == "comparison":
+        tool_a = tool_data.get("tool_a", "")
+        tool_b = tool_data.get("tool_b", "")
+        if tool_a:
+            article_html = enforce_tool_url(article_html, get_tool_url(tool_a), tool_a)
+        if tool_b:
+            article_html = enforce_tool_url(article_html, get_tool_url(tool_b), tool_b)
+
     article_html = enforce_disclosure_position(article_html, article_type)
 
-    # 3. Enforce max 3 CTAs
-    article_html = enforce_cta_limit(article_html, tool_url, tool_name)
+    if article_type not in ("roundup",):
+        article_html = enforce_cta_limit(article_html, tool_url, tool_name)
 
     word_count = len(article_html.split())
 
@@ -670,6 +1050,41 @@ def write_article(tool_data, published_slugs=None):
 
 
 # ─────────────────────────────────────────
+# WRITE-AHEAD CAP
+# ─────────────────────────────────────────
+
+def should_write_articles() -> bool:
+    """
+    Skip writing if 21+ unpublished drafts are waiting.
+    Saves API budget — no point writing articles that sit for weeks.
+    """
+    handoffs = load_json(HANDOFFS_FILE, {})
+    
+    if isinstance(handoffs, dict):
+        unpublished = [
+            key for key, data in handoffs.items()
+            if data.get("status") in ("pending_edit", "pending_publish")
+        ]
+    else:
+        unpublished = [
+            h for h in handoffs
+            if h.get("status") in ("pending_edit", "pending_publish")
+        ]
+    
+    count = len(unpublished)
+    
+    if count >= WRITE_AHEAD_LIMIT:
+        print(f"   📦 Write-ahead cap: {count} drafts queued (limit: {WRITE_AHEAD_LIMIT})")
+        print(f"   ⏸️  Skipping article writing — queue is full enough")
+        write_log(f"Write-ahead cap: {count} drafts, skipping")
+        return False
+    
+    remaining = WRITE_AHEAD_LIMIT - count
+    print(f"   📊 Queue: {count} drafts waiting | Room for {remaining} more")
+    return True
+
+
+# ─────────────────────────────────────────
 # MAIN RUN
 # ─────────────────────────────────────────
 
@@ -677,11 +1092,13 @@ def run():
     print("\n✍️  Article Agent starting...\n")
     write_log(f"\n## {datetime.now().strftime('%Y-%m-%d %H:%M')} — Article Agent run")
 
+    if not should_write_articles():
+        return
+
     keyword_data = load_json(KEYWORD_DATA_FILE, {})
     handoffs = load_json(HANDOFFS_FILE, {})
     topics_used = load_json(TOPICS_USED_FILE, [])
 
-    # Collect already-published slugs for smart internal linking
     published_slugs = [
         data.get("url_slug", key)
         for key, data in keyword_data.items()
@@ -689,7 +1106,6 @@ def run():
            and data.get("url_slug")
     ]
 
-    # Find pending tools
     pending = [
         (key, data) for key, data in keyword_data.items()
         if data.get("status") == "pending_article"
@@ -700,19 +1116,33 @@ def run():
         write_log("No pending tools found.")
         return
 
-    # Highest score first
-    pending.sort(key=lambda x: x[1].get("tool_score", 0), reverse=True)
+    # Sort: roundups first (most revenue), then comparisons, then by score
+    def sort_priority(item):
+        key, data = item
+        article_type = data.get("article_type", "review")
+        score = data.get("tool_score", 0)
+        type_bonus = {"roundup": 300, "comparison": 200}.get(article_type, 0)
+        return type_bonus + score
+    
+    pending.sort(key=sort_priority, reverse=True)
 
     print(f"📋 Found {len(pending)} tool(s) waiting for articles")
-    print(f"📝 Writing up to {DAILY_CAP} articles this run\n")
-    write_log(f"Found {len(pending)} pending. Cap: {DAILY_CAP}")
+    print(f"📝 Writing up to {DAILY_CAP} articles this run")
+    
+    type_counts = {}
+    for _, data in pending:
+        t = data.get("article_type", "review")
+        type_counts[t] = type_counts.get(t, 0) + 1
+    type_summary = " | ".join(f"{t}: {c}" for t, c in type_counts.items())
+    print(f"📊 Queue: {type_summary}\n")
+    write_log(f"Found {len(pending)}. Cap: {DAILY_CAP}. Types: {type_summary}")
 
     written = 0
 
     for tool_key, tool_data in pending:
         if written >= DAILY_CAP:
             print(f"\n⏸️  Daily cap of {DAILY_CAP} reached.")
-            write_log(f"Daily cap reached after {written} articles.")
+            write_log(f"Cap reached after {written} articles.")
             break
 
         tool_name = tool_data.get("tool_name", tool_key)
@@ -720,17 +1150,30 @@ def run():
         score = tool_data.get("tool_score", "?")
         tool_url = get_tool_url(tool_name)
 
+        style_tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
+
         print(f"🔧 Writing: {tool_name}")
         print(f"   Type: {article_type} | Score: {score} | URL: {tool_url}")
+        
+        if article_type == "roundup":
+            tools_list = tool_data.get("tools_to_cover", [])
+            print(f"   Roundup: {len(tools_list)} tools")
+        elif article_type == "comparison":
+            print(f"   Comparing: {tool_data.get('tool_a', '?')} vs {tool_data.get('tool_b', '?')}")
+        
         write_log(f"\n### {tool_name} ({article_type}) — {tool_url}")
 
         try:
             article_html, word_count = write_article(tool_data, published_slugs)
-
+            
+            style_tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
+            last_style = (style_tracker.get("last_styles") or ["unknown"])[-1]
+            last_hook = (style_tracker.get("last_hooks") or ["unknown"])[-1]
+            
+            print(f"   🎨 Style: {last_style} | Hook: {last_hook}")
             print(f"   ✅ Done — {word_count} words")
-            write_log(f"Written: {word_count} words")
+            write_log(f"Written: {word_count} words | Style: {last_style} | Hook: {last_hook}")
 
-            # Save to handoffs
             handoff_key = tool_data.get("url_slug", tool_key)
             handoffs[handoff_key] = {
                 "tool_name": tool_name,
@@ -745,14 +1188,17 @@ def run():
                 "written_date": datetime.now().strftime("%Y-%m-%d"),
                 "tool_score": score,
                 "category": tool_data.get("tool_category", "ai-tools"),
-                "tool_url": tool_url
+                "tool_url": tool_url,
+                "writing_style": last_style,
+                "hook_type": last_hook,
+                "tools_covered": tool_data.get("tools_to_cover", []),
+                "tool_a": tool_data.get("tool_a", ""),
+                "tool_b": tool_data.get("tool_b", ""),
             }
 
-            # Mark as written in keyword_data
             keyword_data[tool_key]["status"] = "article_written"
             keyword_data[tool_key]["article_written_date"] = datetime.now().strftime("%Y-%m-%d")
 
-            # Track topic
             slug = tool_data.get("url_slug", "")
             if slug and slug not in topics_used:
                 topics_used.append(slug)
@@ -767,19 +1213,18 @@ def run():
             write_log(f"ERROR: {e}")
             continue
 
-    # Save all files
     save_json(KEYWORD_DATA_FILE, keyword_data)
     save_json(HANDOFFS_FILE, handoffs)
     save_json(TOPICS_USED_FILE, topics_used)
 
     print(f"✅ Article Agent done. Wrote {written} article(s) this run.")
-    write_log(f"Run complete. Articles written: {written}")
+    write_log(f"Complete. Written: {written}")
 
     if written > 0:
         remaining = len(pending) - written
-        print(f"\n📬 Next step: run editor_agent.py → image_agent.py → publisher_agent.py")
+        print(f"\n📬 Next: editor_agent.py → image_agent.py → publisher_agent.py")
         if remaining > 0:
-            print(f"   {remaining} tool(s) still queued — run again tomorrow or increase DAILY_CAP.")
+            print(f"   {remaining} tool(s) still queued.")
 
 
 if __name__ == "__main__":

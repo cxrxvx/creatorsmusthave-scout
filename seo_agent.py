@@ -1,20 +1,17 @@
-# seo_agent.py
-# Writes meta titles, meta descriptions, schema markup, and Open Graph tags for published articles
-# Pushes everything to WordPress via RankMath REST API
-# SAFE: never reads or writes post content — zero risk of wiping articles
-#
-# Features:
-#   - Keyword check: verifies primary keyword appears in meta title
-#   - Rewrite loop: up to 2 retries if Claude fails length requirements
-#   - Duplicate detector: alerts if two articles get identical meta titles
-#   - HowTo schema: for guide/tutorial articles
-#   - Soft 404 guard: skips articles under 800 words (thin content)
-#   - Dry run mode: python3 seo_agent.py --dry-run (no WordPress writes)
-#   - Rollback flag: stores previous meta before overwriting
-#   - Cost tracker: logs estimated API cost per run
-#   - Year guard: wrong years auto-corrected + prompt explicitly states current year
-#   - Focus keyword: sets RankMath focus keyword field automatically
-#   - Open Graph: sets og:title, og:description for Facebook/X sharing
+"""
+seo_agent.py — SEO Metadata Agent for CXRXVX Affiliates
+==========================================================
+Phase 2.5 Opus Upgrade:
+  ✅ Article type-aware schema: roundups get ItemList, comparisons get Article+FAQ
+  ✅ Schema detection reads article_type field instead of guessing from title
+  ✅ Article type-specific meta description angles for better CTR
+  ✅ Removed hard-coded review rating (Google penalizes unearned ratings)
+  ✅ Focus keyword logic for roundups (category keyword) and comparisons (both tool names)
+  ✅ Fixed OG image extraction to match actual image_agent data structure
+  ✅ All existing features preserved (year guard, retries, dedup, rollback, dry run, OG tags)
+
+Drop this file into your cxrxvx-ai-empire/ folder to replace the old seo_agent.py.
+"""
 
 import json
 import os
@@ -70,7 +67,10 @@ def save_handoffs(data):
         json.dump(data, f, indent=2)
 
 
-# ── Year Guard ─────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════
+# GUARDS (unchanged — work well)
+# ═══════════════════════════════════════════════════════
+
 def validate_year(meta):
     corrected = False
     for field in ("meta_title", "meta_description"):
@@ -83,7 +83,6 @@ def validate_year(meta):
     return meta, corrected
 
 
-# ── Soft 404 Guard ─────────────────────────────────────────────────────────────
 def count_words(text):
     clean = re.sub(r'<[^>]+>', ' ', text or '')
     return len(clean.split())
@@ -98,13 +97,13 @@ def passes_word_count_guard(article, slug):
     return True
 
 
-# ── Duplicate Detector ─────────────────────────────────────────────────────────
 def build_existing_titles(handoffs):
     titles = {}
     for slug, article in handoffs.items():
-        mt = article.get("meta_title")
-        if mt:
-            titles[mt.lower().strip()] = slug
+        if isinstance(article, dict):
+            mt = article.get("meta_title")
+            if mt:
+                titles[mt.lower().strip()] = slug
     return titles
 
 
@@ -115,63 +114,137 @@ def check_duplicate(meta_title, existing_titles, current_slug):
     return False, None
 
 
-# ── Schema Type Detection ──────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════
+# SCHEMA TYPE DETECTION — now reads article_type field
+# ═══════════════════════════════════════════════════════
+
 def detect_schema_type(article):
-    article_type = article.get("article_type", "affiliate_review")
+    """
+    Determine which schema markup to use based on article_type field.
+    
+    Phase 2.5: Uses the article_type field directly instead of guessing
+    from the title string. Much more reliable.
+    
+    Returns: "Review", "ItemList", "Comparison", "HowTo", or "Article"
+    """
+    article_type = article.get("article_type", "review")
     title        = article.get("article_title", "").lower()
 
-    if "how to" in title or "tutorial" in title or "step by step" in title or "guide" in title:
-        return "HowTo"
-    elif article_type == "affiliate_review" or "review" in title:
-        return "Review"
-    elif "vs" in title or "versus" in title or "comparison" in title:
+    # ⚡ Phase 2.5: article_type field is the primary signal
+    if article_type == "roundup":
+        return "ItemList"
+    elif article_type == "comparison":
+        return "Comparison"
+    elif article_type == "authority_article":
+        return "Article"
+    elif article_type == "alert":
+        return "Review"  # New tool alerts get Review schema for rich snippets
+    elif article_type in ("review", "affiliate_review"):
+        # Check for HowTo subtype based on title
+        if any(kw in title for kw in ["how to", "tutorial", "step by step", "guide"]):
+            return "HowTo"
         return "Review"
     else:
         return "Article"
 
 
-# ── Claude Metadata Generation ─────────────────────────────────────────────────
-def build_prompt(tool_name, title, keyword, content, schema_type, retry_note=""):
+# ═══════════════════════════════════════════════════════
+# FOCUS KEYWORD LOGIC — varies by article type
+# ═══════════════════════════════════════════════════════
+
+def get_focus_keyword(article):
+    """
+    Determine the best focus keyword for RankMath.
+    
+    Reviews: primary_keyword as-is
+    Roundups: category-based keyword ("best [category] tools for [audience]")
+    Comparisons: both tool names ("tool a vs tool b")
+    """
+    article_type = article.get("article_type", "review")
+    primary      = article.get("primary_keyword", "")
+
+    if primary:
+        return primary
+
+    # Fallback generation
+    tool_name = article.get("tool_name", "")
+    if article_type == "comparison":
+        comp = article.get("comparison_tools", {})
+        a = comp.get("tool_a", "")
+        b = comp.get("tool_b", "")
+        if a and b:
+            return f"{a} vs {b}".lower()
+    elif article_type == "roundup":
+        category = article.get("tool_category", "")
+        if category:
+            return f"best {category} tools"
+
+    return tool_name.lower() if tool_name else ""
+
+
+# ═══════════════════════════════════════════════════════
+# CLAUDE METADATA GENERATION — article type aware
+# ═══════════════════════════════════════════════════════
+
+def get_meta_angle(article_type):
+    """
+    Return article type-specific instructions for meta description.
+    Different types need different CTR angles.
+    """
+    angles = {
+        "review": "Focus on the verdict — is it worth it? Mention a specific pro or pricing detail.",
+        "roundup": "Emphasize that these are tested and ranked. Mention the number of tools. Use 'best' and the category name.",
+        "comparison": "Emphasize the head-to-head comparison. Mention both tool names. Help the reader decide which one to pick.",
+        "alert": "Emphasize that this is a new launch. Create urgency — early adopter advantage.",
+        "authority_article": "Focus on being the complete guide. Emphasize comprehensiveness and credibility.",
+    }
+    return angles.get(article_type, angles["review"])
+
+
+def build_prompt(tool_name, title, keyword, content, schema_type, article_type, retry_note=""):
     content_sample    = content[:800] if content else "No content available."
     retry_instruction = ""
     if retry_note:
         retry_instruction = f"\n\n⚠️  PREVIOUS ATTEMPT FAILED: {retry_note}\nFix this in your new attempt."
 
-    return f"""You are an expert SEO specialist. Write metadata for this article.
+    meta_angle = get_meta_angle(article_type)
+
+    return f"""You are an expert SEO specialist writing metadata for an affiliate review website.
 {retry_instruction}
-IMPORTANT: The current year is {CURRENT_YEAR}. Always use {CURRENT_YEAR} — never use any other year.
+IMPORTANT: The current year is {CURRENT_YEAR}. Always use {CURRENT_YEAR} — never any other year.
 
 ARTICLE DETAILS:
-- Tool: {tool_name}
-- Title: {title}
+- Tool/Topic: {tool_name}
+- Article title: {title}
 - Primary keyword: {keyword}
 - Schema type: {schema_type}
+- Article type: {article_type}
 - Content preview: {content_sample}
 
 YOUR TASKS:
 
 1. META TITLE (strict rules):
    - The primary keyword "{keyword}" MUST appear in the meta title
-   - 50-60 characters MAXIMUM — count every character carefully
-   - Must match search intent
-   - Do NOT copy the article title — rewrite it for Google
+   - 50-60 characters MAXIMUM — count carefully
+   - Must match search intent for a "{article_type}" article
+   - Do NOT copy the article title word-for-word — rewrite it for Google
    - No clickbait, no ALL CAPS
-   - Always use {CURRENT_YEAR} if a year is included — never any other year
+   - Use {CURRENT_YEAR} if including a year
 
 2. META DESCRIPTION (strict rules):
-   - 140-155 characters MAXIMUM — count every character carefully
+   - 140-155 characters MAXIMUM — count carefully
    - Include the primary keyword naturally
-   - State a clear benefit or outcome
-   - End with a subtle call to action (e.g. "Find out if it's worth it.")
+   - ANGLE FOR THIS ARTICLE TYPE: {meta_angle}
+   - End with a subtle call to action
    - No quotes, no special characters
-   - Always use {CURRENT_YEAR} if a year is included — never any other year
+   - Use {CURRENT_YEAR} if including a year
 
 3. FAQ QUESTIONS (3 real buyer questions):
-   - Questions a real person would type into Google
+   - Questions a real person would type into Google about this {"category of tools" if article_type == "roundup" else "tool" if article_type in ("review", "alert") else "comparison"}
    - Answers under 60 words each
    - Factual and helpful — no fluff
 
-Respond in this EXACT format (nothing else — no preamble, no explanation):
+Respond in this EXACT format (nothing else):
 
 META_TITLE: [your meta title here]
 META_DESCRIPTION: [your meta description here]
@@ -186,11 +259,12 @@ FAQ_3_A: [answer 3]"""
 def generate_seo_metadata(slug, article):
     global run_cost
 
-    tool_name   = article.get("tool_name", slug)
-    title       = article.get("article_title", "")
-    keyword     = article.get("primary_keyword", "")
-    content     = article.get("article_html", "")
-    schema_type = detect_schema_type(article)
+    tool_name    = article.get("tool_name", slug)
+    title        = article.get("article_title", "")
+    keyword      = get_focus_keyword(article)
+    content      = article.get("article_html", "")
+    schema_type  = detect_schema_type(article)
+    article_type = article.get("article_type", "review")
 
     total_input_tokens  = 0
     total_output_tokens = 0
@@ -200,7 +274,7 @@ def generate_seo_metadata(slug, article):
         if attempt > 1:
             log(f"  ↻ Retry {attempt - 1}/{MAX_RETRIES}: {retry_note}")
 
-        prompt = build_prompt(tool_name, title, keyword, content, schema_type, retry_note)
+        prompt = build_prompt(tool_name, title, keyword, content, schema_type, article_type, retry_note)
 
         response = client.messages.create(
             model=CLAUDE_MODEL,
@@ -218,7 +292,6 @@ def generate_seo_metadata(slug, article):
             retry_note = "Response parse failed — check your format exactly"
             continue
 
-        # Year guard
         meta, _ = validate_year(meta)
 
         # Validate lengths
@@ -283,7 +356,10 @@ def parse_seo_response(raw_text):
     return result
 
 
-# ── Schema Builders ────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════
+# SCHEMA BUILDERS — updated with roundup/comparison types
+# ═══════════════════════════════════════════════════════
+
 def build_faqpage_schema(tool_name, faqs):
     questions = []
     for i in range(1, 4):
@@ -295,6 +371,8 @@ def build_faqpage_schema(tool_name, faqs):
                 "name": q,
                 "acceptedAnswer": {"@type": "Answer", "text": a}
             })
+    if not questions:
+        return None
     return {
         "@context": "https://schema.org",
         "@type": "FAQPage",
@@ -303,6 +381,12 @@ def build_faqpage_schema(tool_name, faqs):
 
 
 def build_review_schema(tool_name, meta):
+    """
+    Review schema WITHOUT a rating value.
+    Google's guidelines require ratings to be based on a defined methodology.
+    A hard-coded "4/5" with no testing methodology gets flagged.
+    The schema still triggers rich snippets without the rating.
+    """
     return {
         "@context": "https://schema.org",
         "@type": "Review",
@@ -320,11 +404,6 @@ def build_review_schema(tool_name, meta):
         "itemReviewed": {
             "@type": "SoftwareApplication",
             "name": tool_name
-        },
-        "reviewRating": {
-            "@type": "Rating",
-            "ratingValue": "4",
-            "bestRating": "5"
         }
     }
 
@@ -357,20 +436,145 @@ def build_howto_schema(tool_name, meta, content):
     }
 
 
-def build_combined_schema(schema_type, tool_name, meta, faqs, content):
+def build_itemlist_schema(article, meta):
+    """
+    ⚡ Phase 2.5: ItemList schema for roundup/"Best X for Y" articles.
+    Google can display these as rich list results in search.
+    """
+    roundup_tools = article.get("roundup_tools", [])
+    items = []
+    for i, tool_info in enumerate(roundup_tools, 1):
+        name = tool_info if isinstance(tool_info, str) else tool_info.get("name", "")
+        if name:
+            items.append({
+                "@type": "ListItem",
+                "position": i,
+                "name": name,
+            })
+
+    if not items:
+        return None
+
+    return {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": meta.get("meta_title", article.get("article_title", "")),
+        "description": meta.get("meta_description", ""),
+        "numberOfItems": len(items),
+        "itemListElement": items
+    }
+
+
+def build_article_schema(tool_name, meta):
+    """Generic Article schema for authority articles and comparisons."""
+    return {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": meta.get("meta_title", tool_name),
+        "description": meta.get("meta_description", ""),
+        "author": {
+            "@type": "Organization",
+            "name": SITE_NAME
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": SITE_NAME,
+            "url": "https://creatorsmusthave.com"
+        }
+    }
+
+
+def build_combined_schema(schema_type, tool_name, meta, faqs, content, article=None):
+    """
+    Build all applicable schemas for this article.
+    
+    Phase 2.5 schema mapping:
+      Review      → Review + FAQPage
+      ItemList    → ItemList + FAQPage (roundup articles)
+      Comparison  → Article + FAQPage (comparisons)
+      HowTo       → HowTo + FAQPage
+      Article     → Article + FAQPage (authority articles)
+    """
     schemas = []
+
     if schema_type == "Review":
         schemas.append(build_review_schema(tool_name, meta))
-        schemas.append(build_faqpage_schema(tool_name, faqs))
+    elif schema_type == "ItemList":
+        itemlist = build_itemlist_schema(article or {}, meta)
+        if itemlist:
+            schemas.append(itemlist)
+        else:
+            # Fallback if no roundup_tools data
+            schemas.append(build_article_schema(tool_name, meta))
     elif schema_type == "HowTo":
         schemas.append(build_howto_schema(tool_name, meta, content))
-        schemas.append(build_faqpage_schema(tool_name, faqs))
+    elif schema_type == "Comparison":
+        schemas.append(build_article_schema(tool_name, meta))
     else:
-        schemas.append(build_faqpage_schema(tool_name, faqs))
+        schemas.append(build_article_schema(tool_name, meta))
+
+    # FAQ schema for all types
+    faq_schema = build_faqpage_schema(tool_name, faqs)
+    if faq_schema:
+        schemas.append(faq_schema)
+
     return "\n".join(json.dumps(s, indent=2) for s in schemas)
 
 
-# ── WordPress / RankMath Push ──────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════
+# OG IMAGE — fixed to match actual image_agent data structure
+# ═══════════════════════════════════════════════════════
+
+def get_hero_image_url(article):
+    """
+    Extract hero image URL for Open Graph tags.
+    Matches the actual image_data structure from image_agent.py.
+    """
+    image_data = article.get("image_data", {})
+    if not isinstance(image_data, dict):
+        return ""
+
+    # image_agent stores hero as hero_media_id — we need the URL
+    # Check if we have a stored URL from WordPress
+    hero_media_id = image_data.get("hero_media_id")
+    if hero_media_id:
+        # Try to get the URL from WordPress
+        try:
+            auth = (WP_USERNAME, WP_APP_PASSWORD)
+            resp = requests.get(
+                f"{WP_URL}/wp-json/wp/v2/media/{hero_media_id}",
+                auth=auth, timeout=10
+            )
+            if resp.status_code == 200:
+                url = resp.json().get("source_url", "")
+                if url:
+                    return url
+        except Exception:
+            pass
+
+    # Fallback: screenshot media ID
+    screenshot_media_id = image_data.get("screenshot_media_id")
+    if screenshot_media_id:
+        try:
+            auth = (WP_USERNAME, WP_APP_PASSWORD)
+            resp = requests.get(
+                f"{WP_URL}/wp-json/wp/v2/media/{screenshot_media_id}",
+                auth=auth, timeout=10
+            )
+            if resp.status_code == 200:
+                url = resp.json().get("source_url", "")
+                if url:
+                    return url
+        except Exception:
+            pass
+
+    return ""
+
+
+# ═══════════════════════════════════════════════════════
+# WORDPRESS / RANKMATH PUSH (unchanged)
+# ═══════════════════════════════════════════════════════
+
 def get_existing_meta(wp_post_id):
     auth     = (WP_USERNAME, WP_APP_PASSWORD)
     endpoint = f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}"
@@ -387,66 +591,48 @@ def get_existing_meta(wp_post_id):
     return {}
 
 
-def get_hero_image_url(article):
-    """Extract hero image URL from article data for Open Graph image tag."""
-    image_data = article.get("image_data", {})
-    if isinstance(image_data, dict):
-        # Try hero image URL first
-        hero = image_data.get("hero", {})
-        if isinstance(hero, dict):
-            url = hero.get("wp_url") or hero.get("url", "")
-            if url:
-                return url
-    # Fallback: site default OG image
-    return "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg"
-
-
 def push_to_rankmath(wp_post_id, meta_title, meta_description, schema_json, keyword="", og_image=""):
-    """Push SEO metadata to WordPress via RankMath REST API.
-    SAFE: only writes to post meta fields — never touches post content.
-    Includes Open Graph tags for Facebook and X (Twitter) sharing.
-    """
+    """Push SEO metadata to WordPress via RankMath REST API. Never touches post content."""
     if DRY_RUN:
         log(f"  [DRY RUN] Would push to post {wp_post_id}:")
-        log(f"  [DRY RUN] Title:       {meta_title}")
-        log(f"  [DRY RUN] Desc:        {meta_description}")
-        log(f"  [DRY RUN] Keyword:     {keyword}")
-        log(f"  [DRY RUN] OG image:    {og_image or 'default'}")
+        log(f"  [DRY RUN] Title:    {meta_title}")
+        log(f"  [DRY RUN] Desc:     {meta_description}")
+        log(f"  [DRY RUN] Keyword:  {keyword}")
+        log(f"  [DRY RUN] OG image: {og_image or 'none'}")
         return True, "DRY RUN"
 
     auth     = (WP_USERNAME, WP_APP_PASSWORD)
     endpoint = f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}"
 
-    # Push ONLY to meta fields — post content is never read or written
     payload = {
         "meta": {
-            # Core SEO fields
-            "rank_math_title":           meta_title,
-            "rank_math_description":     meta_description,
-            "rank_math_focus_keyword":   keyword,
-            # Open Graph — controls how article looks when shared on Facebook / X
+            "rank_math_title":                meta_title,
+            "rank_math_description":          meta_description,
+            "rank_math_focus_keyword":        keyword,
             "rank_math_facebook_title":       meta_title,
             "rank_math_facebook_description": meta_description,
-            "rank_math_twitter_use_facebook": "on",   # reuse FB data for X
+            "rank_math_twitter_use_facebook": "on",
         }
     }
 
-    # Add OG image if we have one
     if og_image:
         payload["meta"]["rank_math_facebook_image"] = og_image
 
     resp = requests.post(endpoint, json=payload, auth=auth, timeout=30)
-
     if resp.status_code not in (200, 201):
         return False, f"Push error {resp.status_code}: {resp.text[:200]}"
-
     return True, "OK"
 
 
-# ── Main Run ───────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════
+# MAIN RUN
+# ═══════════════════════════════════════════════════════
+
 def get_articles_needing_seo(handoffs):
     pending = []
     for slug, article in handoffs.items():
+        if not isinstance(article, dict):
+            continue
         if (
             article.get("status") in ("published", "draft_live")
             and not article.get("seo_done")
@@ -463,7 +649,7 @@ def run():
 
     log("=" * 60)
     if DRY_RUN:
-        log("SEO Agent starting — DRY RUN MODE (nothing will be written to WordPress)")
+        log("SEO Agent starting — DRY RUN MODE")
     else:
         log("SEO Agent starting")
 
@@ -475,6 +661,16 @@ def run():
         return
 
     log(f"Found {len(pending)} articles needing SEO metadata")
+
+    # Show article type breakdown
+    type_counts = {}
+    for _, article in pending:
+        t = article.get("article_type", "review")
+        type_counts[t] = type_counts.get(t, 0) + 1
+    if type_counts:
+        type_str = ", ".join(f"{v} {k}" for k, v in type_counts.items())
+        log(f"Article types: {type_str}")
+
     log(f"Daily cap: {DAILY_CAP}")
 
     existing_titles = build_existing_titles(handoffs)
@@ -489,24 +685,23 @@ def run():
             log(f"Daily cap of {DAILY_CAP} reached — stopping")
             break
 
-        tool_name  = article.get("tool_name", slug)
-        wp_post_id = article.get("wp_post_id")
-        keyword    = article.get("primary_keyword", "")
-        log(f"\n→ Processing: {tool_name} (post ID {wp_post_id})")
+        tool_name    = article.get("tool_name", slug)
+        wp_post_id   = article.get("wp_post_id")
+        article_type = article.get("article_type", "review")
+        keyword      = get_focus_keyword(article)
+        log(f"\n→ Processing: {tool_name} (type: {article_type}, post {wp_post_id})")
 
-        # Soft 404 guard
         if not passes_word_count_guard(article, slug):
             skipped += 1
             processed += 1
             continue
 
         try:
-            # Generate metadata
             log("  Generating SEO metadata via Claude...")
             meta, schema_type = generate_seo_metadata(slug, article)
 
             if not meta:
-                log(f"  ✗ Failed to generate valid metadata after all retries — skipping")
+                log(f"  ✗ Failed after all retries — skipping")
                 failed += 1
                 processed += 1
                 continue
@@ -514,9 +709,9 @@ def run():
             log(f"  Meta title ({len(meta['meta_title'])} chars): {meta['meta_title']}")
             log(f"  Meta desc  ({len(meta['meta_description'])} chars): {meta['meta_description']}")
             log(f"  Focus keyword: {keyword}")
-            log(f"  Schema type: {schema_type} + FAQPage")
+            log(f"  Schema: {schema_type} + FAQPage")
 
-            # Duplicate detector
+            # Duplicate check
             is_dup, conflict_slug = check_duplicate(meta["meta_title"], existing_titles, slug)
             if is_dup:
                 log(f"  ⚠️  DUPLICATE META TITLE — conflicts with: {conflict_slug} — skipping")
@@ -526,16 +721,16 @@ def run():
 
             # Build schema
             content     = article.get("article_html", "")
-            schema_json = build_combined_schema(schema_type, tool_name, meta, meta, content)
+            schema_json = build_combined_schema(schema_type, tool_name, meta, meta, content, article)
 
-            # Get hero image for Open Graph
+            # OG image
             og_image = get_hero_image_url(article)
-            if og_image and "og-default" not in og_image:
-                log(f"  OG image: {og_image}")
+            if og_image:
+                log(f"  OG image: found")
             else:
-                log(f"  OG image: using site default")
+                log(f"  OG image: none available")
 
-            # Rollback: store existing meta before overwriting
+            # Rollback
             if not DRY_RUN:
                 existing = get_existing_meta(wp_post_id)
                 if existing.get("rank_math_title"):
@@ -543,7 +738,7 @@ def run():
                     handoffs[slug]["meta_description_previous"] = existing.get("rank_math_description", "")
                     log(f"  Rollback stored")
 
-            # Push to WordPress — meta fields only, content never touched
+            # Push
             log("  Pushing to WordPress...")
             ok, msg = push_to_rankmath(
                 wp_post_id,
@@ -558,19 +753,20 @@ def run():
                 handoffs[slug]["seo_done"]          = True
                 handoffs[slug]["meta_title"]         = meta["meta_title"]
                 handoffs[slug]["meta_description"]   = meta["meta_description"]
+                handoffs[slug]["focus_keyword"]      = keyword
                 handoffs[slug]["schema_type"]        = schema_type
                 handoffs[slug]["og_image"]           = og_image
                 handoffs[slug]["seo_processed_date"] = datetime.now().isoformat()
                 existing_titles[meta["meta_title"].lower().strip()] = slug
                 save_handoffs(handoffs)
-                log(f"  ✓ SEO metadata + Open Graph live for: {tool_name}")
+                log(f"  ✓ SEO live: {tool_name}")
                 success += 1
             else:
-                log(f"  ✗ WordPress push failed: {msg}")
+                log(f"  ✗ Push failed: {msg}")
                 failed += 1
 
         except Exception as e:
-            log(f"  ✗ Error processing {tool_name}: {e}")
+            log(f"  ✗ Error: {e}")
             failed += 1
 
         processed += 1

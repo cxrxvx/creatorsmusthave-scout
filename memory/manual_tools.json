@@ -19,13 +19,13 @@
   },
   {
     "name": "ConvertKit",
-    "description": "Email marketing platform built specifically for creators \u2014 bloggers, YouTubers, podcasters. Landing pages, automations, paid newsletters. Strong affiliate program.",
+    "description": "Email marketing platform built specifically for creators — bloggers, YouTubers, podcasters. Landing pages, automations, paid newsletters. Strong affiliate program.",
     "website": "convertkit.com",
     "status": "processed"
   },
   {
     "name": "Beehiiv",
-    "description": "Newsletter platform built for growth. Used by major newsletter creators. Monetization built in \u2014 ads, paid subscriptions, boosts. Growing fast.",
+    "description": "Newsletter platform built for growth. Used by major newsletter creators. Monetization built in — ads, paid subscriptions, boosts. Growing fast.",
     "website": "beehiiv.com",
     "status": "processed"
   },
@@ -147,6 +147,356 @@
     "name": "Gumroad",
     "description": "Platform for selling digital products directly to audiences. Ebooks, courses, templates, software, music. Simple setup with no monthly fees.",
     "website": "gumroad.com",
+    "status": "processed"
+  },
+  {
+    "name": "HeyGen",
+    "description": "AI video platform that creates studio-quality videos with realistic AI avatars and voices for content creators and marketers",
+    "website": "heygen.com",
+    "status": "processed"
+  },
+  {
+    "name": "InVideo AI",
+    "description": "AI video creation platform that turns text prompts and scripts into fully edited videos for YouTube, social media and marketing",
+    "website": "invideo.io",
+    "status": "processed"
+  },
+  {
+    "name": "Fliki AI",
+    "description": "AI tool that converts text and blog posts into videos with realistic AI voiceovers for content creators",
+    "website": "fliki.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Colossyan",
+    "description": "AI video platform for creating training and explainer videos using AI avatars without cameras or studios",
+    "website": "colossyan.com",
+    "status": "processed"
+  },
+  {
+    "name": "Runway ML",
+    "description": "AI creative platform for video generation, editing and visual effects used by filmmakers and content creators",
+    "website": "runwayml.com",
+    "status": "processed"
+  },
+  {
+    "name": "Zebracat AI",
+    "description": "AI video generator that creates faceless videos from text prompts for YouTube automation and social media creators",
+    "website": "zebracat.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Veed AI",
+    "description": "Online video editor with AI tools for subtitles, transcription, translation and video enhancement for content creators",
+    "website": "veed.io",
+    "status": "processed"
+  },
+  {
+    "name": "Murf AI",
+    "description": "AI voice generator that creates studio-quality voiceovers in 120+ voices and 20 languages for videos, podcasts and presentations",
+    "website": "murf.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Play.ht",
+    "description": "AI text-to-speech platform with ultra-realistic voices for creating voiceovers, podcasts and audio content",
+    "website": "play.ht",
+    "status": "processed"
+  },
+  {
+    "name": "Lalal AI",
+    "description": "AI audio tool that separates vocals from instrumentals and removes background noise from audio and video files",
+    "website": "lalal.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Lovo AI",
+    "description": "AI voice generator and text-to-speech platform with 500+ voices for content creators, podcasters and video producers",
+    "website": "lovo.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Speechify",
+    "description": "AI text-to-speech app that reads any content aloud at high speed, used by creators for content consumption and voiceovers",
+    "website": "speechify.com",
+    "status": "processed"
+  },
+  {
+    "name": "Resemble AI",
+    "description": "AI voice cloning platform that creates custom AI voices and realistic speech synthesis for creators and developers",
+    "website": "resemble.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Copy.ai",
+    "description": "AI copywriting platform that generates marketing copy, blog posts, social media content and sales emails for creators and marketers",
+    "website": "copy.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Rytr",
+    "description": "AI writing tool that generates blog posts, emails, social media captions and marketing copy in 40+ languages",
+    "website": "rytr.me",
+    "status": "processed"
+  },
+  {
+    "name": "Hypotenuse AI",
+    "description": "AI content platform that generates product descriptions, blog articles and marketing copy at scale for ecommerce and content teams",
+    "website": "hypotenuse.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Scalenut",
+    "description": "AI SEO and content marketing platform that researches, plans and writes long-form SEO content for bloggers and marketers",
+    "website": "scalenut.com",
+    "status": "processed"
+  },
+  {
+    "name": "Frase",
+    "description": "AI SEO content tool that researches top-ranking pages, generates content briefs and writes SEO-optimised articles",
+    "website": "frase.io",
+    "status": "processed"
+  },
+  {
+    "name": "Anyword",
+    "description": "AI copywriting platform with predictive performance scoring that generates and optimises marketing copy for better conversions",
+    "website": "anyword.com",
+    "status": "processed"
+  },
+  {
+    "name": "Narrato AI",
+    "description": "AI content creation and workflow platform for content teams to plan, write, optimise and publish content at scale",
+    "website": "narrato.io",
+    "status": "processed"
+  },
+  {
+    "name": "KoalaWriter",
+    "description": "AI blog writing tool that generates long-form SEO articles with real-time data and automatic internal linking",
+    "website": "koala.sh",
+    "status": "processed"
+  },
+  {
+    "name": "BrandWell AI",
+    "description": "AI content platform that creates long-form SEO blog posts and brand content from a single keyword",
+    "website": "brandwell.ai",
+    "status": "processed"
+  },
+  {
+    "name": "NeuronWriter",
+    "description": "AI SEO content editor that analyses competitor content and guides writers to create better-ranking articles",
+    "website": "neuronwriter.com",
+    "status": "processed"
+  },
+  {
+    "name": "RankIQ",
+    "description": "AI SEO toolset for bloggers that identifies low-competition keywords and creates content briefs for faster ranking",
+    "website": "rankiq.com",
+    "status": "processed"
+  },
+  {
+    "name": "GrowthBar AI",
+    "description": "AI SEO tool that generates SEO-optimised blog posts and provides keyword research for bloggers and content marketers",
+    "website": "growthbarseo.com",
+    "status": "processed"
+  },
+  {
+    "name": "Outranking",
+    "description": "AI SEO writing platform that creates and optimises long-form content with automated internal linking and SERP analysis",
+    "website": "outranking.io",
+    "status": "processed"
+  },
+  {
+    "name": "Leonardo AI",
+    "description": "AI image generation platform for creating game assets, concept art, marketing visuals and creative content at scale",
+    "website": "leonardo.ai",
+    "status": "processed"
+  },
+  {
+    "name": "AdCreative AI",
+    "description": "AI advertising creative platform that generates high-converting ad creatives, banners and social media visuals for marketers",
+    "website": "adcreative.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Predis AI",
+    "description": "AI social media content generator that creates posts, carousels, videos and ad creatives from a single prompt",
+    "website": "predis.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Looka",
+    "description": "AI logo design and brand identity platform that generates professional logos and brand kits for creators and small businesses",
+    "website": "looka.com",
+    "status": "processed"
+  },
+  {
+    "name": "NightCafe",
+    "description": "AI art generator that creates images from text prompts using multiple AI models for digital artists and content creators",
+    "website": "nightcafe.studio",
+    "status": "processed"
+  },
+  {
+    "name": "Ideogram AI",
+    "description": "AI image generator specialised in creating images with accurate text rendering for posters, thumbnails and graphic design",
+    "website": "ideogram.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Stockimg AI",
+    "description": "AI design platform that generates stock photos, logos, book covers, posters and social media visuals on demand",
+    "website": "stockimg.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Gamma AI",
+    "description": "AI presentation and document creator that generates beautiful slide decks, documents and webpages from text prompts",
+    "website": "gamma.app",
+    "status": "processed"
+  },
+  {
+    "name": "Taskade AI",
+    "description": "AI productivity platform that combines task management, mind mapping and AI agents for creators and remote teams",
+    "website": "taskade.com",
+    "status": "processed"
+  },
+  {
+    "name": "Motion AI",
+    "description": "AI calendar and task manager that automatically schedules tasks and meetings based on priorities and deadlines",
+    "website": "usemotion.com",
+    "status": "processed"
+  },
+  {
+    "name": "SaneBox",
+    "description": "AI email management tool that automatically filters, prioritises and organises email for professionals and creators",
+    "website": "sanebox.com",
+    "status": "processed"
+  },
+  {
+    "name": "Fireflies AI",
+    "description": "AI meeting assistant that records, transcribes and summarises meetings with searchable notes and action items",
+    "website": "fireflies.ai",
+    "status": "processed"
+  },
+  {
+    "name": "MeetGeek AI",
+    "description": "AI meeting recorder and summariser that automatically captures key moments and action items from video calls",
+    "website": "meetgeek.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Chatbase",
+    "description": "AI chatbot builder that trains custom ChatGPT-powered chatbots on your content for customer support and lead generation",
+    "website": "chatbase.co",
+    "status": "processed"
+  },
+  {
+    "name": "Tidio AI",
+    "description": "AI customer service platform with live chat and chatbot that helps online businesses automate support and increase sales",
+    "website": "tidio.com",
+    "status": "processed"
+  },
+  {
+    "name": "ManyChat AI",
+    "description": "AI chat marketing platform that automates Instagram, Facebook and WhatsApp conversations to grow creator audiences",
+    "website": "manychat.com",
+    "status": "processed"
+  },
+  {
+    "name": "Ocoya",
+    "description": "AI social media content creation and scheduling platform that generates captions, hashtags and visuals for all platforms",
+    "website": "ocoya.com",
+    "status": "processed"
+  },
+  {
+    "name": "Instantly AI",
+    "description": "AI cold email outreach platform that automates personalised email campaigns for creators and agencies",
+    "website": "instantly.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Durable AI",
+    "description": "AI website builder that creates a complete business website with copy and images in under 30 seconds",
+    "website": "durable.co",
+    "status": "processed"
+  },
+  {
+    "name": "10Web AI",
+    "description": "AI WordPress website builder that generates complete websites with content and images from a business description",
+    "website": "10web.io",
+    "status": "processed"
+  },
+  {
+    "name": "Webflow",
+    "description": "Visual web design platform with AI tools that lets creators build professional websites without coding",
+    "website": "webflow.com",
+    "status": "processed"
+  },
+  {
+    "name": "Originality AI",
+    "description": "AI content detector and plagiarism checker that identifies AI-generated content for publishers and content teams",
+    "website": "originality.ai",
+    "status": "processed"
+  },
+  {
+    "name": "Grammarly",
+    "description": "AI writing assistant that checks grammar, style, clarity and tone across all writing platforms for creators and professionals",
+    "website": "grammarly.com",
+    "status": "processed"
+  },
+  {
+    "name": "QuillBot",
+    "description": "AI paraphrasing and writing tool that rewrites, summarises and improves text for students, writers and content creators",
+    "website": "quillbot.com",
+    "status": "processed"
+  },
+  {
+    "name": "BasedLabs",
+    "description": "AI video generation platform for creators — generate realistic AI videos and avatars for content production",
+    "status": "processed"
+  },
+  {
+    "name": "Munch",
+    "description": "AI video repurposing tool that automatically clips long-form videos into short viral clips for TikTok, Reels and YouTube Shorts",
+    "status": "processed"
+  },
+  {
+    "name": "Deepbrain AI",
+    "description": "AI avatar video generator that turns text scripts into professional videos with realistic AI presenters — no camera needed",
+    "status": "processed"
+  },
+  {
+    "name": "HeadshotPro",
+    "description": "AI headshot generator that creates professional profile photos from selfies — popular with creators and personal brands, ~30% affiliate commission",
+    "status": "processed"
+  },
+  {
+    "name": "PhotoAI",
+    "description": "AI photo generator that creates professional photos of yourself in any setting or style from a few training images",
+    "status": "processed"
+  },
+  {
+    "name": "Aragon AI",
+    "description": "AI headshot and professional photo generator — upload selfies and get studio-quality headshots in minutes",
+    "status": "processed"
+  },
+  {
+    "name": "ImagineArt",
+    "description": "AI image generation platform for creators to produce art, illustrations and visual content for social media and blogs",
+    "status": "processed"
+  },
+  {
+    "name": "ArtSmart AI",
+    "description": "AI image generation tool with affiliate program — creates high quality images for content creators and marketers",
+    "status": "processed"
+  },
+  {
+    "name": "Shopia",
+    "description": "AI writing assistant for bloggers and ecommerce creators — generates SEO articles and product descriptions with affiliate program",
+    "status": "processed"
+  },
+  {
+    "name": "Speedwrite",
+    "description": "AI text rewriter and paraphrasing tool for bloggers and content creators to rewrite and improve existing content fast",
     "status": "processed"
   }
 ]

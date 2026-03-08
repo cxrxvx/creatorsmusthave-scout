@@ -1,0 +1,130 @@
+{
+  "canva": {
+    "name": "Canva",
+    "score": 70,
+    "type": "authority_article",
+    "category": "image",
+    "description": "Multi-purpose graphic design tool that helps creators make social media graphics, presentations, videos, and visual content with templates and drag-and-drop editing",
+    "has_affiliate_potential": true,
+    "is_fast_growing": false,
+    "source": "manual",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": []
+  },
+  "descript": {
+    "name": "Descript",
+    "score": 70,
+    "type": "affiliate_review",
+    "category": "video",
+    "description": "All-in-one video and podcast editing platform that lets creators edit media by editing text, with AI voice cloning and built-in publishing tools",
+    "has_affiliate_potential": true,
+    "is_fast_growing": true,
+    "source": "manual",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": []
+  },
+  "notion": {
+    "name": "Notion",
+    "score": 70,
+    "type": "authority_article",
+    "category": "productivity",
+    "description": "All-in-one workspace enabling creators to organize content calendars, build knowledge bases, and manage projects with flexible databases and collaborative docs",
+    "has_affiliate_potential": true,
+    "is_fast_growing": false,
+    "source": "manual",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": []
+  },
+  "synthesia": {
+    "name": "Synthesia",
+    "score": 70,
+    "type": "authority_article",
+    "category": "video",
+    "description": "AI video generation platform that creates professional videos using AI avatars and text-to-speech, eliminating need for cameras or studios",
+    "has_affiliate_potential": false,
+    "is_fast_growing": true,
+    "source": "manual",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": [
+      "Descript"
+    ]
+  },
+  "elevenlabs": {
+    "name": "ElevenLabs",
+    "score": 70,
+    "type": "authority_article",
+    "category": "audio",
+    "description": "AI voice generation and cloning tool that helps creators produce realistic voiceovers and narration for videos, podcasts, and audiobooks",
+    "has_affiliate_potential": false,
+    "is_fast_growing": true,
+    "source": "manual",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": []
+  },
+  "heygen": {
+    "name": "HeyGen",
+    "score": 85,
+    "type": "affiliate_review",
+    "category": "video",
+    "description": "AI video platform that creates studio-quality videos with realistic AI avatars and voices, helping creators produce professional video content without cameras or editing skills",
+    "has_affiliate_potential": true,
+    "is_fast_growing": true,
+    "source": "manual",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": [
+      "Descript",
+      "Synthesia"
+    ]
+  },
+  "runway_ml": {
+    "name": "Runway ML",
+    "score": 70,
+    "type": "authority_article",
+    "category": "video",
+    "description": "AI-powered video generation and editing platform that helps creators produce professional visual effects and AI-generated video content",
+    "has_affiliate_potential": false,
+    "is_fast_growing": true,
+    "source": "manual",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": [
+      "Descript",
+      "Synthesia",
+      "HeyGen"
+    ]
+  },
+  "murf_ai": {
+    "name": "Murf AI",
+    "score": 73,
+    "type": "affiliate_review",
+    "category": "audio",
+    "description": "AI voice generator creating studio-quality voiceovers in 120+ voices and 20 languages for video, podcast, and presentation creators",
+    "has_affiliate_potential": true,
+    "is_fast_growing": true,
+    "source": "manual",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": [
+      "ElevenLabs"
+    ]
+  },
+  "grammarly": {
+    "name": "Grammarly",
+    "score": 70,
+    "type": "authority_article",
+    "category": "writing",
+    "description": "AI writing assistant that helps creators improve grammar, clarity, style and tone across all their content platforms",
+    "has_affiliate_potential": true,
+    "is_fast_growing": false,
+    "source": "manual",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": []
+  }
+}

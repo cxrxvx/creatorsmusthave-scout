@@ -74,7 +74,17 @@
       "completeness_notes": "Passed",
       "editor_summary": "Strong article with excellent readability, specific pricing details, honest cons, and clear 'who it's NOT for' guidance. The main weakness is SEO optimization\u2014the exact primary keyword phrase needs to appear in the intro and at least one H2 heading for better targeting. Consider changing 'What Is Krisp Accent Conversion?' to 'What Is Krisp Accent Conversion for Podcasters?' and working the full keyword into the opening paragraph."
     },
-    "editor_reviewed": "2026-03-07"
+    "editor_reviewed": "2026-03-07",
+    "image_data": {
+      "screenshot_media_id": 236,
+      "screenshot_alt_text": "Krisp accent conversion interface showing real-time audio processing for podcasters",
+      "screenshot_source": "homepage_screenshot",
+      "hero_media_id": 237,
+      "hero_alt_text": "Podcaster recording with professional microphone for Krisp accent conversion review",
+      "hero_source": "Pexels \u2014 'remote worker video call headset home office'"
+    },
+    "images_date": "2026-03-08",
+    "images_added": true
   },
   "willow-voice-for-teams-review-new-ai-transcription-2026": {
     "tool_name": "Willow Voice for Teams",
@@ -567,7 +577,13 @@
     "wp_post_id": 229,
     "published_at": "2026-03-07T21:35:02.884980",
     "publish_mode": "publish",
-    "affiliate_injected": false
+    "affiliate_injected": false,
+    "seo_done": true,
+    "meta_title": "Kajabi Review for Course Creators 2026: Worth It?",
+    "meta_description": "Our Kajabi review for course creators 2026 examines pricing, features, and whether this all-in-one platform justifies its cost. Find out if it's worth it.",
+    "schema_type": "Review",
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "seo_processed_date": "2026-03-07T23:30:02.511837"
   },
   "notion-review-content-creators-2026": {
     "tool_name": "Notion",
@@ -597,13 +613,23 @@
     "images_added": true,
     "image_data": {
       "screenshot_media_id": 46,
-      "screenshot_alt_text": "Notion dashboard interface showing content organization features for creators"
+      "screenshot_alt_text": "Notion dashboard interface showing content organization features for creators",
+      "hero_media_id": 238,
+      "hero_alt_text": "Content creator using Notion for content planning and organization in 2026",
+      "hero_source": "Pexels \u2014 'productivity workspace notes organisation'",
+      "screenshot_injected": true
     },
-    "images_date": "2026-03-06",
+    "images_date": "2026-03-08",
     "wp_post_id": 230,
     "published_at": "2026-03-07T21:35:05.504541",
     "publish_mode": "publish",
-    "affiliate_injected": false
+    "affiliate_injected": false,
+    "seo_done": true,
+    "meta_title": "Notion Review for Content Creators 2026: Worth It?",
+    "meta_description": "Our 2026 Notion review for content creators covers pricing, features, and workflow management. See if it replaces your tool stack.",
+    "schema_type": "Review",
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "seo_processed_date": "2026-03-07T23:30:13.195873"
   },
   "loom-review-content-creators-2026": {
     "tool_name": "Loom",
@@ -640,7 +666,13 @@
     "wp_post_id": 231,
     "published_at": "2026-03-07T21:35:19.292002",
     "publish_mode": "publish",
-    "affiliate_injected": false
+    "affiliate_injected": false,
+    "seo_done": true,
+    "meta_title": "Loom Review for Content Creators 2026: Is It Worth It?",
+    "meta_description": "Our Loom review for content creators 2026 covers pricing, features, and real workflow tests. Perfect for tutorials and client videos. See if it fits.",
+    "schema_type": "Review",
+    "og_image": "https://creatorsmusthave.com/wp-content/uploads/og-default.jpg",
+    "seo_processed_date": "2026-03-07T23:30:25.578273"
   },
   "opus-clip-review-youtube-shorts-creators": {
     "tool_name": "Opus Clip",
@@ -1210,7 +1242,17 @@
       "completeness_notes": "Pricing uses 'approximately' instead of exact verified prices which weakens specificity; affiliate disclosure present; cons are specific and realistic.",
       "editor_summary": "Strong article that meets approval threshold with authentic voice and practical detail. The main weakness is pricing uncertainty ('approximately $49/month' and 'verify current pricing') which reduces trustworthiness \u2014 either confirm exact prices or date the pricing explicitly. Otherwise, this is well-structured, avoids common AI writing pitfalls, and provides genuinely useful information for the target audience."
     },
-    "editor_reviewed": "2026-03-07"
+    "editor_reviewed": "2026-03-07",
+    "image_data": {
+      "screenshot_media_id": 240,
+      "screenshot_alt_text": "Luma Agents dashboard interface showing AI video generation tools for content creators",
+      "screenshot_source": "homepage_screenshot",
+      "hero_media_id": 241,
+      "hero_alt_text": "Content creator planning video project for Luma Agents review workflow",
+      "hero_source": "Pexels \u2014 'video creator reviewing footage storyboard planning'"
+    },
+    "images_date": "2026-03-08",
+    "images_added": true
   },
   "vois-ai-voice-generator-review-podcasters": {
     "tool_name": "Vois",
@@ -1236,6 +1278,13 @@
       "completeness_notes": "Passed - includes exact pricing with three tiers, specific cons with detail, clear 'NOT for' section, affiliate disclosure at top, detailed verdict section.",
       "editor_summary": "This is a high-quality review that meets all requirements. Strong structure with specific pricing ($67/$147/$297), honest cons (limited to 25 voices, 8-15GB storage requirement, no mobile app), clear target audience segmentation, and natural keyword integration. The offline-first positioning is well-articulated and differentiated. Ready to publish."
     },
-    "editor_reviewed": "2026-03-07"
+    "editor_reviewed": "2026-03-07",
+    "image_data": {
+      "hero_media_id": 242,
+      "hero_alt_text": "Podcaster recording with professional microphone testing Vois AI voice generator review",
+      "hero_source": "Pexels \u2014 'podcaster recording voice microphone home studio'"
+    },
+    "images_date": "2026-03-08",
+    "images_added": true
   }
 }

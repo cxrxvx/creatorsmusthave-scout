@@ -1417,3 +1417,49 @@
 [2026-03-07 17:48:34]   💰 Run cost: $0.0001
 [2026-03-07 17:48:34] ============================================================
 
+[2026-03-07 23:29:49] ============================================================
+[2026-03-07 23:29:49] SEO Agent starting
+[2026-03-07 23:29:49] Found 3 articles needing SEO metadata
+[2026-03-07 23:29:49] Daily cap: 15
+[2026-03-07 23:29:49] 
+→ Processing: Kajabi (post ID 229)
+[2026-03-07 23:29:49]   Generating SEO metadata via Claude...
+[2026-03-07 23:29:58]   Tokens: 661 in / 364 out | Cost: $0.00001
+[2026-03-07 23:29:58]   Meta title (49 chars): Kajabi Review for Course Creators 2026: Worth It?
+[2026-03-07 23:29:58]   Meta desc  (154 chars): Our Kajabi review for course creators 2026 examines pricing, features, and whether this all-in-one platform justifies its cost. Find out if it's worth it.
+[2026-03-07 23:29:58]   Focus keyword: kajabi review for course creators 2026
+[2026-03-07 23:29:58]   Schema type: Review + FAQPage
+[2026-03-07 23:29:58]   OG image: using site default
+[2026-03-07 23:29:59]   Pushing to WordPress...
+[2026-03-07 23:30:02]   ✓ SEO metadata + Open Graph live for: Kajabi
+[2026-03-07 23:30:02] 
+→ Processing: Notion (post ID 230)
+[2026-03-07 23:30:02]   Generating SEO metadata via Claude...
+[2026-03-07 23:30:09]   Tokens: 678 in / 298 out | Cost: $0.00001
+[2026-03-07 23:30:09]   Meta title (50 chars): Notion Review for Content Creators 2026: Worth It?
+[2026-03-07 23:30:09]   Meta desc  (130 chars): Our 2026 Notion review for content creators covers pricing, features, and workflow management. See if it replaces your tool stack.
+[2026-03-07 23:30:09]   Focus keyword: notion review for content creators 2026
+[2026-03-07 23:30:09]   Schema type: Review + FAQPage
+[2026-03-07 23:30:09]   OG image: using site default
+[2026-03-07 23:30:10]   Pushing to WordPress...
+[2026-03-07 23:30:13]   ✓ SEO metadata + Open Graph live for: Notion
+[2026-03-07 23:30:13] 
+→ Processing: Loom (post ID 231)
+[2026-03-07 23:30:13]   Generating SEO metadata via Claude...
+[2026-03-07 23:30:22]   Tokens: 678 in / 308 out | Cost: $0.00001
+[2026-03-07 23:30:22]   Meta title (54 chars): Loom Review for Content Creators 2026: Is It Worth It?
+[2026-03-07 23:30:22]   Meta desc  (149 chars): Our Loom review for content creators 2026 covers pricing, features, and real workflow tests. Perfect for tutorials and client videos. See if it fits.
+[2026-03-07 23:30:22]   Focus keyword: loom review for content creators 2026
+[2026-03-07 23:30:22]   Schema type: Review + FAQPage
+[2026-03-07 23:30:22]   OG image: using site default
+[2026-03-07 23:30:22]   Pushing to WordPress...
+[2026-03-07 23:30:25]   ✓ SEO metadata + Open Graph live for: Loom
+[2026-03-07 23:30:25] 
+============================================================
+[2026-03-07 23:30:25] SEO Agent complete
+[2026-03-07 23:30:25]   ✓ Success:  3
+[2026-03-07 23:30:25]   ✗ Failed:   0
+[2026-03-07 23:30:25]   ⏭  Skipped:  0
+[2026-03-07 23:30:25]   💰 Run cost: $0.0000
+[2026-03-07 23:30:25] ============================================================
+

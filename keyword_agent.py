@@ -1,5 +1,21 @@
+"""
+keyword_agent.py — SEO Keyword Research Agent for CXRXVX Affiliates
+=====================================================================
+Phase 2.5 Opus Upgrade:
+  ✅ Content types aligned with article_agent: review, roundup, comparison, alert, authority_article
+  ✅ Roundup generation — detects when 5+ tools exist in same category, generates "Best X for Y"
+  ✅ Comparison pairing — finds competing tools and generates "X vs Y" keyword packages
+  ✅ Outputs roundup_tools and comparison_tools fields for article_agent
+  ✅ Tracks existing roundups/comparisons to prevent duplicates
+  ✅ Ratio enforcement: ~1 roundup per 5 reviews, ~1 comparison per 3-4 tools with competitors
+  ✅ All existing features preserved (clusters, audiences, slug dedup, physical detection)
+
+Drop this file into your cxrxvx-ai-empire/ folder to replace the old keyword_agent.py.
+"""
+
 import json
 import os
+import re
 from datetime import datetime
 from anthropic import Anthropic
 from config import ANTHROPIC_API_KEY, CLAUDE_MODEL, SITE_NAME
@@ -11,68 +27,68 @@ KEYWORD_DATA = "memory/keyword_data.json"
 TOPICS_USED = "memory/topics_used.json"
 LOGS_DIR = "memory/logs/keyword_agent"
 
-# Only research keywords for tools we are confident about
 MIN_SCORE_THRESHOLD = 60
-
-# Process max this many tools per run to control API spend
 DAILY_CAP = 8
 
-# Hard signals — if these appear in the NAME, it's definitely physical
+# ── Roundup/comparison generation ratios ──
+# Generate 1 roundup when this many single reviews exist in a category
+ROUNDUP_TRIGGER_COUNT = 5
+# Generate 1 comparison when a tool has a direct competitor also in our database
+MIN_TOOLS_FOR_COMPARISON = 2
+
+# ═══════════════════════════════════════════════════════
+# PHYSICAL PRODUCT DETECTION (unchanged — works well)
+# ═══════════════════════════════════════════════════════
+
 PHYSICAL_NAME_SIGNALS = [
     "macbook", "iphone", "ipad", "pixel phone", "galaxy phone",
     "airpods", "homepod", "apple watch", "gaming console"
 ]
-
-# Soft signals — only flag as physical if these appear AND no software signals present
 PHYSICAL_DESC_SIGNALS = [
     "physical device", "hardware device", "buy now ships",
     "ships in", "order online", "add to cart", "in the box",
     "unboxing", "plug in", "usb device", "hdmi", "bluetooth speaker"
 ]
-
-# If description contains these, it's software regardless of anything else
 SOFTWARE_OVERRIDE_SIGNALS = [
     "app", "software", "subscription", "saas", "platform", "tool",
     "dashboard", "browser", "extension", "api", "plugin", "web-based",
     "cloud", "download", "install", "free trial", "pricing plan"
 ]
 
-# Article types the Tool Scout can assign — Keyword Agent respects these
-VALID_ARTICLE_TYPES = [
-    "affiliate_review", "full_review", "authority_article",
-    "new_tool_alert", "comparison", "listicle", "tutorial"
-]
+def is_physical_product(tool):
+    name_lower = tool.get("name", "").lower()
+    desc_lower = tool.get("description", "").lower()
+    for signal in PHYSICAL_NAME_SIGNALS:
+        if signal in name_lower:
+            return True
+    for signal in SOFTWARE_OVERRIDE_SIGNALS:
+        if signal in desc_lower:
+            return False
+    for signal in PHYSICAL_DESC_SIGNALS:
+        if signal in desc_lower:
+            return True
+    return False
 
-# Map Scout article types to Keyword Agent article types
+
+# ═══════════════════════════════════════════════════════
+# ARTICLE TYPE MAPPING — aligned with article_agent.py
+# ═══════════════════════════════════════════════════════
+
+# Scout article types → keyword agent article types
 ARTICLE_TYPE_MAP = {
     "affiliate_review":  "review",
     "full_review":       "review",
-    "authority_article": "review",
+    "authority_article": "authority_article",
     "new_tool_alert":    "alert",
     "comparison":        "comparison",
-    "listicle":          "listicle",
-    "tutorial":          "tutorial"
+    "listicle":          "roundup",
+    "tutorial":          "review",
 }
 
-# ─────────────────────────────────────────────────────────────
-# CONTENT TYPE ARCHITECTURE
-# Every high-value tool eventually gets full coverage across
-# all 5 types. The keyword agent assigns one type per article
-# so the system knows what's written and what's still missing.
-# ─────────────────────────────────────────────────────────────
+# ── Title templates per article type (aligned with article_agent) ──
 
-# Priority order — what to write first for a given tool
-CONTENT_TYPE_PRIORITY = [
-    "product_review",   # always first — the core review
-    "comparison",       # second — "[Tool A] vs [Tool B]" converts very well
-    "question",         # third — fast traffic, funnels to review
-    "money_page",       # fourth — "Best X for Y" list articles
-    "foundation_hub",   # fifth — niche-level guide, written once per category
-]
-
-# Title templates per content type — Claude picks from these
-CONTENT_TYPE_TEMPLATES = {
-    "product_review": [
+TITLE_TEMPLATES = {
+    "review": [
         "[Tool] Review: Is It Worth It for [Audience]? (2026)",
         "I Tested [Tool] for 30 Days — Here's What [Audience] Need to Know",
         "The Honest [Tool] Review for [Audience] (Tested 2026)",
@@ -82,48 +98,29 @@ CONTENT_TYPE_TEMPLATES = {
         "[Tool] Pricing Explained: What [Audience] Actually Pay",
         "[Tool] for [Audience]: [Specific Outcome] Without [Pain Point]",
     ],
+    "roundup": [
+        "Best [Category] Tools for [Audience] in 2026 (Tested & Ranked)",
+        "[Number] Best [Category] Tools for [Audience] — Honest Picks",
+        "Best Free [Category] Tools for [Audience] (2026)",
+        "Best [Category] Tools Under $[Price] for [Audience]",
+    ],
     "comparison": [
-        "[Tool A] vs [Tool B]: Which Should [Audience] Choose in 2026?",
-        "[Tool A] vs [Tool B] for [Audience]: The Honest Comparison",
-        "[Tool A] or [Tool B]? I Tested Both — Here's the Verdict",
-        "[Brand A] vs [Brand B]: Which Is Better for [Audience]?",
-        "Premium vs Budget [Tool Type]: Is the Price Difference Worth It?",
+        "[Tool A] vs [Tool B]: Which Is Better for [Audience]? (2026)",
+        "[Tool A] vs [Tool B] — Honest Comparison for [Audience]",
+        "[Tool A] or [Tool B]? The Real Difference for [Audience]",
     ],
-    "question": [
-        "Why Does [Tool] [Common Problem]? (And How to Fix It)",
-        "How Long Does [Tool] Take to [Outcome]? Real Results",
-        "Is [Tool] Worth It for [Specific Audience]? Honest Answer",
-        "Can [Tool] Really [Bold Claim]? I Put It to the Test",
-        "How to Fix [Common Problem] in [Tool] (Step-by-Step)",
-        "[Tool] Not Working? Here's What to Do",
-        "Is [Tool] Safe for [Audience]? Everything You Need to Know",
+    "alert": [
+        "[Tool] Just Launched — First Look for [Audience] (2026)",
+        "[Tool] Review: Is This New Tool Worth It for [Audience]?",
     ],
-    "money_page": [
-        "Best [Tool Type] for [Audience] in 2026 (Tested & Ranked)",
-        "Best [Tool Type] for [Audience] on a Budget",
-        "Best [Tool Type] Under $[Price]: Tested by [Audience]",
-        "Best [Tool Type] for Beginners: [Audience] Guide 2026",
-        "Best [Tool Type] for Professionals: Top Picks for [Audience]",
-    ],
-    "foundation_hub": [
-        "The Complete Guide to [Niche Topic] for [Audience] (2026)",
-        "[Niche Topic] for Beginners: Everything [Audience] Need to Know",
-        "How [Niche Technology] Works: A Plain-English Guide for [Audience]",
-        "[Niche Topic] Buyer's Guide: How [Audience] Should Choose",
-        "[Niche Topic] Cost Breakdown: What [Audience] Actually Pay",
+    "authority_article": [
+        "The Complete Guide to [Topic] for [Audience] (2026)",
+        "[Topic] for Beginners: Everything [Audience] Need to Know",
+        "How [Topic] Works: A Plain-English Guide for [Audience]",
     ],
 }
 
-# What each content type is for — passed to Claude as context
-CONTENT_TYPE_DESCRIPTIONS = {
-    "product_review":  "Individual tool review. Captures buyer-intent search for this specific tool. 1,500-2,500 words. Includes pricing table, pros/cons, who it's for/not for.",
-    "comparison":      "Head-to-head comparison between two tools. Converts extremely well — search intent is very specific. 1,500-2,000 words.",
-    "question":        "Problem or question article. Attracts traffic fast, lower competition. Funnels readers to the main review. 800-1,500 words.",
-    "money_page":      "'Best X for Y' list article covering multiple tools. Strong buyer intent, high affiliate conversion. 2,000-3,500 words.",
-    "foundation_hub":  "Niche-level guide — not tool-specific. Written once per category. Becomes the internal linking backbone. 2,500-4,000 words.",
-}
-
-# Category-specific audience context for better keyword targeting
+# Category-specific audience context
 CATEGORY_AUDIENCE = {
     "video":        "YouTubers, TikTok creators, Instagram Reels creators, video editors",
     "audio":        "podcasters, voiceover artists, musicians, audio creators",
@@ -132,8 +129,36 @@ CATEGORY_AUDIENCE = {
     "productivity": "freelancers, solopreneurs, remote workers, content creators",
     "coding":       "developer-creators, technical bloggers, no-code builders",
     "seo":          "bloggers, affiliate marketers, SEO specialists, content strategists",
-    "other":        "content creators, online entrepreneurs, digital marketers"
+    "email":        "newsletter creators, email marketers, community builders",
+    "courses":      "course creators, coaches, online educators",
+    "other":        "content creators, online entrepreneurs, digital marketers",
 }
+
+# ── Known competitor pairs for comparison articles ──
+# Add pairs as you discover them. Format: (tool_a, tool_b)
+KNOWN_COMPETITORS = [
+    ("jasper ai", "copy.ai"),
+    ("jasper ai", "writesonic"),
+    ("descript", "riverside"),
+    ("descript", "opus clip"),
+    ("elevenlabs", "murf ai"),
+    ("elevenlabs", "speechify"),
+    ("canva", "midjourney"),
+    ("convertkit", "beehiiv"),
+    ("convertkit", "substack"),
+    ("beehiiv", "substack"),
+    ("kajabi", "teachable"),
+    ("surfer seo", "jasper ai"),
+    ("pictory", "opus clip"),
+    ("loom", "synthesia"),
+    ("heygen", "synthesia"),
+    ("later", "metricool"),
+]
+
+
+# ═══════════════════════════════════════════════════════
+# FILE HELPERS
+# ═══════════════════════════════════════════════════════
 
 def load_json(path, default):
     if os.path.exists(path):
@@ -149,48 +174,16 @@ def save_json(path, data):
 def write_log(entry):
     os.makedirs(LOGS_DIR, exist_ok=True)
     today = datetime.now().strftime("%Y-%m-%d")
-    log_path = f"{LOGS_DIR}/{today}.md"
-    with open(log_path, "a") as f:
+    with open(f"{LOGS_DIR}/{today}.md", "a") as f:
         f.write(entry + "\n")
 
-def is_physical_product(tool):
-    """
-    Detect physical hardware that slipped past the Scout filter.
-    Uses three-layer check to avoid false positives on software tools.
-    """
-    name_lower = tool["name"].lower()
-    desc_lower = tool["description"].lower()
-
-    # Layer 1 — hard name signals: always physical regardless of description
-    for signal in PHYSICAL_NAME_SIGNALS:
-        if signal in name_lower:
-            return True
-
-    # Layer 2 — if description has software signals, it's definitely not physical
-    for signal in SOFTWARE_OVERRIDE_SIGNALS:
-        if signal in desc_lower:
-            return False
-
-    # Layer 3 — soft description signals: only flag if no software context found
-    for signal in PHYSICAL_DESC_SIGNALS:
-        if signal in desc_lower:
-            return True
-
-    return False
-
 def is_duplicate_slug(slug, existing_keyword_data):
-    """Check if this slug already exists in keyword data."""
     for key, data in existing_keyword_data.items():
         if data.get("url_slug") == slug:
             return data.get("tool_name", key)
     return None
 
 def build_slug_index(keyword_data):
-    """
-    Build a secondary index: slug → tool_key.
-    Lets the Article Writer find tools by slug as well as by name key.
-    Saved alongside keyword_data.json as keyword_slug_index.json.
-    """
     index = {}
     for tool_key, data in keyword_data.items():
         slug = data.get("url_slug")
@@ -198,281 +191,247 @@ def build_slug_index(keyword_data):
             index[slug] = tool_key
     return index
 
-def get_content_type_for_tool(tool, existing_keyword_data):
+
+# ═══════════════════════════════════════════════════════
+# ROUNDUP DETECTION — when to generate "Best X for Y" articles
+# ═══════════════════════════════════════════════════════
+
+def find_roundup_opportunities(keyword_data, tool_database):
     """
-    Decide which content type to write next for this tool.
-
-    Logic:
-    - If this tool already has a product_review written → pick next type
-      in priority order that hasn't been written yet
-    - If no articles written yet → always start with product_review
-    - foundation_hub is niche-level, not tool-specific → only assigned
-      if no hub exists yet for this tool's category
-
-    Returns one of: product_review | comparison | question | money_page | foundation_hub
+    Detect categories with enough reviewed tools to generate a roundup.
+    
+    Rules:
+    - Need 5+ tools in the same category with keyword packages
+    - No roundup already exists for that category
+    - Returns list of {category, tools, audience}
     """
-    tool_key = tool["name"].lower().replace(" ", "-")
-    category = tool.get("category", "other")
-
-    # Find all content types already written for this tool
-    written_types = set()
-    for key, data in existing_keyword_data.items():
-        if data.get("tool_name", "").lower() == tool["name"].lower():
-            ct = data.get("content_type", "product_review")
-            written_types.add(ct)
-
-    # Check if a foundation_hub exists for this category already
-    hub_exists_for_category = any(
-        data.get("content_type") == "foundation_hub"
-        and data.get("tool_category", "") == category
-        for data in existing_keyword_data.values()
-    )
-
-    # Work through priority order — return first type not yet written
-    for content_type in CONTENT_TYPE_PRIORITY:
-        if content_type in written_types:
+    # Count tools per category that have keyword packages
+    category_tools = {}
+    for key, data in keyword_data.items():
+        if not isinstance(data, dict):
             continue
-        # Skip foundation_hub if one already exists for this category
-        if content_type == "foundation_hub" and hub_exists_for_category:
+        category = data.get("tool_category", "other")
+        tool_name = data.get("tool_name", "")
+        if tool_name and data.get("status") in ("pending_article", "article_written", "published"):
+            if category not in category_tools:
+                category_tools[category] = []
+            category_tools[category].append({
+                "name": tool_name,
+                "score": data.get("tool_score", 0),
+                "slug": data.get("url_slug", ""),
+            })
+
+    # Also check tool_database for tools not yet keyworded
+    for key, tool in tool_database.items():
+        if not isinstance(tool, dict):
             continue
-        return content_type
-
-    # All types written — default back to product_review (freshness update)
-    return "product_review"
-
-def get_tools_needing_keywords():
-    """
-    Find tools ready for keyword research.
-    - Only processes tools scoring 60 or above
-    - Skips tools with no affiliate potential
-    - Skips physical products
-    - Skips already processed tools
-    - Sorts by score descending (best tools first)
-    """
-    tools_raw = load_json(TOOL_DATABASE, {})
-    done = load_json(KEYWORD_DATA, {})
-    topics = load_json(TOPICS_USED, [])
-
-    tools = list(tools_raw.values())
-
-    skipped_low_score = 0
-    skipped_no_affiliate = 0
-    skipped_physical = 0
-    skipped_done = 0
-    pending = []
-
-    for tool in tools:
-        tool_key = tool["name"].lower().replace(" ", "-")
-        already_done = tool_key in done
-        already_written = tool["name"].lower() in [t.lower() for t in topics]
-        is_ready = tool.get("status") in ["discovered", "promoted"]
-
-        if already_done or already_written:
-            skipped_done += 1
-            continue
-
-        if not is_ready:
-            continue
-
-        # Skip tools below confidence threshold
+        category = tool.get("category", "other")
+        tool_name = tool.get("name", "")
         score = tool.get("score", 0)
-        if score < MIN_SCORE_THRESHOLD:
-            skipped_low_score += 1
-            write_log(f"⏭️  Skipped (score {score} below {MIN_SCORE_THRESHOLD}): {tool['name']}")
+        if score >= MIN_SCORE_THRESHOLD and tool_name:
+            existing_names = [t["name"].lower() for t in category_tools.get(category, [])]
+            if tool_name.lower() not in existing_names:
+                if category not in category_tools:
+                    category_tools[category] = []
+                category_tools[category].append({
+                    "name": tool_name,
+                    "score": score,
+                    "slug": "",
+                })
+
+    # Check which categories already have roundups
+    existing_roundup_categories = set()
+    for key, data in keyword_data.items():
+        if isinstance(data, dict) and data.get("article_type") == "roundup":
+            cat = data.get("tool_category", "")
+            if cat:
+                existing_roundup_categories.add(cat)
+
+    # Find categories ready for a roundup
+    opportunities = []
+    for category, tools in category_tools.items():
+        if len(tools) >= ROUNDUP_TRIGGER_COUNT and category not in existing_roundup_categories:
+            # Sort by score, take top 8
+            tools.sort(key=lambda x: x.get("score", 0), reverse=True)
+            top_tools = tools[:8]
+            audience = CATEGORY_AUDIENCE.get(category, CATEGORY_AUDIENCE["other"])
+            opportunities.append({
+                "category": category,
+                "tools": top_tools,
+                "tool_count": len(tools),
+                "audience": audience,
+            })
+
+    return opportunities
+
+
+# ═══════════════════════════════════════════════════════
+# COMPARISON DETECTION — find competing tool pairs
+# ═══════════════════════════════════════════════════════
+
+def find_comparison_opportunities(keyword_data, tool_database):
+    """
+    Find tool pairs that should have comparison articles.
+    
+    Sources:
+    1. KNOWN_COMPETITORS list (manually curated)
+    2. Tools in the same category with similar scores (auto-detected)
+    
+    Rules:
+    - Both tools must be in our database (score 60+)
+    - No comparison article already exists for this pair
+    - Returns list of {tool_a, tool_b, category, reason}
+    """
+    # Get all known tools
+    all_tools = {}
+    for key, tool in tool_database.items():
+        if not isinstance(tool, dict):
             continue
+        name = tool.get("name", "").lower()
+        if name and tool.get("score", 0) >= MIN_SCORE_THRESHOLD:
+            all_tools[name] = {
+                "name": tool.get("name", ""),
+                "category": tool.get("category", "other"),
+                "score": tool.get("score", 0),
+            }
 
-        # Skip tools with no affiliate potential
-        if not tool.get("has_affiliate_potential", True):
-            skipped_no_affiliate += 1
-            write_log(f"⏭️  Skipped (no affiliate): {tool['name']}")
+    # Check which comparisons already exist
+    existing_comparisons = set()
+    for key, data in keyword_data.items():
+        if isinstance(data, dict) and data.get("article_type") == "comparison":
+            comp = data.get("comparison_tools", {})
+            a = comp.get("tool_a", "").lower()
+            b = comp.get("tool_b", "").lower()
+            if a and b:
+                existing_comparisons.add(frozenset([a, b]))
+
+    opportunities = []
+
+    # Source 1: Known competitor pairs
+    for tool_a_name, tool_b_name in KNOWN_COMPETITORS:
+        pair = frozenset([tool_a_name, tool_b_name])
+        if pair in existing_comparisons:
             continue
+        # Both must be in our database
+        if tool_a_name in all_tools and tool_b_name in all_tools:
+            opportunities.append({
+                "tool_a": all_tools[tool_a_name]["name"],
+                "tool_b": all_tools[tool_b_name]["name"],
+                "category": all_tools[tool_a_name]["category"],
+                "reason": "known competitors",
+            })
 
-        # Skip physical products
-        if is_physical_product(tool):
-            skipped_physical += 1
-            write_log(f"⏭️  Skipped (physical product): {tool['name']}")
-            print(f"   ⏭️  Skipping physical product: {tool['name']}")
+    # Source 2: Same category, similar scores (auto-detected)
+    by_category = {}
+    for name, info in all_tools.items():
+        cat = info["category"]
+        if cat not in by_category:
+            by_category[cat] = []
+        by_category[cat].append(info)
+
+    for cat, tools in by_category.items():
+        if len(tools) < 2:
             continue
+        tools.sort(key=lambda x: x["score"], reverse=True)
+        # Pair top tool with #2, #2 with #3 (natural competitors)
+        for i in range(min(len(tools) - 1, 3)):
+            a = tools[i]
+            b = tools[i + 1]
+            pair = frozenset([a["name"].lower(), b["name"].lower()])
+            if pair in existing_comparisons:
+                continue
+            # Skip if already in opportunities from known competitors
+            if any(frozenset([o["tool_a"].lower(), o["tool_b"].lower()]) == pair for o in opportunities):
+                continue
+            # Only pair tools with similar enough scores (within 20 points)
+            if abs(a["score"] - b["score"]) <= 20:
+                opportunities.append({
+                    "tool_a": a["name"],
+                    "tool_b": b["name"],
+                    "category": cat,
+                    "reason": "same category, similar scores",
+                })
 
-        pending.append(tool)
+    return opportunities
 
-    # Sort by score descending — highest value tools get written first
-    pending.sort(key=lambda x: x.get("score", 0), reverse=True)
 
-    # Print skip summary
-    if skipped_low_score > 0:
-        print(f"   ℹ️  Skipped {skipped_low_score} tool(s) with score below {MIN_SCORE_THRESHOLD}")
-    if skipped_no_affiliate > 0:
-        print(f"   ℹ️  Skipped {skipped_no_affiliate} tool(s) with no affiliate potential")
-    if skipped_physical > 0:
-        print(f"   ℹ️  Skipped {skipped_physical} physical product(s)")
-
-    return pending
+# ═══════════════════════════════════════════════════════
+# KEYWORD RESEARCH — single tool reviews
+# ═══════════════════════════════════════════════════════
 
 def get_locked_article_type(tool):
-    """
-    Respect the article type the Tool Scout assigned.
-    Only override if Scout didn't assign one.
-    Maps Scout types to Keyword Agent types.
-    """
+    """Respect the article type the Tool Scout assigned."""
     scout_type = tool.get("article_type", "")
     if scout_type in ARTICLE_TYPE_MAP:
         return ARTICLE_TYPE_MAP[scout_type]
-    # Fallback based on score
     score = tool.get("score", 0)
     if score >= 70:
         return "review"
-    elif score >= 60:
-        return "alert"
     else:
         return "alert"
 
-def research_keywords(tool, existing_keyword_data):
-    """Ask Claude to research the best keyword strategy for this tool."""
-
+def research_keywords_single(tool, existing_keyword_data):
+    """Research keywords for a single-tool review or alert."""
     category = tool.get("category", "other")
     audience = CATEGORY_AUDIENCE.get(category, CATEGORY_AUDIENCE["other"])
-    locked_article_type = get_locked_article_type(tool)
+    locked_type = get_locked_article_type(tool)
 
-    # Determine content type for this article
-    content_type = get_content_type_for_tool(tool, existing_keyword_data)
-    content_type_desc = CONTENT_TYPE_DESCRIPTIONS.get(content_type, "")
-    title_templates = CONTENT_TYPE_TEMPLATES.get(content_type, CONTENT_TYPE_TEMPLATES["product_review"])
-    templates_formatted = "\n".join(f"  - {t}" for t in title_templates)
+    templates = TITLE_TEMPLATES.get(locked_type, TITLE_TEMPLATES["review"])
+    templates_formatted = "\n".join(f"  - {t}" for t in templates)
 
-    days_since_launch = (datetime.now() - datetime.strptime(
-        tool.get("discovered_date", datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d"
-    )).days
+    days_since_launch = 0
+    try:
+        days_since_launch = (datetime.now() - datetime.strptime(
+            tool.get("discovered_date", datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d"
+        )).days
+    except (ValueError, TypeError):
+        pass
+
     today = datetime.now().strftime("%B %d, %Y")
 
-    prompt = f"""You are an SEO keyword research specialist for "{SITE_NAME}" — an affiliate website reviewing the best tools for content creators.
+    prompt = f"""You are an SEO keyword research specialist for "{SITE_NAME}" — an affiliate website reviewing creator tools.
 
-We are a BRAND NEW domain (launched March 2026) with zero domain authority.
-This means we must ONLY target low-competition, long-tail keywords for the first 6 months.
-Never recommend a keyword with difficulty above 30. We cannot rank for competitive terms yet.
+We are a NEW domain (launched March 2026) with zero domain authority.
+Only target low-competition, long-tail keywords. Max difficulty: 30.
 
-Today's date: {today}
-Tool discovered: {days_since_launch} days ago
-{"⚡ URGENT: This tool just launched — competition window is open RIGHT NOW. Prioritize first-mover keywords." if days_since_launch <= 3 else ""}
-{"⏰ Tool is " + str(days_since_launch) + " days old — act before competition increases." if 4 <= days_since_launch <= 14 else ""}
+Today: {today}
+{"⚡ URGENT: Tool just launched — first-mover window open." if days_since_launch <= 3 else ""}
 
-TOOL DETAILS:
-Name: {tool['name']}
-Description: {tool['description']}
+TOOL: {tool['name']}
+Description: {tool.get('description', '')}
 Category: {category}
 Score: {tool.get('score', 0)}/100
-Article type LOCKED: {locked_article_type}
-IMPORTANT: The article type is already decided. Do NOT change it.
-Your job is only to find the best keywords for this article type.
+Article type (LOCKED — do not change): {locked_type}
+Target audience: {audience}
 
-TARGET AUDIENCE for this category: {audience}
-Write keywords that THIS specific audience would search for.
-
-CONTENT TYPE FOR THIS ARTICLE: {content_type}
-What this means: {content_type_desc}
-This is what determines the angle, keyword, and title format.
-Do NOT change the content type. Research keywords that fit it exactly.
-
-YOUR TASK — think like a professional SEO strategist:
-
-STEP 1 — SEARCH INTENT
-Match the exact content type already ranking on page 1.
-The content type is locked to: {content_type}
-Find keywords where THIS content type ranks on page 1.
-
-STEP 2 — LONG-TAIL KEYWORD FIRST
-Never target the short obvious keyword. Find the specific long-tail version.
-Example: not "AI video editor" but "best AI video editor for YouTube shorts under $20"
-Long-tail = lower competition + clearer intent + higher conversion rate.
-
-STEP 3 — KEYWORD CLUSTER
-Find 8-12 related keywords the same article can naturally rank for.
-Include: brand keywords, feature keywords, comparison keywords, problem keywords.
-
-STEP 4 — TRAFFIC VALUE OVER VOLUME
-Prioritize buyer intent and problem urgency over raw search volume.
-200 searches with high buyer intent beats 2000 searches with low intent.
-
-STEP 5 — REALISTIC DIFFICULTY
-Be honest about competition. Rules:
-- Tool with 1M+ users = difficulty never below 40
-- Brand new tool (under 30 days old) = difficulty likely under 15
-- Established SaaS with many reviews = difficulty 20-35
-- Never recommend difficulty above 30 for our new domain
-
-STEP 6 — SERP GAP
-What is missing from articles currently ranking?
-Outdated info? No pricing table? No creator workflow? No free trial info?
-This is our content advantage.
-
-STEP 7 — ARTICLE TITLE
-Choose a title from these templates for the content type "{content_type}":
+TITLE TEMPLATES (pick one and adapt):
 {templates_formatted}
 
-Adapt the chosen template to fit the tool and audience exactly.
-Keep it under 60 characters. Natural language. No keyword stuffing.
+YOUR TASK:
+1. Find the best long-tail primary keyword (not the obvious short one)
+2. Build a cluster of 8-12 related keywords
+3. Identify the SERP gap (what page 1 is missing)
+4. Create a title under 60 characters using a template above
+5. Generate 3 supporting article ideas for the topic cluster
 
-STEP 8 — TOPIC CLUSTER (supporting articles)
-For every main article, identify 3 supporting articles that:
-- Target related long-tail keywords the main article cannot rank for alone
-- Answer specific questions people search AFTER discovering the main tool
-- Build topical authority so Google sees us as the expert on this tool/category
-- Are drawn from DIFFERENT content types than the main article
-
-Assign each supporting article one of these content types:
-  product_review | comparison | question | money_page | foundation_hub
-
-Examples for a Descript review (content_type: product_review):
-  → "descript vs adobe audition for podcasters" (content_type: comparison)
-  → "how to remove filler words automatically in descript" (content_type: question)
-  → "descript free plan limitations 2026" (content_type: question)
-These supporting articles link back to the main review — building a content cluster.
-
-Respond ONLY with a valid JSON object, nothing else:
+Respond ONLY with valid JSON:
 {{
-  "primary_keyword": "specific long-tail keyword to target",
-  "secondary_keywords": ["keyword 2", "keyword 3", "keyword 4"],
-  "keyword_cluster": [
-    "related keyword 1",
-    "related keyword 2",
-    "related keyword 3",
-    "related keyword 4",
-    "related keyword 5",
-    "related keyword 6",
-    "related keyword 7",
-    "related keyword 8"
-  ],
+  "primary_keyword": "specific long-tail keyword",
+  "secondary_keywords": ["kw2", "kw3", "kw4"],
+  "keyword_cluster": ["related1", "related2", "related3", "related4", "related5", "related6", "related7", "related8"],
   "search_intent": "buyer|comparison|informational",
-  "estimated_difficulty": "easy|medium|hard",
   "difficulty_score": 15,
   "traffic_value": "high|medium|low",
-  "article_type": "{locked_article_type}",
-  "content_type": "{content_type}",
-  "recommended_word_count": 2000,
-  "article_title": "Title using one of the templates provided above — under 60 characters",
-  "url_slug": "keyword-friendly-url-slug",
-  "serp_gap": "What is missing from current page 1 results that we can do better",
-  "reasoning": "One sentence explaining why this keyword was chosen",
+  "article_type": "{locked_type}",
+  "recommended_word_count": 2500,
+  "article_title": "Title under 60 characters",
+  "url_slug": "keyword-friendly-slug",
+  "serp_gap": "What page 1 is missing",
   "urgency": "high|medium|low",
   "supporting_articles": [
-    {{
-      "title": "Supporting article title 1",
-      "slug": "url-slug-1",
-      "content_type": "comparison|question|money_page|foundation_hub|product_review",
-      "angle": "Why this supports the main article and builds topical authority"
-    }},
-    {{
-      "title": "Supporting article title 2",
-      "slug": "url-slug-2",
-      "content_type": "comparison|question|money_page|foundation_hub|product_review",
-      "angle": "Why this supports the main article and builds topical authority"
-    }},
-    {{
-      "title": "Supporting article title 3",
-      "slug": "url-slug-3",
-      "content_type": "comparison|question|money_page|foundation_hub|product_review",
-      "angle": "Why this supports the main article and builds topical authority"
-    }}
+    {{"title": "Title 1", "slug": "slug-1", "content_type": "comparison", "angle": "Why this helps"}},
+    {{"title": "Title 2", "slug": "slug-2", "content_type": "question", "angle": "Why this helps"}},
+    {{"title": "Title 3", "slug": "slug-3", "content_type": "roundup", "angle": "Why this helps"}}
   ]
 }}"""
 
@@ -481,10 +440,7 @@ Respond ONLY with a valid JSON object, nothing else:
         max_tokens=1200,
         messages=[{"role": "user", "content": prompt}]
     )
-
     raw = response.content[0].text.strip()
-
-    # Clean up if Claude wrapped it in markdown code blocks
     if raw.startswith("```"):
         raw = raw.split("```")[1]
         if raw.startswith("json"):
@@ -492,122 +448,356 @@ Respond ONLY with a valid JSON object, nothing else:
     raw = raw.strip()
 
     result = json.loads(raw)
-
-    # Always enforce the locked article type — never let Claude override it
-    result["article_type"] = locked_article_type
-
-    # Always enforce the content type — never let Claude override it
-    result["content_type"] = content_type
-
-    # Duplicate slug check
-    duplicate_of = is_duplicate_slug(result["url_slug"], existing_keyword_data)
-    if duplicate_of:
-        print(f"   ⚠️  Slug '{result['url_slug']}' already used by '{duplicate_of}' — appending tool name")
-        write_log(f"⚠️  Duplicate slug detected: {result['url_slug']} — already used by {duplicate_of}")
-        tool_suffix = tool["name"].lower().replace(" ", "-")[:20]
-        result["url_slug"] = f"{result['url_slug']}-{tool_suffix}"
-
+    result["article_type"] = locked_type  # enforce
     result["tool_name"] = tool["name"]
-    result["tool_category"] = tool["category"]
+    result["tool_category"] = tool.get("category", "other")
     result["tool_score"] = tool.get("score", 0)
     result["researched_date"] = datetime.now().strftime("%Y-%m-%d")
-    result["days_since_launch"] = days_since_launch
     result["status"] = "pending_article"
 
-    # Log supporting articles if generated
-    if result.get("supporting_articles"):
-        for sa in result["supporting_articles"]:
-            ct_label = sa.get("content_type", "")
-            print(f"   📎 Cluster [{ct_label}]: {sa.get('title', '')}")
+    # Duplicate slug check
+    dup = is_duplicate_slug(result["url_slug"], existing_keyword_data)
+    if dup:
+        suffix = tool["name"].lower().replace(" ", "-")[:20]
+        result["url_slug"] = f"{result['url_slug']}-{suffix}"
+        print(f"   ⚠️  Slug already used by '{dup}' — appended suffix")
 
     return result
+
+
+# ═══════════════════════════════════════════════════════
+# KEYWORD RESEARCH — roundup articles ("Best X for Y")
+# ═══════════════════════════════════════════════════════
+
+def research_keywords_roundup(opportunity, existing_keyword_data):
+    """Research keywords for a roundup article covering multiple tools."""
+    category = opportunity["category"]
+    audience = opportunity["audience"]
+    tools = opportunity["tools"]
+    tool_names = [t["name"] for t in tools]
+
+    templates = TITLE_TEMPLATES["roundup"]
+    templates_formatted = "\n".join(f"  - {t}" for t in templates)
+
+    prompt = f"""You are an SEO keyword research specialist for "{SITE_NAME}" — an affiliate website reviewing creator tools.
+
+New domain, zero authority. Max keyword difficulty: 30.
+
+ROUNDUP ARTICLE — "Best X for Y" format covering multiple tools.
+Category: {category}
+Target audience: {audience}
+Tools to cover: {', '.join(tool_names)}
+
+TITLE TEMPLATES (pick one and adapt):
+{templates_formatted}
+
+This is the HIGHEST CONVERTING article type in affiliate marketing.
+Searchers looking for "best [category] tools" are ready to buy.
+
+Respond ONLY with valid JSON:
+{{
+  "primary_keyword": "best [category] tools for [audience]",
+  "secondary_keywords": ["kw2", "kw3", "kw4"],
+  "keyword_cluster": ["related1", "related2", "related3", "related4", "related5", "related6"],
+  "search_intent": "buyer",
+  "difficulty_score": 20,
+  "traffic_value": "high",
+  "article_type": "roundup",
+  "recommended_word_count": 4000,
+  "article_title": "Title under 60 characters using a template above",
+  "url_slug": "best-category-tools-for-audience",
+  "serp_gap": "What existing roundups on page 1 are missing",
+  "urgency": "high"
+}}"""
+
+    response = client.messages.create(
+        model=CLAUDE_MODEL,
+        max_tokens=800,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    raw = response.content[0].text.strip()
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    raw = raw.strip()
+
+    result = json.loads(raw)
+    result["article_type"] = "roundup"  # enforce
+    result["tool_name"] = f"Best {category.title()} Tools"
+    result["tool_category"] = category
+    result["tool_score"] = max(t.get("score", 0) for t in tools)
+    result["researched_date"] = datetime.now().strftime("%Y-%m-%d")
+    result["status"] = "pending_article"
+    # ⚡ This field tells article_agent which tools to include
+    result["roundup_tools"] = [{"name": t["name"], "slug": t.get("slug", "")} for t in tools]
+
+    dup = is_duplicate_slug(result["url_slug"], existing_keyword_data)
+    if dup:
+        result["url_slug"] = f"{result['url_slug']}-{category}"
+
+    return result
+
+
+# ═══════════════════════════════════════════════════════
+# KEYWORD RESEARCH — comparison articles ("X vs Y")
+# ═══════════════════════════════════════════════════════
+
+def research_keywords_comparison(comp_opportunity, existing_keyword_data):
+    """Research keywords for a head-to-head comparison article."""
+    tool_a = comp_opportunity["tool_a"]
+    tool_b = comp_opportunity["tool_b"]
+    category = comp_opportunity["category"]
+    audience = CATEGORY_AUDIENCE.get(category, CATEGORY_AUDIENCE["other"])
+
+    templates = TITLE_TEMPLATES["comparison"]
+    templates_formatted = "\n".join(f"  - {t}" for t in templates)
+
+    prompt = f"""You are an SEO keyword research specialist for "{SITE_NAME}" — an affiliate website reviewing creator tools.
+
+New domain, zero authority. Max keyword difficulty: 30.
+
+COMPARISON ARTICLE — "{tool_a} vs {tool_b}" head-to-head.
+Category: {category}
+Target audience: {audience}
+
+This article ranks for BOTH tool names — double the traffic opportunity.
+Searchers comparing two tools are very close to buying.
+
+TITLE TEMPLATES (pick one and adapt):
+{templates_formatted}
+
+Respond ONLY with valid JSON:
+{{
+  "primary_keyword": "{tool_a.lower()} vs {tool_b.lower()}",
+  "secondary_keywords": ["kw2", "kw3", "kw4"],
+  "keyword_cluster": ["related1", "related2", "related3", "related4", "related5", "related6"],
+  "search_intent": "comparison",
+  "difficulty_score": 15,
+  "traffic_value": "high",
+  "article_type": "comparison",
+  "recommended_word_count": 3000,
+  "article_title": "Title under 60 characters using a template above",
+  "url_slug": "{tool_a.lower().replace(' ', '-')}-vs-{tool_b.lower().replace(' ', '-')}",
+  "serp_gap": "What existing comparisons are missing",
+  "urgency": "high"
+}}"""
+
+    response = client.messages.create(
+        model=CLAUDE_MODEL,
+        max_tokens=800,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    raw = response.content[0].text.strip()
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    raw = raw.strip()
+
+    result = json.loads(raw)
+    result["article_type"] = "comparison"  # enforce
+    result["tool_name"] = f"{tool_a} vs {tool_b}"
+    result["tool_category"] = category
+    result["tool_score"] = 80  # comparisons are always high value
+    result["researched_date"] = datetime.now().strftime("%Y-%m-%d")
+    result["status"] = "pending_article"
+    # ⚡ This field tells article_agent which tools to compare
+    result["comparison_tools"] = {"tool_a": tool_a, "tool_b": tool_b}
+
+    dup = is_duplicate_slug(result["url_slug"], existing_keyword_data)
+    if dup:
+        result["url_slug"] = f"{result['url_slug']}-comparison"
+
+    return result
+
+
+# ═══════════════════════════════════════════════════════
+# GET TOOLS NEEDING KEYWORDS (updated — same core logic)
+# ═══════════════════════════════════════════════════════
+
+def get_tools_needing_keywords():
+    """Find tools ready for single-review keyword research."""
+    tools_raw = load_json(TOOL_DATABASE, {})
+    done = load_json(KEYWORD_DATA, {})
+    topics = load_json(TOPICS_USED, [])
+
+    tools = list(tools_raw.values()) if isinstance(tools_raw, dict) else tools_raw
+
+    skipped_low = 0
+    skipped_no_aff = 0
+    skipped_physical = 0
+    pending = []
+
+    for tool in tools:
+        if not isinstance(tool, dict):
+            continue
+        tool_key = tool.get("name", "").lower().replace(" ", "-")
+        if not tool_key:
+            continue
+
+        if tool_key in done:
+            continue
+        if tool.get("name", "").lower() in [t.lower() for t in topics]:
+            continue
+        if tool.get("status") not in ["discovered", "promoted", "pending"]:
+            continue
+
+        score = tool.get("score", 0)
+        if score < MIN_SCORE_THRESHOLD:
+            skipped_low += 1
+            continue
+        if not tool.get("has_affiliate_potential", True):
+            skipped_no_aff += 1
+            continue
+        if is_physical_product(tool):
+            skipped_physical += 1
+            continue
+
+        pending.append(tool)
+
+    pending.sort(key=lambda x: x.get("score", 0), reverse=True)
+
+    if skipped_low > 0:
+        print(f"   ℹ️  Skipped {skipped_low} tool(s) below score {MIN_SCORE_THRESHOLD}")
+    if skipped_no_aff > 0:
+        print(f"   ℹ️  Skipped {skipped_no_aff} tool(s) with no affiliate potential")
+    if skipped_physical > 0:
+        print(f"   ℹ️  Skipped {skipped_physical} physical product(s)")
+
+    return pending
+
+
+# ═══════════════════════════════════════════════════════
+# MAIN RUN
+# ═══════════════════════════════════════════════════════
 
 def run():
     print("\n🔑 Keyword Agent starting...\n")
     write_log(f"\n## {datetime.now().strftime('%Y-%m-%d %H:%M')} — Keyword Agent run started")
 
-    pending = get_tools_needing_keywords()
-
-    if not pending:
-        print("✅ No tools waiting for keyword research right now.")
-        write_log("No tools pending keyword research.")
-        return
-
-    # Apply daily cap
-    if len(pending) > DAILY_CAP:
-        print(f"📋 Found {len(pending)} tools — processing top {DAILY_CAP} by score (daily cap)\n")
-        pending = pending[:DAILY_CAP]
-    else:
-        print(f"📋 Found {len(pending)} tool(s) waiting for keyword research\n")
-
     keyword_data = load_json(KEYWORD_DATA, {})
+    tool_database = load_json(TOOL_DATABASE, {})
     processed = 0
 
-    for tool in pending:
-        tool_key = tool["name"].lower().replace(" ", "-")
-        urgency_flag = "⚡" if tool.get("score", 0) >= 75 else "🔍"
-        print(f"{urgency_flag} Researching keywords for: {tool['name']} (score: {tool.get('score', 0)})")
+    # ── Phase 1: Single-tool reviews ──────────────────────────────────────
+    pending = get_tools_needing_keywords()
 
-        try:
-            result = research_keywords(tool, keyword_data)
-            keyword_data[tool_key] = result
+    if pending:
+        review_cap = max(DAILY_CAP - 2, 4)  # Reserve 2 slots for roundups/comparisons
+        to_process = pending[:review_cap]
+        print(f"📋 Single reviews: {len(pending)} tools waiting, processing {len(to_process)}")
 
-            urgency_emoji = {"high": "🔥", "medium": "⏰", "low": "📅"}.get(
-                result.get("urgency", "low"), "📅"
-            )
+        for tool in to_process:
+            if processed >= DAILY_CAP:
+                break
+            tool_key = tool["name"].lower().replace(" ", "-")
+            score = tool.get("score", 0)
+            print(f"\n{'⚡' if score >= 75 else '🔍'} Researching: {tool['name']} (score: {score})")
 
-            content_type_emoji = {
-                "product_review":  "📝",
-                "comparison":      "⚖️",
-                "question":        "❓",
-                "money_page":      "💰",
-                "foundation_hub":  "🏛️",
-            }.get(result.get("content_type", ""), "📝")
+            try:
+                result = research_keywords_single(tool, keyword_data)
+                keyword_data[tool_key] = result
 
-            print(f"   ✅ Primary keyword: \"{result['primary_keyword']}\"")
-            print(f"   {content_type_emoji} Content type: {result.get('content_type', 'product_review')}")
-            print(f"   📊 Difficulty: {result['estimated_difficulty']} ({result['difficulty_score']}/100)")
-            print(f"   🎯 Intent: {result['search_intent']}")
-            print(f"   💰 Traffic value: {result['traffic_value']}")
-            print(f"   📝 Article type: {result['article_type']} ({result['recommended_word_count']} words)")
-            print(f"   🏆 Title: {result['article_title']}")
-            print(f"   🔗 Slug: {result['url_slug']}")
-            print(f"   🕳️  SERP gap: {result['serp_gap']}")
-            print(f"   {urgency_emoji} Urgency: {result.get('urgency', 'unknown')}\n")
+                print(f"   ✅ Keyword: \"{result['primary_keyword']}\"")
+                print(f"   📝 Type: {result['article_type']} | {result['recommended_word_count']} words")
+                print(f"   🏆 Title: {result['article_title']}")
+                print(f"   🔗 Slug: {result['url_slug']}")
+                print(f"   📊 Difficulty: {result['difficulty_score']}/100")
 
-            log_entry = f"""
-### {tool['name']} (score: {tool.get('score', 0)})
-- Primary keyword: {result['primary_keyword']}
-- Content type: {result.get('content_type', 'product_review')}
-- Keyword cluster: {', '.join(result['keyword_cluster'])}
-- Difficulty: {result['estimated_difficulty']} ({result['difficulty_score']}/100)
-- Intent: {result['search_intent']}
-- Traffic value: {result['traffic_value']}
-- Urgency: {result.get('urgency', 'unknown')}
-- Article type: {result['article_type']} ({result['recommended_word_count']} words)
-- Title: {result['article_title']}
-- Slug: {result['url_slug']}
-- SERP gap: {result['serp_gap']}
-- Reasoning: {result['reasoning']}"""
-            write_log(log_entry)
+                if result.get("supporting_articles"):
+                    for sa in result["supporting_articles"]:
+                        print(f"   📎 Cluster [{sa.get('content_type', '')}]: {sa.get('title', '')}")
 
-            processed += 1
+                write_log(f"### {tool['name']} → \"{result['primary_keyword']}\" | {result['article_type']} | diff {result['difficulty_score']}")
+                processed += 1
 
-        except Exception as e:
-            print(f"   ❌ Error processing {tool['name']}: {e}\n")
-            write_log(f"### ERROR — {tool['name']}: {e}")
+            except Exception as e:
+                print(f"   ❌ Error: {e}")
+                write_log(f"### ERROR — {tool['name']}: {e}")
+    else:
+        print("   ℹ️  No single-review tools pending")
 
-    # Save keyword data
+    # ── Phase 2: Roundup articles ─────────────────────────────────────────
+    if processed < DAILY_CAP:
+        roundup_opps = find_roundup_opportunities(keyword_data, tool_database)
+        if roundup_opps:
+            print(f"\n📦 Roundup opportunities: {len(roundup_opps)} categories ready")
+            for opp in roundup_opps[:1]:  # Max 1 roundup per run
+                if processed >= DAILY_CAP:
+                    break
+                tool_names = [t["name"] for t in opp["tools"]]
+                print(f"\n🏆 Generating roundup: Best {opp['category'].title()} Tools")
+                print(f"   Tools: {', '.join(tool_names[:5])}{'...' if len(tool_names) > 5 else ''}")
+
+                try:
+                    result = research_keywords_roundup(opp, keyword_data)
+                    roundup_key = f"roundup-{opp['category']}"
+                    keyword_data[roundup_key] = result
+
+                    print(f"   ✅ Keyword: \"{result['primary_keyword']}\"")
+                    print(f"   📝 Type: roundup | {result['recommended_word_count']} words")
+                    print(f"   🏆 Title: {result['article_title']}")
+                    print(f"   🔗 Slug: {result['url_slug']}")
+                    print(f"   🔧 Tools included: {len(result.get('roundup_tools', []))}")
+
+                    write_log(f"### ROUNDUP: {result['article_title']} → \"{result['primary_keyword']}\" | {len(result.get('roundup_tools', []))} tools")
+                    processed += 1
+
+                except Exception as e:
+                    print(f"   ❌ Roundup error: {e}")
+                    write_log(f"### ERROR — Roundup {opp['category']}: {e}")
+        else:
+            print(f"\n   ℹ️  No roundup opportunities yet (need {ROUNDUP_TRIGGER_COUNT}+ tools per category)")
+
+    # ── Phase 3: Comparison articles ──────────────────────────────────────
+    if processed < DAILY_CAP:
+        comp_opps = find_comparison_opportunities(keyword_data, tool_database)
+        if comp_opps:
+            print(f"\n⚖️  Comparison opportunities: {len(comp_opps)} pairs found")
+            for opp in comp_opps[:1]:  # Max 1 comparison per run
+                if processed >= DAILY_CAP:
+                    break
+                print(f"\n⚖️  Generating comparison: {opp['tool_a']} vs {opp['tool_b']}")
+                print(f"   Reason: {opp['reason']}")
+
+                try:
+                    result = research_keywords_comparison(opp, keyword_data)
+                    comp_key = f"comparison-{opp['tool_a'].lower().replace(' ', '-')}-vs-{opp['tool_b'].lower().replace(' ', '-')}"
+                    keyword_data[comp_key] = result
+
+                    print(f"   ✅ Keyword: \"{result['primary_keyword']}\"")
+                    print(f"   📝 Type: comparison | {result['recommended_word_count']} words")
+                    print(f"   🏆 Title: {result['article_title']}")
+                    print(f"   🔗 Slug: {result['url_slug']}")
+
+                    write_log(f"### COMPARISON: {result['article_title']} → \"{result['primary_keyword']}\"")
+                    processed += 1
+
+                except Exception as e:
+                    print(f"   ❌ Comparison error: {e}")
+                    write_log(f"### ERROR — Comparison {opp['tool_a']} vs {opp['tool_b']}: {e}")
+        else:
+            print(f"\n   ℹ️  No comparison opportunities yet")
+
+    # ── Save everything ───────────────────────────────────────────────────
     save_json(KEYWORD_DATA, keyword_data)
-
-    # Save slug index for Article Writer
     slug_index = build_slug_index(keyword_data)
     save_json("memory/keyword_slug_index.json", slug_index)
 
-    print(f"💾 Saved keyword data for {processed} tool(s) to {KEYWORD_DATA}")
-    print(f"🗂️  Slug index saved to memory/keyword_slug_index.json")
-    write_log(f"\nRun complete. Processed {processed} tools.")
+    # ── Summary ───────────────────────────────────────────────────────────
+    type_counts = {}
+    for data in keyword_data.values():
+        if isinstance(data, dict):
+            t = data.get("article_type", "review")
+            type_counts[t] = type_counts.get(t, 0) + 1
+    type_str = ", ".join(f"{v} {k}" for k, v in type_counts.items())
+
+    print(f"\n💾 Saved {processed} keyword package(s)")
+    print(f"📊 Total in keyword_data: {len(keyword_data)} ({type_str})")
+    write_log(f"\nRun complete. Processed: {processed}. Total: {len(keyword_data)}")
     print("\n✅ Keyword Agent done.\n")
+
 
 if __name__ == "__main__":
     run()

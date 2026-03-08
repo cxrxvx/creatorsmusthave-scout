@@ -1,180 +1,455 @@
-import schedule, time, sys, os, json
+"""
+scheduler.py — Decoupled pipeline scheduler for Creators Must Have
+===================================================================
+Phase 2.5 Opus Upgrade:
+  ✅ Google-safe publishing ramp: 1/day → 2/day → 3/day → 5/day → uncapped
+  ✅ Write-ahead cap: skip article writing if 21+ unpublished drafts queued
+  ✅ Watchdog integration: runs after every --now pipeline and catches errors
+  ✅ Pipeline summary with article type breakdown
+  ✅ All existing features preserved (decoupled agents, per-agent locks, cost breaker)
+
+Agents run on their own independent timers. Work gets processed as fast as it arrives.
+
+Schedule:
+  Tool Scout:         06:00 09:00 12:00 15:00 18:00 21:00  (6x/day)
+  Keyword Agent:      06:00 09:00 12:00 15:00 18:00 21:00  (6x/day)
+  Article Writer:     06:00 09:00 12:00 15:00 18:00 21:00  (6x/day — write-ahead capped)
+  Editor Agent:       06:30 09:30 12:30 15:30 18:30 21:30  (6x/day — 30min after writers)
+  Image Agent:        07:00 10:00 13:00 16:00 19:00 22:00  (6x/day)
+  SEO Agent:          07:00 10:00 13:00 16:00 19:00 22:00  (6x/day)
+  Internal Links:     23:00                                  (1x/day)
+  Publisher:          10:00 17:00 21:00                     (3x/day — strategic US times)
+  Health Monitor:     08:00                                  (1x/day)
+
+Why these publisher times?
+  10:00 Latvia (08:00 UTC) — Google morning crawl window
+  17:00 Latvia (15:00 UTC) — US East Coast peak browsing
+  21:00 Latvia (19:00 UTC) — US West Coast afternoon + overnight indexing
+
+Drop this file into your cxrxvx-ai-empire/ folder to replace the old scheduler.py.
+"""
+
+import subprocess
+import sys
+import os
+import json
+import schedule
+import time
+import threading
 from datetime import datetime, date
-import tool_scout, keyword_agent, article_agent, publisher_agent, health_monitor, seo_agent, internal_link_agent
+from pathlib import Path
 
-SITE_LAUNCH = datetime(2026, 3, 5)
-SCAN_TIMES = ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]
-HEALTH_CHECK_TIME = "08:00"
-DAILY_COST_LIMIT_USD = 20.00
-QUIET_HOURS_START = 23
-QUIET_HOURS_END = 5
-LOCK_FILE = "memory/.pipeline_lock"
-DAILY_COUNTER_FILE = "memory/.daily_counter.json"
+# ── paths ──────────────────────────────────────────────────────────────────────
+BASE_DIR   = Path(__file__).parent
+MEMORY_DIR = BASE_DIR / "memory"
+LOCK_FILE  = MEMORY_DIR / ".pipeline_lock"
+COST_FILE  = MEMORY_DIR / ".daily_cost.json"
+HANDOFFS_FILE = MEMORY_DIR / "handoffs.json"
 
-def get_daily_cap():
-    months_active = (datetime.now() - SITE_LAUNCH).days / 30
-    if months_active < 2:   return 2
-    elif months_active < 4: return 3
-    elif months_active < 6: return 5
-    else:                   return 99
+# ── cost circuit breaker ───────────────────────────────────────────────────────
+MAX_DAILY_COST = 20.00   # hard stop if API spend exceeds this today
 
-def get_articles_written_today():
-    today = str(date.today())
-    if not os.path.exists(DAILY_COUNTER_FILE): return 0
+# ── write-ahead cap ───────────────────────────────────────────────────────────
+# Skip article writing if this many unpublished drafts are queued.
+# At 1/day (month 1) = 3 weeks buffer. At 3/day (month 4+) = 1 week buffer.
+WRITE_AHEAD_CAP = 21
+
+# ── Google-safe publish ramp ──────────────────────────────────────────────────
+SITE_LAUNCH_DATE = date(2026, 3, 5)
+
+
+def get_daily_publish_cap() -> int:
+    """
+    Google-safe publishing ramp for new domains.
+    
+    Pattern Google likes: launch batch → steady drip → gradual ramp.
+    The 15-article launch batch on day 1 is fine — Google expects new sites
+    to launch with content. This ramp controls ONGOING daily publishing.
+    
+    Old (risky):  3/day from day 1
+    New (safe):   1/day → 2/day → 3/day → 5/day → uncapped
+    """
+    days_active = (date.today() - SITE_LAUNCH_DATE).days
+
+    if days_active <= 28:     return 1    # Weeks 1-4: slow and steady
+    elif days_active <= 90:   return 2    # Months 2-3: building trust
+    elif days_active <= 150:  return 3    # Months 4-5: ramping up
+    elif days_active <= 180:  return 5    # Month 6: Google trusts domain
+    else:                     return 99   # Month 7+: uncapped
+
+
+# ── write-ahead cap check ────────────────────────────────────────────────────
+
+def should_write_articles() -> bool:
+    """
+    Check if we need more articles or if the draft queue is full enough.
+    
+    If 21+ articles are sitting at pending_edit or pending_publish,
+    skip article writing to save API budget. Those articles won't
+    publish for weeks — no point writing more.
+    
+    Returns True if writing should proceed, False to skip.
+    """
     try:
-        data = json.load(open(DAILY_COUNTER_FILE))
-        return 0 if data.get("date") != today else data.get("articles_published", 0)
-    except: return 0
-
-def increment_daily_counter(count):
-    today = str(date.today())
-    current = get_articles_written_today()
-    os.makedirs("memory", exist_ok=True)
-    json.dump({"date": today, "articles_published": current + count}, open(DAILY_COUNTER_FILE, "w"))
-
-def get_estimated_cost_today():
-    try: return float(json.load(open("memory/system_health.json")).get("estimated_cost_today", 0.0))
-    except: return 0.0
-
-def cost_limit_exceeded():
-    cost = get_estimated_cost_today()
-    if cost >= DAILY_COST_LIMIT_USD:
-        print(f"\n  COST CIRCUIT BREAKER: ${cost:.2f} spent — limit ${DAILY_COST_LIMIT_USD:.2f}")
-        write_scheduler_log(f"COST BREAKER: ${cost:.2f}")
-        return True
-    return False
-
-def acquire_lock():
-    if os.path.exists(LOCK_FILE):
-        lock_age = time.time() - os.path.getmtime(LOCK_FILE)
-        if lock_age > 7200:
-            os.remove(LOCK_FILE)
-            write_scheduler_log("Stale lock removed")
+        if not HANDOFFS_FILE.exists():
+            return True
+        handoffs = json.loads(HANDOFFS_FILE.read_text())
+        
+        if isinstance(handoffs, dict):
+            unpublished = sum(
+                1 for data in handoffs.values()
+                if isinstance(data, dict)
+                and data.get("status") in ("pending_edit", "pending_publish")
+            )
         else:
-            print(f"  Pipeline already running ({lock_age/60:.0f}min) — skipping")
-            write_scheduler_log("Skipped — already running")
+            return True
+
+        if unpublished >= WRITE_AHEAD_CAP:
+            log(f"⏸️  Write-ahead cap: {unpublished} drafts queued (max {WRITE_AHEAD_CAP}) — skipping article writing")
             return False
-    os.makedirs("memory", exist_ok=True)
-    open(LOCK_FILE, "w").write(datetime.now().isoformat())
+
+        log(f"📝 Write-ahead: {unpublished}/{WRITE_AHEAD_CAP} drafts queued — writing allowed")
+        return True
+
+    except Exception as e:
+        log(f"⚠️  Write-ahead check failed ({e}) — allowing writes as safety fallback")
+        return True
+
+
+def get_pipeline_summary() -> str:
+    """Get a quick summary of pipeline state for logging."""
+    try:
+        if not HANDOFFS_FILE.exists():
+            return "No handoffs file yet"
+        handoffs = json.loads(HANDOFFS_FILE.read_text())
+        if not isinstance(handoffs, dict):
+            return "Handoffs format unexpected"
+
+        status_counts = {}
+        type_counts = {}
+        for slug, data in handoffs.items():
+            if not isinstance(data, dict):
+                continue
+            status = data.get("status", "unknown")
+            status_counts[status] = status_counts.get(status, 0) + 1
+            atype = data.get("article_type", "review")
+            type_counts[atype] = type_counts.get(atype, 0) + 1
+
+        parts = []
+        for s in ["pending_edit", "pending_publish", "published", "needs_rewrite"]:
+            if status_counts.get(s, 0) > 0:
+                parts.append(f"{status_counts[s]} {s}")
+
+        status_str = " | ".join(parts) if parts else "empty"
+
+        type_parts = [f"{v} {k}" for k, v in type_counts.items()]
+        type_str = ", ".join(type_parts) if type_parts else ""
+
+        summary = f"Pipeline: {status_str}"
+        if type_str:
+            summary += f" | Types: {type_str}"
+        return summary
+
+    except Exception:
+        return "Could not read pipeline state"
+
+
+# ── helpers ───────────────────────────────────────────────────────────────────
+
+def log(msg: str):
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{ts}] {msg}", flush=True)
+
+
+def run_agent(script: str, extra_args: list[str] | None = None) -> bool:
+    """Run a single agent script. Returns True on success."""
+    cmd = [sys.executable, str(BASE_DIR / script)]
+    if extra_args:
+        cmd.extend(extra_args)
+    log(f"▶  Starting {script}")
+    try:
+        result = subprocess.run(cmd, cwd=str(BASE_DIR), timeout=1800)
+        if result.returncode == 0:
+            log(f"✅ {script} finished")
+            return True
+        else:
+            log(f"⚠️  {script} exited with code {result.returncode}")
+            return False
+    except subprocess.TimeoutExpired:
+        log(f"⏰ {script} timed out after 30 minutes — killed")
+        return False
+    except Exception as e:
+        log(f"❌ {script} crashed: {e}")
+        return False
+
+
+def get_daily_cost() -> float:
+    """Read today's accumulated API cost from the cost tracker file."""
+    try:
+        if not COST_FILE.exists():
+            return 0.0
+        data = json.loads(COST_FILE.read_text())
+        if data.get("date") != str(date.today()):
+            return 0.0
+        return float(data.get("cost", 0.0))
+    except Exception:
+        return 0.0
+
+
+def cost_ok() -> bool:
+    """Returns True if we're still under the daily cost limit."""
+    cost = get_daily_cost()
+    if cost >= MAX_DAILY_COST:
+        log(f"🛑 COST CIRCUIT BREAKER — ${cost:.2f} spent today (limit ${MAX_DAILY_COST:.2f}). Skipping run.")
+        return False
     return True
 
-def release_lock():
-    if os.path.exists(LOCK_FILE): os.remove(LOCK_FILE)
 
-def has_pending_articles():
+def acquire_agent_lock(agent: str) -> bool:
+    """
+    Per-agent lock so two instances of the same agent never run in parallel.
+    Lock file: memory/.lock_<agentname>
+    Stale after 45 minutes.
+    """
+    lock = MEMORY_DIR / f".lock_{agent}"
+    if lock.exists():
+        try:
+            data = json.loads(lock.read_text())
+            started = datetime.fromisoformat(data["started"])
+            age_mins = (datetime.now() - started).total_seconds() / 60
+            if age_mins < 45:
+                log(f"⏳ {agent} already running (started {age_mins:.0f}m ago) — skipping")
+                return False
+            else:
+                log(f"🔓 Stale lock for {agent} ({age_mins:.0f}m old) — clearing")
+                lock.unlink()
+        except Exception:
+            lock.unlink()
+    lock.write_text(json.dumps({"agent": agent, "started": datetime.now().isoformat()}))
+    return True
+
+
+def release_agent_lock(agent: str):
+    lock = MEMORY_DIR / f".lock_{agent}"
     try:
-        data = json.load(open("memory/keyword_data.json"))
-        return any(v.get("status") == "pending_article" for v in data.values())
-    except: return True
+        lock.unlink(missing_ok=True)
+    except Exception:
+        pass
 
-def in_quiet_hours():
-    # Quiet hours disabled — running 24/7 to catch tool launches in any timezone
-    return False
 
-def write_scheduler_log(entry):
-    log_dir = "memory/logs/scheduler"
-    os.makedirs(log_dir, exist_ok=True)
-    today = datetime.now().strftime("%Y-%m-%d")
-    with open(f"{log_dir}/{today}.md", "a") as f:
-        f.write(f"[{datetime.now().strftime('%H:%M')}] {entry}\n")
-
-def banner(text):
-    print(f"\n{'=' * 50}\n  {text}\n{'=' * 50}\n")
-
-def _run_step(name, fn):
-    print(f"\n{'-' * 50}\n  {name}\n{'-' * 50}")
+def run_with_lock(agent_name: str, script: str, extra_args: list[str] | None = None):
+    """Acquire lock → cost check → run agent → release lock. Safe for concurrent schedule."""
+    if not cost_ok():
+        return
+    if not acquire_agent_lock(agent_name):
+        return
     try:
-        fn()
-        write_scheduler_log(f"OK {name}")
-    except Exception as e:
-        print(f"\n  FAILED {name}: {e}")
-        write_scheduler_log(f"FAILED {name}: {e}")
-
-def run_pipeline():
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    if in_quiet_hours(): return
-    if not acquire_lock(): return
-    try:
-        cap = get_daily_cap()
-        already = get_articles_written_today()
-        remaining = cap - already
-        if remaining <= 0:
-            banner(f"Cap reached — scouting only — {now}")
-            write_scheduler_log(f"Cap reached ({already}/{cap})")
-            _run_step("Tool Scout", tool_scout.run)
-            _run_step("Keyword Agent", keyword_agent.run)
-            return
-        banner(f"Pipeline starting — {now}")
-        print(f"  Cap: {cap} | Published: {already} | Remaining: {remaining}")
-        write_scheduler_log(f"Pipeline started. Remaining: {remaining}/{cap}")
-        if cost_limit_exceeded(): return
-        _run_step("Tool Scout", tool_scout.run)
-        _run_step("Keyword Agent", keyword_agent.run)
-        if has_pending_articles():
-            # Writer has no daily cap — build up draft library freely
-            # Publisher respects the cap — controls what actually goes live
-            article_agent.DAILY_CAP = 10
-            publisher_agent.DAILY_PUBLISH_CAP = remaining
-            _run_step("Article Writer", article_agent.run)
-            _run_step("Editor Agent", editor_agent.run)
-            _run_step("Image Agent", image_agent.run)
-            _run_step("Publisher", publisher_agent.run)
-            _run_step("SEO Agent", seo_agent.run)
-            _run_step("Internal Link Agent", internal_link_agent.run)
-            try:
-                data = json.load(open("memory/keyword_data.json"))
-                now_pub = sum(1 for v in data.values() if v.get("status") in ("draft_live","published") and v.get("wp_post_id"))
-                increment_daily_counter(max(0, now_pub - already))
-            except: pass
-        else:
-            print("\n  No tools queued — skipping Article Writer")
-            write_scheduler_log("Skipped Article Writer — nothing pending")
-        banner(f"Pipeline complete — {datetime.now().strftime('%H:%M')}")
-        write_scheduler_log("Pipeline complete")
+        run_agent(script, extra_args)
     finally:
-        release_lock()
+        release_agent_lock(agent_name)
 
-def run_health_check():
-    banner(f"Health Monitor — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    write_scheduler_log("Health check started")
+
+# ── watchdog integration ──────────────────────────────────────────────────────
+
+def run_watchdog():
+    """
+    Run the watchdog after pipeline runs to catch errors immediately.
+    If watchdog.py doesn't exist yet, skip gracefully.
+    """
+    watchdog_path = BASE_DIR / "watchdog.py"
+    if not watchdog_path.exists():
+        return  # Watchdog not deployed yet — skip silently
+
     try:
-        health_monitor.run()
-        write_scheduler_log("Health check complete")
+        # Import and run inline to avoid subprocess overhead
+        sys.path.insert(0, str(BASE_DIR))
+        from watchdog import check_pipeline_run
+        alert = check_pipeline_run()
+
+        if alert.get("has_critical"):
+            log(f"🚨 WATCHDOG: {alert['critical_count']} critical issue(s) detected!")
+            for issue in alert.get("critical_issues", [])[:3]:
+                diagnosis = issue.get("diagnosis", issue.get("message", "Unknown"))
+                log(f"   🔴 {diagnosis}")
+        elif alert.get("has_warnings"):
+            log(f"⚠️  WATCHDOG: {alert['warning_count']} warning(s)")
+        else:
+            log("🐕 Watchdog: all clear")
+
+    except ImportError:
+        # watchdog.py exists but has import errors — not critical
+        log("⚠️  Watchdog import failed — check watchdog.py for errors")
     except Exception as e:
-        print(f"  Failed: {e}")
-        write_scheduler_log(f"FAILED Health Monitor: {e}")
+        # Watchdog itself crashed — don't let it break the scheduler
+        log(f"⚠️  Watchdog error: {e}")
+
+
+# ── individual agent jobs ──────────────────────────────────────────────────────
+# Each runs in its own thread so slow agents don't block the scheduler clock.
+
+def job_scout():
+    threading.Thread(target=run_with_lock, args=("scout", "tool_scout.py"), daemon=True).start()
+
+def job_keyword():
+    threading.Thread(target=run_with_lock, args=("keyword", "keyword_agent.py"), daemon=True).start()
+
+def job_article():
+    """Article writer with write-ahead cap check."""
+    if not should_write_articles():
+        return  # Queue full — skip this run to save API budget
+    threading.Thread(target=run_with_lock, args=("article", "article_agent.py"), daemon=True).start()
+
+def job_editor():
+    threading.Thread(target=run_with_lock, args=("editor", "editor_agent.py"), daemon=True).start()
+
+def job_image():
+    threading.Thread(target=run_with_lock, args=("image", "image_agent.py"), daemon=True).start()
+
+def job_seo():
+    threading.Thread(target=run_with_lock, args=("seo", "seo_agent.py"), daemon=True).start()
+
+def job_internal_links():
+    threading.Thread(target=run_with_lock, args=("links", "internal_link_agent.py"), daemon=True).start()
+
+def job_health():
+    threading.Thread(target=run_with_lock, args=("health", "health_monitor.py"), daemon=True).start()
+
+def job_publisher():
+    cap = get_daily_publish_cap()
+    days = (date.today() - SITE_LAUNCH_DATE).days
+    log(f"📤 Publisher firing — daily cap: {cap}/day (day {days})")
+    threading.Thread(
+        target=run_with_lock,
+        args=("publisher", "publisher_agent.py", ["--cap", str(cap)]),
+        daemon=True
+    ).start()
+
+
+# ── schedule setup ─────────────────────────────────────────────────────────────
 
 def setup_schedule():
-    for t in SCAN_TIMES:
-        schedule.every().day.at(t).do(run_pipeline)
-        print(f"  Pipeline: {t} EET")
-    schedule.every().day.at(HEALTH_CHECK_TIME).do(run_health_check)
-    print(f"  Health:   {HEALTH_CHECK_TIME} EET")
+    log("📅 Setting up decoupled agent schedule...")
 
-def main():
-    if "--now" in sys.argv:
-        print("\n--now flag — running pipeline once\n")
-        run_pipeline()
-        return
-    banner("Creators Must Have — Scheduler Starting")
-    print(f"  Daily cap:    {get_daily_cap()} articles/day")
-    print(f"  Cost limit:   ${DAILY_COST_LIMIT_USD:.2f}/day")
-    print(f"  Quiet hours:  {QUIET_HOURS_START}:00 - {QUIET_HOURS_END}:00")
-    print(f"\n  Setting up schedule...\n")
-    setup_schedule()
-    print(f"\n  Next runs:")
-    for job in schedule.jobs:
-        print(f"    {job.next_run.strftime('%H:%M')} — {job.job_func.__name__}")
-    print(f"\n{'=' * 50}\n  Scheduler running. Ctrl+C to stop.\n{'=' * 50}\n")
-    write_scheduler_log("Scheduler started")
-    try:
-        while True:
-            schedule.run_pending()
-            time.sleep(30)
-    except KeyboardInterrupt:
-        print("\n  Stopped.")
-        write_scheduler_log("Stopped by user")
-        release_lock()
+    # Tool Scout — 6x/day
+    for t in ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]:
+        schedule.every().day.at(t).do(job_scout)
+
+    # Keyword Agent — 6x/day
+    for t in ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]:
+        schedule.every().day.at(t).do(job_keyword)
+
+    # Article Writer — 6x/day (write-ahead cap checked in job_article)
+    for t in ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]:
+        schedule.every().day.at(t).do(job_article)
+
+    # Editor Agent — 6x/day (30 min offset so articles exist to edit)
+    for t in ["06:30", "09:30", "12:30", "15:30", "18:30", "21:30"]:
+        schedule.every().day.at(t).do(job_editor)
+
+    # Image Agent — 6x/day (1hr offset, approved articles ready by now)
+    for t in ["07:00", "10:00", "13:00", "16:00", "19:00", "22:00"]:
+        schedule.every().day.at(t).do(job_image)
+
+    # SEO Agent — 6x/day (alongside image agent)
+    for t in ["07:00", "10:00", "13:00", "16:00", "19:00", "22:00"]:
+        schedule.every().day.at(t).do(job_seo)
+
+    # Publisher — 3x/day at strategic US-audience times
+    for t in ["10:00", "17:00", "21:00"]:
+        schedule.every().day.at(t).do(job_publisher)
+
+    # Internal Links — 1x/day after all publishing done
+    schedule.every().day.at("23:00").do(job_internal_links)
+
+    # Health Monitor — 1x/day morning check
+    schedule.every().day.at("08:00").do(job_health)
+
+    cap = get_daily_publish_cap()
+    days = (date.today() - SITE_LAUNCH_DATE).days
+
+    log("✅ Schedule configured:")
+    log("   Scout + Keyword + Article:  06:00 09:00 12:00 15:00 18:00 21:00")
+    log("   Editor:                     06:30 09:30 12:30 15:30 18:30 21:30")
+    log("   Image + SEO:                07:00 10:00 13:00 16:00 19:00 22:00")
+    log("   Publisher:                  10:00 17:00 21:00")
+    log("   Internal Links:             23:00")
+    log("   Health Monitor:             08:00")
+    log(f"   Daily publish cap:          {cap}/day (day {days} since launch)")
+    log(f"   Write-ahead cap:            {WRITE_AHEAD_CAP} max unpublished drafts")
+    log(f"   Cost circuit breaker:       ${MAX_DAILY_COST:.2f}/day")
+
+
+# ── run-once mode (python3 scheduler.py --now) ─────────────────────────────────
+
+def run_pipeline_once():
+    """
+    Runs the full pipeline once in sequence — useful for testing.
+    Includes write-ahead cap check and watchdog at the end.
+    """
+    log("🔁 Running full pipeline once (--now mode)...")
+    cap = get_daily_publish_cap()
+    days = (date.today() - SITE_LAUNCH_DATE).days
+    log(f"   Publish cap: {cap}/day (day {days}) | Write-ahead cap: {WRITE_AHEAD_CAP}")
+    log(f"   {get_pipeline_summary()}")
+
+    steps = [
+        ("scout",     "tool_scout.py",         None,  True),
+        ("keyword",   "keyword_agent.py",       None,  True),
+        ("article",   "article_agent.py",       None,  "write_ahead"),  # special check
+        ("editor",    "editor_agent.py",        None,  True),
+        ("image",     "image_agent.py",         None,  True),
+        ("seo",       "seo_agent.py",           None,  True),
+        ("publisher", "publisher_agent.py",     ["--cap", str(cap)], True),
+        ("links",     "internal_link_agent.py", None,  True),
+    ]
+
+    results = []
+    for name, script, args, should_run in steps:
+        if not cost_ok():
+            log("🛑 Cost limit hit — stopping pipeline")
+            break
+
+        # Write-ahead cap check for article writer
+        if should_run == "write_ahead":
+            if not should_write_articles():
+                results.append((name, "skipped (write-ahead cap)"))
+                continue
+
+        success = run_agent(script, args)
+        results.append((name, "✅" if success else "❌"))
+
+    # Print run summary
+    log("")
+    log("📋 Pipeline run summary:")
+    for name, status in results:
+        log(f"   {status}  {name}")
+
+    log(f"\n   {get_pipeline_summary()}")
+
+    # Run watchdog to catch any errors
+    log("")
+    run_watchdog()
+
+    log("✅ --now run complete")
+
+
+# ── entry point ────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    main()
+    log("=" * 60)
+    log("🚀 Creators Must Have — Decoupled Pipeline Scheduler")
+    log(f"   Phase 2.5 — Google-safe ramp + write-ahead cap")
+    log("=" * 60)
+
+    if "--now" in sys.argv:
+        run_pipeline_once()
+        sys.exit(0)
+
+    setup_schedule()
+    log("⏰ Scheduler running — press Ctrl+C to stop")
+    log("")
+
+    # Keep the scheduler alive
+    while True:
+        schedule.run_pending()
+        time.sleep(30)   # check every 30 seconds

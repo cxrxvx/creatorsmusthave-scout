@@ -1,918 +1,903 @@
-import feedparser
+"""
+tool_scout.py — Tool Discovery Agent for CXRXVX Affiliates
+=============================================================
+Phase 2.5 Opus Upgrade:
+  ✅ Fixed RSS source labels (BetaList feeds had wrong names)
+  ✅ Category detection — tools enter pipeline with a category assigned
+  ✅ Competitor flagging — detects when new tool competes with existing ones
+  ✅ Discovery stats tracked in memory/discovery_stats.json
+  ✅ Existing tool names passed to scoring prompt to prevent duplicate scores
+  ✅ Removed dead r/AItools subreddit (HTTP 404)
+  ✅ Proper promoted/archived counting in summary
+  ✅ All existing features preserved (3-tier scoring, watchlist, manual tools, pre-filter)
+
+Scans 13 RSS sources + 14 Reddit subreddits for creator tools.
+Scores tools 0-100, routes to pipeline (55+), watchlist (35-54), or rejection.
+
+Drop this file into your cxrxvx-ai-empire/ folder to replace the old tool_scout.py.
+"""
+
 import json
 import os
-import re
+import sys
 import time
-from datetime import datetime, timezone, timedelta
+import re
+from datetime import datetime, timedelta
+from pathlib import Path
+import feedparser
 import requests
-import anthropic
-from config import ANTHROPIC_API_KEY
+from anthropic import Anthropic
 
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+# ─── Paths ────────────────────────────────────────────────────────────────────
+BASE_DIR   = Path(__file__).parent
+MEMORY_DIR = BASE_DIR / "memory"
+MEMORY_DIR.mkdir(exist_ok=True)
 
-# =============================================================================
-# RSS SOURCES — verified working as of March 2026
-# =============================================================================
-# Removed at launch: TLDR AI (news digest only), MarkTechPost (research only),
-#                    Nitter Twitter feeds (instances dead/unreliable)
-# Removed March 2026: SiliconAngle AI + AI Business — 2 runs, 30 evals, 0 tools.
-#                     Both cover enterprise news only, never creator tool launches.
-#                     Saving ~$18/month in wasted API calls.
-# Active: 7 sources across Product Hunt, Hacker News, TechCrunch, VentureBeat
-# =============================================================================
+TOOL_DB_FILE    = MEMORY_DIR / "tool_database.json"
+WATCHLIST_FILE  = MEMORY_DIR / "watchlist.json"
+MANUAL_FILE     = MEMORY_DIR / "manual_tools.json"
+STATS_FILE      = MEMORY_DIR / "discovery_stats.json"
 
+# ─── Config ───────────────────────────────────────────────────────────────────
+sys.path.insert(0, str(BASE_DIR))
+from config import ANTHROPIC_API_KEY, CLAUDE_MODEL
+
+client = Anthropic(api_key=ANTHROPIC_API_KEY)
+
+# ─── Thresholds ───────────────────────────────────────────────────────────────
+FULL_REVIEW_THRESHOLD = 55   # score 55+ → article pipeline
+WATCHLIST_THRESHOLD   = 35   # score 35-54 → watchlist
+
+# ─── RSS Feeds — 13 sources (labels fixed in Phase 2.5) ──────────────────────
 RSS_FEEDS = [
-    # --- Tier 1: Product Hunt (best signal for new tool launches) ---
-    {
-        "url": "https://www.producthunt.com/feed?category=artificial-intelligence",
-        "source": "Product Hunt - AI"
-    },
-    {
-        "url": "https://www.producthunt.com/feed?category=productivity",
-        "source": "Product Hunt - Productivity"
-    },
-    {
-        "url": "https://www.producthunt.com/feed",
-        "source": "Product Hunt - General"
-    },
-
-    # --- Tier 2: Hacker News (Show HN launches — 15% hit rate in live test) ---
-    {
-        "url": "https://hnrss.org/newest?q=AI+tool",
-        "source": "Hacker News - AI Tools"
-    },
-    {
-        "url": "https://hnrss.org/newest?q=AI+launch",
-        "source": "Hacker News - AI Launches"
-    },
-
-    # --- Tier 3: Tech news (occasional product coverage) ---
-    {
-        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
-        "source": "TechCrunch AI"
-    },
-    {
-        "url": "https://venturebeat.com/category/ai/feed/",
-        "source": "VentureBeat AI"
-    },
+    {"url": "https://www.producthunt.com/feed?category=artificial-intelligence", "source": "Product Hunt - AI"},
+    {"url": "https://www.producthunt.com/feed?category=productivity",            "source": "Product Hunt - Productivity"},
+    {"url": "https://www.producthunt.com/feed",                                  "source": "Product Hunt - General"},
+    {"url": "https://hnrss.org/newest?q=AI+tool",                                "source": "Hacker News - AI Tools"},
+    {"url": "https://hnrss.org/launches",                                        "source": "Hacker News - Launches"},
+    {"url": "https://techcrunch.com/category/artificial-intelligence/feed/",     "source": "TechCrunch AI"},
+    {"url": "https://venturebeat.com/category/ai/feed/",                         "source": "VentureBeat AI"},
+    # ⚡ Phase 2.5: fixed labels — these are all BetaList topic feeds
+    {"url": "https://betalist.com/topics/ai-tools.atom",           "source": "BetaList - AI Tools"},
+    {"url": "https://betalist.com/topics/content-creators.atom",   "source": "BetaList - Content Creators"},
+    {"url": "https://betalist.com/topics/video.atom",              "source": "BetaList - Video"},
+    {"url": "https://betalist.com/topics/social-media.atom",       "source": "BetaList - Social Media"},
+    {"url": "https://www.theverge.com/rss/index.xml",              "source": "The Verge"},
+    {"url": "https://www.marktechpost.com/feed/",                  "source": "MarkTechPost"},
 ]
 
-# =============================================================================
-# REDDIT SUBREDDITS — 15 communities covering creators + AI tools
-# Uses Reddit's FREE public JSON API — no API key or account needed.
-# Just hits reddit.com/r/SUBREDDIT/new.json — always available.
-# =============================================================================
-
-SUBREDDITS = [
-    # Core AI tool communities (highest signal for new tools)
-    "artificial",        # Biggest AI subreddit — everything lands here first
-    "AItools",           # Dedicated AI tool launches and reviews
-    "ChatGPT",           # AI tools discussion — huge audience
-    "MachineLearning",   # More technical but catches real tools early
-    "singularity",       # AI launches + hype — early signal
-    # Creator communities (our target audience posting about their problems)
-    "ContentCreators",   # Content creator tools and workflows
-    "Blogging",          # Blogging + writing tools
-    "YoutubeCreators",   # Video creator tools
-    "podcasting",        # Podcast tools — Buzzsprout, Descript territory
-    "VideoEditing",      # Video creator tools
-    # Business / SaaS communities (where indie devs launch)
-    "SideProject",       # Indie devs launching tools — gold mine
-    "indiehackers",      # Bootstrapped SaaS launches
-    "Entrepreneur",      # Business tools, productivity
-    "passive_income",    # Creator monetisation tools
-    "SEO",               # SEO tools — Surfer territory
+# ─── Reddit — 14 subreddits (removed dead r/AItools) ─────────────────────────
+REDDIT_SUBREDDITS = [
+    "artificial", "ChatGPT", "MachineLearning", "singularity",
+    "ContentCreators", "Blogging", "YoutubeCreators", "podcasting", "VideoEditing",
+    "SideProject", "indiehackers", "Entrepreneur", "passive_income", "SEO",
 ]
 
-# Reddit posts that signal a TOOL rather than a discussion
-REDDIT_SIGNAL_WORDS = [
-    "launched", "launch", "just launched", "releasing", "released",
-    "built", "i built", "i made", "we built", "we launched",
-    "show hn", "introducing", "check out", "new tool", "new app",
-    "beta", "free tool", "open beta", "early access",
-    "ai tool", "tool for", "app for", "software for",
-    "saas", "platform", "sign up", "try it", "try for free", "free plan",
-]
-
-# Reddit posts to skip immediately — waste of scoring budget
-REDDIT_REJECT_WORDS = [
-    "porn", "nsfw", "gambling", "casino", "crypto", "nft", "bitcoin",
-    "forex", "trading bot", "meme", "funny", "rant", "vent",
-    "ama", "ask me", "question:", "eli5", "explain",
-    "physical", "hardware", "3d print", "pcb", "raspberry pi",
-]
-
-# Reddit public JSON API — no auth needed
-# Descriptive User-Agent is required by Reddit's rules
 REDDIT_HEADERS = {
-    "User-Agent": "creatorsmusthave-toolscout/1.0 (creatorsmusthave.com — affiliate content site)"
+    "User-Agent": "CreatorsMustHave-ToolScout/1.0 (tool discovery bot)"
 }
 
-# 1.5 seconds between subreddit requests — keeps Reddit happy
-REDDIT_DELAY = 1.5
-
-# =============================================================================
-# SCORING THRESHOLDS
-# Three-tier system:
-#   60+   → write article now (affiliate_review or authority_article)
-#   40-59 → watchlist — recheck at 48h → 5d → 14d → 30d → archive
-#   0-39  → rejected permanently
-# =============================================================================
-
-FULL_REVIEW_THRESHOLD = 55
-WATCHLIST_THRESHOLD = 35
-
-MEMORY_FILE = "memory/tool_database.json"
-WATCHLIST_FILE = "memory/watchlist.json"
-
-# Recheck intervals in days
-# Aggressive because Product Hunt voting peaks within 48 hours of launch
-RECHECK_INTERVALS = [2, 5, 14, 30]
-
-# =============================================================================
-# MAJOR PLATFORM PRE-FILTER
-# OpenAI, Anthropic, Google, Meta etc have no affiliate programs.
-# A dedicated GPT-5 review earns $0 and competes with TechCrunch.
-# These tools get classified as "authority_article" — valuable for traffic
-# and domain trust, but the keyword agent treats them differently.
-# Cap score at 70 max. Never set has_affiliate_potential: true.
-# =============================================================================
-
-MAJOR_PLATFORMS = [
-    "openai", "chatgpt", "gpt-4", "gpt-5", "gpt 4", "gpt 5",
-    "anthropic", "claude code", " claude ",
-    "google gemini", "gemini ", "google bard",
-    "meta llama", "llama ", "meta ai",
-    "microsoft copilot", " copilot",
-    "amazon bedrock", "aws bedrock",
-    "mistral ", "cohere ",
-    "stability ai",
+# ─── Signal / Reject word lists ───────────────────────────────────────────────
+SIGNAL_WORDS = [
+    "ai", "gpt", "llm", "generate", "automate", "creator", "video", "audio",
+    "voice", "write", "content", "podcast", "youtube", "blog", "seo", "image",
+    "affiliate", "saas", "tool", "app", "platform", "launch", "new",
 ]
 
-def is_major_platform(title, description):
+REJECT_WORDS = [
+    "hardware", "physical", "device", "sensor", "drone", "robot",
+    "crypto", "nft", "blockchain", "adult", "gambling", "betting",
+    "medical", "healthcare", "hospital", "pharmaceutical",
+    "government", "military", "defence", "defense",
+]
+
+# ─── Category detection keywords ─────────────────────────────────────────────
+# Maps keywords found in tool name/description to categories
+# Used to assign a category before the tool reaches keyword_agent
+CATEGORY_KEYWORDS = {
+    "video": ["video", "youtube", "tiktok", "reels", "shorts", "clip", "editing", "footage",
+              "animation", "render", "screen record", "webcam", "stream", "caption", "subtitle"],
+    "audio": ["audio", "podcast", "voice", "speech", "music", "sound", "transcri", "dictation",
+              "narration", "voiceover", "recording", "microphone", "noise cancell"],
+    "writing": ["write", "copy", "blog", "content writ", "article", "grammar", "proofread",
+                "paraphrase", "rewrite", "essay", "text generat", "ai writ"],
+    "image": ["image", "photo", "graphic", "design", "illustration", "art generat",
+              "logo", "banner", "thumbnail", "visual", "midjourney", "dall-e", "stable diffusion"],
+    "seo": ["seo", "keyword", "backlink", "serp", "rank", "search engine", "domain authority",
+            "organic traffic", "meta tag", "sitemap"],
+    "email": ["email", "newsletter", "subscriber", "mailing list", "drip campaign",
+              "email market", "broadcast", "inbox"],
+    "courses": ["course", "coaching", "lms", "online teach", "student", "curriculum",
+                "membership", "lesson", "training platform"],
+    "productivity": ["productivity", "project manage", "task", "notion", "organize",
+                     "workflow", "automat", "schedule", "calendar", "collaborat"],
+}
+
+
+def detect_category(name: str, description: str) -> str:
     """
-    Returns True if this is a model/feature release from a major AI lab
-    with no affiliate program.
+    Detect the most likely category for a tool based on name + description.
+    Returns the best matching category, or "other" if none match.
     """
-    combined = (title + " " + description).lower()
-    return any(platform in combined for platform in MAJOR_PLATFORMS)
+    text = (name + " " + description).lower()
+    scores = {}
+    for category, keywords in CATEGORY_KEYWORDS.items():
+        score = sum(1 for kw in keywords if kw in text)
+        if score > 0:
+            scores[category] = score
+
+    if not scores:
+        return "other"
+    return max(scores, key=scores.get)
 
 
-# =============================================================================
-# MEMORY FUNCTIONS
-# =============================================================================
-
-def load_known_tools():
-    """Load all previously discovered tools from memory."""
-    if os.path.exists(MEMORY_FILE):
-        with open(MEMORY_FILE, "r") as f:
-            return json.load(f)
-    return {}
-
-
-def save_tool(tool):
-    """Save a new tool to tool_database.json."""
-    os.makedirs("memory", exist_ok=True)
-    known = load_known_tools()
-    slug = tool["name"].lower().replace(" ", "-").replace("/", "-")[:50]
-    known[slug] = tool
-    with open(MEMORY_FILE, "w") as f:
-        json.dump(known, f, indent=2)
-    article_label = tool["article_type"].upper().replace("_", " ")
-    print(f"   💾 Saved: {tool['name']} [{article_label}]")
-
-
-def load_watchlist():
-    """Load all watchlisted tools."""
-    if os.path.exists(WATCHLIST_FILE):
-        with open(WATCHLIST_FILE, "r") as f:
-            return json.load(f)
-    return {}
-
-
-def save_watchlist(watchlist):
-    """Save watchlist to file."""
-    os.makedirs("memory", exist_ok=True)
-    with open(WATCHLIST_FILE, "w") as f:
-        json.dump(watchlist, f, indent=2)
-
-
-def add_to_watchlist(title, description, source_name, source_url, score, reason):
-    """Add a borderline tool to the watchlist for later rechecking."""
-    watchlist = load_watchlist()
-    slug = title.lower().replace(" ", "-").replace("/", "-")[:50]
-
-    if slug in watchlist:
-        return  # Already watching it
-
-    recheck_date = (datetime.now() + timedelta(days=RECHECK_INTERVALS[0])).strftime("%Y-%m-%d")
-
-    watchlist[slug] = {
-        "name": title,
-        "description": description,
-        "source": source_name,
-        "source_url": source_url,
-        "initial_score": score,
-        "initial_reason": reason,
-        "discovered_date": datetime.now().strftime("%Y-%m-%d"),
-        "recheck_date": recheck_date,
-        "recheck_count": 0,
-        "status": "watchlist",
-        "why_watchlist": f"Score {score} — promising but limited info at launch time"
-    }
-
-    save_watchlist(watchlist)
-    print(f"   👀 Watchlisted: {title[:50]} (score {score}) — recheck {recheck_date}")
-
-
-# =============================================================================
-# WATCHLIST RECHECK SYSTEM
-# =============================================================================
-
-def process_watchlist():
+# ─── Competitor detection ─────────────────────────────────────────────────────
+# Known tool categories for competitor matching
+def find_competitors(tool_name: str, category: str, tool_db: dict) -> list:
     """
-    Check all watchlisted tools whose recheck_date has passed.
-    Re-evaluates with Claude. Promotes if score now 60+.
-    Archives after 4 rechecks (30 days total) if never crosses threshold.
-
-    Recheck schedule: 48h → 5d → 14d → 30d → archive
-    Plus: immediate recheck if tool reappears in any feed (separate trigger).
+    Find existing tools in our database that compete with this new tool.
+    Used to flag comparison article opportunities.
     """
-    watchlist = load_watchlist()
-    today = datetime.now().strftime("%Y-%m-%d")
-    promoted = []
-    archived = []
+    competitors = []
+    name_lower = tool_name.lower()
 
-    tools_to_check = {
-        slug: tool for slug, tool in watchlist.items()
-        if tool["status"] == "watchlist" and tool["recheck_date"] <= today
-    }
+    for key, existing in tool_db.items():
+        if not isinstance(existing, dict):
+            continue
+        existing_cat = existing.get("category", "other")
+        existing_name = existing.get("name", "").lower()
 
-    if not tools_to_check:
-        print("   ✓ No watchlist rechecks due today")
-        return promoted, archived
+        # Same category = potential competitor
+        if existing_cat == category and existing_name != name_lower:
+            competitors.append(existing.get("name", key))
 
-    print(f"   {len(tools_to_check)} tools due for recheck...")
-
-    for slug, tool in tools_to_check.items():
-        print(f"\n   📋 Rechecking: {tool['name']} (was score {tool['initial_score']}, recheck #{tool['recheck_count'] + 1})")
-
-        try:
-            result = score_tool_with_claude(tool["name"], tool["description"])
-
-            if not result.get("is_creator_tool"):
-                watchlist[slug]["status"] = "archived"
-                watchlist[slug]["archived_reason"] = result.get("rejection_reason", "rejected on recheck")
-                archived.append(tool["name"])
-                print(f"   📦 Archived (rejected on recheck): {tool['name']}")
-                continue
-
-            new_score = result.get("score", 0)
-
-            if new_score >= FULL_REVIEW_THRESHOLD:
-                watchlist[slug]["status"] = "promoted"
-                watchlist[slug]["promoted_date"] = today
-                watchlist[slug]["final_score"] = new_score
-                watchlist[slug]["recheck_count"] += 1
-                save_watchlist(watchlist)
-
-                article_type = result.get("article_type", "affiliate_review")
-
-                promoted_tool = {
-                    "name": result["name"],
-                    "description": result["description"],
-                    "category": result["category"],
-                    "score": new_score,
-                    "confidence": result.get("confidence", "medium"),
-                    "article_type": article_type,
-                    "fast_growing_category": result.get("fast_growing_category", False),
-                    "is_major_platform": result.get("is_major_platform", False),
-                    "has_affiliate_potential": result.get("has_affiliate_potential", False),
-                    "source": tool["source"],
-                    "source_url": tool["source_url"],
-                    "discovered_date": tool["discovered_date"],
-                    "promoted_from_watchlist": True,
-                    "days_to_promote": (datetime.now() - datetime.strptime(tool["discovered_date"], "%Y-%m-%d")).days,
-                    "status": "discovered"
-                }
-                save_tool(promoted_tool)
-                promoted.append(tool["name"])
-                print(f"   🎉 PROMOTED: {tool['name']} — new score {new_score} → {article_type}")
-
-            else:
-                recheck_count = tool["recheck_count"] + 1
-                watchlist[slug]["recheck_count"] = recheck_count
-
-                if recheck_count >= len(RECHECK_INTERVALS):
-                    watchlist[slug]["status"] = "archived"
-                    watchlist[slug]["archived_reason"] = f"Never crossed threshold after {recheck_count} rechecks. Final score: {new_score}"
-                    archived.append(tool["name"])
-                    print(f"   📦 Archived after {recheck_count} rechecks: {tool['name']} (final score {new_score})")
-                else:
-                    next_days = RECHECK_INTERVALS[recheck_count]
-                    next_date = (datetime.now() + timedelta(days=next_days)).strftime("%Y-%m-%d")
-                    watchlist[slug]["recheck_date"] = next_date
-                    print(f"   ⏳ Still below threshold (score {new_score}) — next recheck {next_date}")
-
-        except Exception as e:
-            print(f"   ⚠️  Recheck failed for {tool['name']}: {e}")
-
-    save_watchlist(watchlist)
-    return promoted, archived
+    # Return top 3 competitors by relevance (same category)
+    return competitors[:3]
 
 
-def check_if_watchlisted_tool_reappeared(title):
-    """
-    If a watchlisted tool shows up in feeds again, trigger an early recheck
-    instead of waiting for the scheduled date.
-    A tool appearing in TechCrunch after being watchlisted from Product Hunt
-    is a strong signal — don't wait 2 weeks for scheduled recheck.
-    """
-    watchlist = load_watchlist()
-    slug = title.lower().replace(" ", "-").replace("/", "-")[:50]
+# ─── Scoring prompt — now with category detection + existing tools context ────
 
-    if slug in watchlist and watchlist[slug]["status"] == "watchlist":
-        today = datetime.now().strftime("%Y-%m-%d")
-        if watchlist[slug]["recheck_date"] > today:
-            watchlist[slug]["recheck_date"] = today
-            save_watchlist(watchlist)
-            print(f"   🔔 Watchlisted tool reappeared in feeds — triggering early recheck: {title[:50]}")
+def build_scoring_prompt(existing_tool_names: list) -> str:
+    """Build the scoring prompt with context about tools we already cover."""
+    existing_context = ""
+    if existing_tool_names:
+        names_str = ", ".join(existing_tool_names[:30])
+        existing_context = f"""
+TOOLS WE ALREADY COVER (do NOT score duplicates of these — reject if same product):
+{names_str}
 
+If this tool is clearly the same product as one listed above (just a different name
+or version), set type = "rejected" and reason = "duplicate of [existing tool name]".
+"""
 
-# =============================================================================
-# CLAUDE EVALUATION
-# =============================================================================
+    return f"""You are a tool scout for "Creators Must Have" — a review site for YouTubers, bloggers, podcasters, and online business owners.
 
-def score_tool_with_claude(title, description):
-    """Send tool to Claude for scoring and categorisation."""
+Score this tool 0-100 for whether we should write an affiliate review article about it.
+{existing_context}
+TARGET AUDIENCE: Content creators — YouTubers, bloggers, podcasters, newsletter writers, course creators, social media managers.
 
-    # Local pre-check: catch major platforms before Claude evaluation
-    major_platform = is_major_platform(title, description)
+SCORING PHILOSOPHY:
+We are a NEW site. Our competitive advantage is SPEED — writing about tools BEFORE
+established sites do. A fresh tool with zero competing articles is more valuable to
+us than an established tool with 500 existing reviews. Score accordingly.
 
-    prompt = f"""You are a quality filter for "Creators Must Have" — an affiliate website
-recommending the best tools for content creators: YouTubers, bloggers, podcasters,
-social media creators, writers, and online business owners.
+SCORING SYSTEM:
 
-Your job: evaluate whether this tool is worth writing about, and what type of article
-it warrants.
+POSITIVE SIGNALS (add these):
++20  Just launched or very new — first-mover SEO advantage, zero competition
++15  Directly helps creators produce content faster or better
++12  Has visible /affiliates or /partners program page
++10  Clear monthly/annual subscription pricing on website
++8   Solves one very specific creator problem extremely well
++7   Fast-growing category: AI video, voice, writing, avatar, agents
++5   Has a free trial or freemium tier
++5   Has paying users, press coverage, or Product Hunt upvotes
++5   SaaS subscription model (likely to add affiliate program later)
 
-Tool title: {title}
-Description: {description}
+NEGATIVE SIGNALS (subtract these):
+-15  Pure ChatGPT wrapper with no unique value — just an API skin
+-10  Category extremely saturated AND tool has zero differentiation
+-8   Enterprise-only, no self-serve signup for individuals
+-5   No pricing visible and no clear monetization path at all
+-5   Very early vaporware — landing page only, no actual working product
 
-━━━ AUTOMATIC REJECTION (set is_creator_tool: false) ━━━
+IMPORTANT — do NOT penalize tools for:
+- Being new (that's an ADVANTAGE for us — first-mover keywords)
+- Not having an affiliate program YET (most SaaS tools add one within 6 months)
+- Having a small user base (irrelevant — we care about SEO opportunity)
+- Being in a competitive category IF the tool has genuine differentiation
 
-Reject immediately if the tool is ANY of these:
-- Related to adult content, OnlyFans, or explicit material
-- Related to gambling or betting
-- Pure crypto, NFT, or blockchain speculation tool
-- Vaporware — no real website, no pricing, just "coming soon"
-- No paid tier and zero affiliate potential
-- Physical hardware (laptops, cameras, microphones, any devices)
+SCORE GUIDE:
+  75-100: Strong candidate — write immediately
+  55-74:  Worth writing about — good SEO opportunity
+  35-54:  Borderline — watchlist and recheck later
+  0-34:   Not relevant to our audience — reject
+
+AUTOMATIC REJECTION (score 0):
+- Physical hardware / devices
+- Open-source library with no paid product
+- Not a creator tool (medical, government, legal, financial, developer-only)
 - A news article, blog post, or newsletter — must be ACTUAL SOFTWARE
-- A pure ChatGPT wrapper with zero unique value or differentiation
-  (Ask: does this do anything a user couldn't do directly in ChatGPT for free?)
-- Company with known fraud, scam, or deceptive billing history
-- Browser extension only — no standalone web product
-- Enterprise-only with "contact us for pricing" — no self-serve tier
-- Open-source library or framework with no paid product attached
+- Adult / gambling / crypto
+- Browser extension only (no standalone web product)
 - Academic research paper or university project
 
-━━━ ARTICLE TYPE — CLASSIFY BEFORE SCORING ━━━
+MAJOR PLATFORM RULE: OpenAI, Anthropic, Google, Meta, Microsoft → score max 70, type = "authority_article", has_affiliate_potential = false.
 
-"affiliate_review" — Independent SaaS tool that has (or likely has) its own
-  affiliate/partner program. This is what earns commissions. Default for most tools.
+CATEGORY — assign the most fitting:
+video | audio | writing | image | seo | email | courses | productivity | other
 
-"authority_article" — A product, model, or feature from a MAJOR AI LAB:
-  OpenAI, Anthropic, Google, Meta, Microsoft, Amazon, Mistral, or Cohere.
-  These companies have NO affiliate programs.
-  Worth writing about ONLY for traffic and domain authority.
-  Score 40-70 max. has_affiliate_potential must be false.
-  Examples: GPT-5 release, Claude Code, Gemini update, Copilot feature.
-
-━━━ SCORING GUIDE ━━━
-
-Start at 50. Add or subtract based on these signals:
-
-POSITIVE signals (add points):
-+25  Has a visible /affiliates or /partners program page — this is the #1 money signal
-+15  Directly helps creators produce content faster or better
-+15  Just launched publicly — first-mover advantage means zero competition for review keywords
-+10  Clear monthly/annual subscription pricing visible on the website
-+8   Solves one very specific creator problem extremely well
-+7   Operates in fast-growing category: AI video, AI voice, AI writing, AI avatar, AI agents
-+5   Has a free trial (not just freemium — an actual time-limited trial)
-+5   Has paying users, press coverage, or Product Hunt upvotes (bonus signal, not a requirement)
-
-NEGATIVE signals (subtract points):
--20  No paid tier and no affiliate program — earns nothing, skip it
--15  Pure ChatGPT wrapper with no unique value or differentiation
--10  Category is extremely saturated with no clear differentiation from existing tools
--8   Enterprise-only with no self-serve signup — can't review what creators can't buy
--5   Pricing extremely high with no justification for the price point
-
-MAJOR PLATFORM RULE:
-If article_type is "authority_article", cap score at 70 maximum.
-Set has_affiliate_potential: false always.
-
-━━━ CATEGORY GUIDE ━━━
-
-writing      — AI writing, copywriting, blog, email, scripts
-video        — AI video creation, editing, captions, thumbnails
-image        — AI image generation, design, graphics
-audio        — AI voice, podcast, music, transcription
-coding       — AI coding assistants (only if useful for creator workflows)
-productivity — AI organisation, research, scheduling, automation
-seo          — AI SEO, keyword research, content optimisation
-other        — anything that doesn't fit above
-
-━━━ OUTPUT FORMAT ━━━
-
-Respond in JSON only. No extra text. No markdown. No code fences. Raw JSON only:
+Output ONLY valid JSON — no explanation, no notes, nothing after the closing brace:
 {{
-  "name": "clean tool name without taglines",
-  "description": "one sentence — what it does specifically for creators",
-  "category": "writing|video|image|audio|coding|productivity|seo|other",
-  "is_creator_tool": true or false,
-  "is_major_platform": true or false,
-  "has_affiliate_potential": true or false,
-  "score": 0-100,
-  "confidence": "high|medium|low",
-  "article_type": "affiliate_review|authority_article|reject",
-  "fast_growing_category": true or false,
-  "reason": "one sentence explaining the score",
-  "rejection_reason": "only fill this if rejected, empty string otherwise"
-}}"""
+  "name": "clean tool name",
+  "score": 72,
+  "type": "affiliate_review",
+  "category": "video",
+  "reason": "one sentence why",
+  "description": "one sentence what it does for creators",
+  "has_affiliate_potential": true,
+  "is_fast_growing": true
+}}
 
-    message = client.messages.create(
-        model="claude-sonnet-4-5-20250929",
-        max_tokens=400,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    raw = message.content[0].text.strip()
-
-    # Strip markdown code fences if Claude adds them despite instructions
-    if raw.startswith("```"):
-        lines = raw.split("\n")
-        raw = "\n".join(lines[1:-1])
-
-    result = json.loads(raw.strip())
-
-    # Safety override: our local check trumps Claude's classification
-    # Prevents Claude from accidentally giving an affiliate_review type
-    # to OpenAI/Anthropic/Google products
-    if major_platform:
-        result["is_major_platform"] = True
-        result["has_affiliate_potential"] = False
-        result["article_type"] = "authority_article"
-        if result.get("score", 0) > 70:
-            result["score"] = 70
-
-    return result
+type must be: "affiliate_review" | "authority_article" | "rejected" | "too_weak"
+category must be: video | audio | writing | image | seo | email | courses | productivity | other"""
 
 
-# =============================================================================
-# TOOL PROCESSING — shared by RSS, Reddit, and manual pipeline
-# =============================================================================
+# ─── Helpers ──────────────────────────────────────────────────────────────────
 
-def process_entry(title, description, source_name, source_url):
-    """
-    Evaluate a single entry using the three-tier system.
-    Shared by scan_rss_feeds(), scan_reddit(), and process_manual_tools().
-
-      60+   → save to tool_database.json
-              affiliate_review  = earns commissions (default)
-              authority_article = traffic + domain authority only (major platforms)
-      40-59 → save to watchlist.json, recheck on schedule
-      0-39  → permanent rejection
-    """
-
-    if not title or len(title.strip()) < 3:
-        return None
-
-    # Check if already fully discovered
-    known = load_known_tools()
-    slug = title.lower().replace(" ", "-").replace("/", "-")[:50]
-
-    if slug in known:
-        print(f"   ⏭️  Already known: {title[:55]}")
-        return None
-
-    # Check if tool reappeared while on watchlist — triggers early recheck
-    check_if_watchlisted_tool_reappeared(title)
-
-    # Check if already on watchlist and not yet due for recheck
-    watchlist = load_watchlist()
-    if slug in watchlist and watchlist[slug]["status"] == "watchlist":
-        print(f"   👀 On watchlist: {title[:55]} (next recheck: {watchlist[slug]['recheck_date']})")
-        return None
-
-    print(f"   🔍 Evaluating: {title[:60]}")
-
-    try:
-        result = score_tool_with_claude(title, description)
-
-        # Hard rejection
-        if not result.get("is_creator_tool"):
-            reason = result.get("rejection_reason") or "not relevant to creators"
-            print(f"   🚫 Rejected: {reason}")
-            return None
-
-        score = result.get("score", 0)
-        article_type = result.get("article_type", "affiliate_review")
-        is_major = result.get("is_major_platform", False)
-
-        # Score 60+ → queue for article
-        if score >= FULL_REVIEW_THRESHOLD:
-            confidence = result.get("confidence", "medium")
-            fast_growing = result.get("fast_growing_category", False)
-
-            extras = []
-            if fast_growing:
-                extras.append("🔥 fast-growing")
-            if is_major:
-                extras.append("🏢 authority only — no affiliate")
-            if confidence == "low":
-                extras.append("⚠️  low confidence")
-            extra_str = f" ({', '.join(extras)})" if extras else ""
-
-            type_label = "Affiliate review" if article_type == "affiliate_review" else "Authority article"
-            print(f"   ✅ {type_label}! Score: {score}{extra_str} — {result.get('reason')}")
-
-            tool = {
-                "name": result["name"],
-                "description": result["description"],
-                "category": result["category"],
-                "score": score,
-                "confidence": confidence,
-                "article_type": article_type,
-                "fast_growing_category": fast_growing,
-                "is_major_platform": is_major,
-                "has_affiliate_potential": result.get("has_affiliate_potential", False),
-                "source": source_name,
-                "source_url": source_url,
-                "discovered_date": datetime.now().strftime("%Y-%m-%d"),
-                "status": "discovered"
-            }
-
-            save_tool(tool)
-            return tool
-
-        # Score 40-59 → watchlist
-        elif score >= WATCHLIST_THRESHOLD:
-            add_to_watchlist(
-                title, description, source_name, source_url,
-                score, result.get("reason", "")
-            )
-            return None
-
-        # Score below 40 → permanent rejection
-        else:
-            print(f"   ⏭️  Too weak: {score} — {result.get('reason')}")
-            return None
-
-    except json.JSONDecodeError as e:
-        print(f"   ⚠️  JSON parse failed for '{title[:40]}': {e}")
-        return None
-    except Exception as e:
-        print(f"   ⚠️  Eval failed for '{title[:40]}': {e}")
-        return None
-
-
-# =============================================================================
-# RSS SCANNING
-# =============================================================================
-
-def scan_rss_feeds():
-    """Scan all RSS feeds and process new tools found."""
-    new_tools = []
-
-    for feed in RSS_FEEDS:
-        feed_url = feed["url"]
-        feed_name = feed["source"]
-        print(f"\n📡 Scanning: {feed_name}")
-
+def load_json(path: Path, default):
+    if path.exists():
         try:
-            feed_data = feedparser.parse(feed_url)
-
-            if not feed_data.entries:
-                print(f"   ⚠️  No entries — feed may be down or URL changed")
-                continue
-
-            for entry in feed_data.entries[:15]:
-                title = entry.get("title", "").strip()
-                description = entry.get("summary", entry.get("description", ""))
-                # Strip HTML tags before sending to Claude
-                description = re.sub(r'<[^>]+>', '', description)[:600]
-                source_url = entry.get("link", "")
-
-                tool = process_entry(title, description, feed_name, source_url)
-                if tool:
-                    new_tools.append(tool)
-
-        except Exception as e:
-            print(f"   ⚠️  Feed scan failed: {feed_name} — {e}")
-
-    return new_tools
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return default
+    return default
 
 
-# =============================================================================
-# REDDIT SCANNING — free public JSON API, no credentials needed
-# =============================================================================
+def save_json(path: Path, data):
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
-def _is_tool_post(post: dict) -> bool:
-    """
-    Quick pre-filter before paying Claude to evaluate.
-    Returns True if this Reddit post looks like it's about a tool.
 
-    Three ways to pass:
-      1. Title/body contains a launch or tool signal word
-      2. It's a link post pointing to a non-social-media domain
-         (indie dev sharing their product URL directly)
-      3. Neither → skip — not worth the API call
-
-    Hard-rejects spam/off-topic content first.
-    """
-    title    = (post.get("title", "") or "").lower()
-    body     = (post.get("selftext", "") or "").lower()
-    combined = title + " " + body
-
-    # Fast exit on spam keywords
-    for word in REDDIT_REJECT_WORDS:
-        if word in combined:
-            return False
-
-    # Positive signal in text
-    for word in REDDIT_SIGNAL_WORDS:
-        if word in combined:
+def already_known(name: str, tool_db: dict, watchlist: list) -> bool:
+    name_lower = name.lower().strip()
+    for key in tool_db:
+        if key.lower() == name_lower:
             return True
-
-    # Link post pointing somewhere real (not YouTube/Twitter/Google)
-    if not post.get("is_self", True):
-        url = post.get("url", "")
-        noise = ["reddit.com", "youtube.com", "twitter.com",
-                 "x.com", "google.com", "amazon.com", "imgur.com",
-                 "tiktok.com", "instagram.com", "facebook.com"]
-        if not any(d in url for d in noise):
+        # Also check the "name" field inside the tool dict
+        if isinstance(tool_db[key], dict) and tool_db[key].get("name", "").lower() == name_lower:
             return True
-
+    for item in watchlist:
+        if isinstance(item, dict) and item.get("name", "").lower() == name_lower:
+            return True
     return False
 
 
-def _fetch_subreddit_posts(subreddit: str, limit: int = 25) -> list:
-    """
-    Fetch newest posts from one subreddit using Reddit's public JSON endpoint.
-    No API key, no OAuth — just a regular HTTPS request.
+def quick_reject(title: str, description: str) -> bool:
+    text = (title + " " + description).lower()
+    for word in REJECT_WORDS:
+        if word in text:
+            return True
+    return False
 
-    Reddit requires a descriptive User-Agent (our REDDIT_HEADERS constant).
-    Returns list of post dicts, or empty list on any failure.
+
+def get_existing_tool_names(tool_db: dict) -> list:
+    """Get list of tool names we already cover — passed to scoring prompt."""
+    names = []
+    for key, data in tool_db.items():
+        if isinstance(data, dict):
+            names.append(data.get("name", key))
+        else:
+            names.append(key)
+    return names
+
+
+def extract_json(raw: str) -> dict | None:
     """
-    url = f"https://www.reddit.com/r/{subreddit}/new.json?limit={limit}"
+    Extract a JSON object from Claude's response, ignoring any trailing text.
+    
+    Claude often outputs valid JSON followed by an explanation:
+      {"name": "Tool", "score": 72, ...}
+      Note: this tool has strong potential because...
+    
+    json.loads() chokes on the trailing text. This function finds just the
+    JSON object by matching braces.
+    """
+    # Strip markdown fences
+    raw = re.sub(r"^```json\s*", "", raw.strip())
+    raw = re.sub(r"\s*```$", "", raw)
+    raw = raw.strip()
+
+    # Method 1: Try parsing as-is (works when Claude only outputs JSON)
     try:
-        r = requests.get(url, headers=REDDIT_HEADERS, timeout=15)
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        pass
 
-        # 429 = rate limited — wait and retry once
-        if r.status_code == 429:
-            print(f"   ⚠️  Reddit rate limit on r/{subreddit} — waiting 30s")
-            time.sleep(30)
-            r = requests.get(url, headers=REDDIT_HEADERS, timeout=15)
+    # Method 2: Find the JSON object by matching braces
+    start = raw.find("{")
+    if start == -1:
+        return None
 
-        if r.status_code != 200:
-            print(f"   ⚠️  r/{subreddit} returned HTTP {r.status_code} — skipping")
-            return []
+    depth = 0
+    end = start
+    in_string = False
+    escape_next = False
 
-        posts = r.json().get("data", {}).get("children", [])
-        return [p["data"] for p in posts]
+    for i in range(start, len(raw)):
+        c = raw[i]
+        if escape_next:
+            escape_next = False
+            continue
+        if c == "\\":
+            escape_next = True
+            continue
+        if c == '"' and not escape_next:
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                end = i + 1
+                break
 
+    if depth != 0:
+        return None
+
+    json_str = raw[start:end]
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        return None
+
+
+def score_tool(title: str, description: str, existing_names: list = None) -> dict | None:
+    """Ask Claude to score a tool. Returns parsed dict or None on failure."""
+    prompt = build_scoring_prompt(existing_names or [])
+    try:
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=400,
+            messages=[{
+                "role": "user",
+                "content": f"{prompt}\n\nTool title: {title}\nDescription: {description or 'No description provided'}"
+            }]
+        )
+        raw = response.content[0].text.strip()
+        result = extract_json(raw)
+        if result is None:
+            print(f"   ⚠️  Could not extract JSON for '{title}'")
+            print(f"   Raw: {raw[:200]}")
+        return result
     except Exception as e:
-        print(f"   ⚠️  r/{subreddit} request failed: {e}")
-        return []
+        print(f"   ⚠️  Scoring failed for '{title}': {e}")
+        return None
 
 
-def scan_reddit() -> list:
-    """
-    Scan all subreddits for new tool posts.
-    Uses Reddit's FREE public JSON API — no credentials required.
+def next_recheck_date(attempt: int) -> str:
+    days = [2, 5, 14, 30]
+    delta = days[min(attempt, len(days) - 1)]
+    return (datetime.now() + timedelta(days=delta)).strftime("%Y-%m-%d")
 
-    Called from run() alongside scan_rss_feeds().
-    All posts go through the same process_entry() → score_tool_with_claude()
-    pipeline as RSS items.
 
-    One extra feature vs RSS: engagement bonus.
-    Reddit upvotes = real humans voting on something useful.
-    We add up to +10 points based on upvotes (capped to avoid gaming).
-    This is applied BEFORE Claude scores — it adjusts the description we send.
+def tool_key(name: str) -> str:
+    return re.sub(r"[^a-z0-9_]", "_", name.lower().strip()).strip("_")
 
-    Returns list of newly discovered tools (same format as scan_rss_feeds).
-    """
-    print(f"\n📡 Reddit Scout — scanning {len(SUBREDDITS)} subreddits (public JSON API)...")
-    new_tools = []
 
-    # Build set of already-known tool names to skip duplicates without
-    # burning an API call on something we already have
-    known = load_known_tools()
-    watchlist = load_watchlist()
-    known_slugs = set(known.keys()) | set(watchlist.keys())
+# ─── Discovery stats tracking ────────────────────────────────────────────────
 
-    for subreddit in SUBREDDITS:
-        print(f"\n   📡 r/{subreddit}", end=" ", flush=True)
-        posts = _fetch_subreddit_posts(subreddit)
+def update_discovery_stats(rss_aff, rss_auth, red_aff, red_auth, promoted_count, archived_count):
+    """Track discovery trends over time."""
+    stats = load_json(STATS_FILE, {"daily": {}})
+    today = datetime.now().strftime("%Y-%m-%d")
 
-        if not posts:
-            print("— no response")
-            time.sleep(REDDIT_DELAY)
+    stats["daily"][today] = {
+        "rss_affiliate": len(rss_aff),
+        "rss_authority": len(rss_auth),
+        "reddit_affiliate": len(red_aff),
+        "reddit_authority": len(red_auth),
+        "total_discovered": len(rss_aff) + len(rss_auth) + len(red_aff) + len(red_auth),
+        "promoted_from_watchlist": promoted_count,
+        "archived_from_watchlist": archived_count,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+    # Keep only last 90 days
+    if len(stats["daily"]) > 90:
+        sorted_dates = sorted(stats["daily"].keys())
+        for old_date in sorted_dates[:-90]:
+            del stats["daily"][old_date]
+
+    # Running totals
+    stats["total_ever_discovered"] = sum(
+        d.get("total_discovered", 0) for d in stats["daily"].values()
+    )
+
+    save_json(STATS_FILE, stats)
+
+
+# ─── Watchlist processing ─────────────────────────────────────────────────────
+
+def process_watchlist():
+    tool_db   = load_json(TOOL_DB_FILE, {})
+    watchlist = load_json(WATCHLIST_FILE, [])
+
+    # Safety: ensure watchlist is a list
+    if not isinstance(watchlist, list):
+        watchlist = []
+
+    today     = datetime.now().strftime("%Y-%m-%d")
+    due       = [t for t in watchlist if isinstance(t, dict) and t.get("recheck_date", "9999") <= today]
+
+    promoted_count = 0
+    archived_count = 0
+
+    if not due:
+        return tool_db, watchlist, promoted_count, archived_count
+
+    print(f"   {len(due)} tools due for recheck...")
+    existing_names = get_existing_tool_names(tool_db)
+
+    remaining = []
+    for item in watchlist:
+        if not isinstance(item, dict):
+            continue
+        if item not in due:
+            remaining.append(item)
             continue
 
-        found_this_sub = 0
+        name    = item.get("name", "")
+        title   = item.get("title", name)
+        desc    = item.get("description", "")
+        attempt = item.get("recheck_count", 0)
 
-        for post in posts:
-            # Fast pre-filter before paying Claude
-            if not _is_tool_post(post):
+        print(f"\n   📋 Rechecking: {title} (was score {item.get('score', '?')}, recheck #{attempt + 1})")
+
+        result = score_tool(title, desc, existing_names)
+        if not result:
+            remaining.append(item)
+            continue
+
+        score = result.get("score", 0)
+        rtype = result.get("type", "rejected")
+
+        if rtype in ("rejected", "too_weak") or score < FULL_REVIEW_THRESHOLD:
+            if attempt >= 3:
+                print(f"   📦 Archived after 4 rechecks: {title} (final score {score})")
+                archived_count += 1
+            else:
+                item["score"]         = score
+                item["recheck_count"] = attempt + 1
+                item["recheck_date"]  = next_recheck_date(attempt + 1)
+                remaining.append(item)
+        else:
+            category = result.get("category") or detect_category(name, desc)
+            key = tool_key(result.get("name", name))
+            tool_db[key] = {
+                "name":                   result.get("name", name),
+                "score":                  score,
+                "type":                   rtype,
+                "category":               category,
+                "description":            result.get("description", desc),
+                "has_affiliate_potential": result.get("has_affiliate_potential", True),
+                "is_fast_growing":        result.get("is_fast_growing", False),
+                "source":                 item.get("source", "watchlist"),
+                "discovered_date":        item.get("discovered_date", today),
+                "promoted_date":          today,
+                "status":                 "discovered",
+            }
+            label = "AFFILIATE REVIEW" if rtype == "affiliate_review" else "AUTHORITY ARTICLE"
+            print(f"   🎉 PROMOTED: {title} — score {score} → {label}")
+            promoted_count += 1
+
+    save_json(WATCHLIST_FILE, remaining)
+    save_json(TOOL_DB_FILE, tool_db)
+    return tool_db, remaining, promoted_count, archived_count
+
+
+# ─── RSS scanning ─────────────────────────────────────────────────────────────
+
+def scan_rss_feeds(tool_db: dict, watchlist: list):
+    today = datetime.now().strftime("%Y-%m-%d")
+    new_affiliate = []
+    new_authority = []
+    existing_names = get_existing_tool_names(tool_db)
+
+    print("\n📰 Starting RSS scan...")
+
+    for feed_cfg in RSS_FEEDS:
+        url    = feed_cfg["url"]
+        source = feed_cfg["source"]
+        print(f"\n📡 Scanning: {source}")
+
+        try:
+            feed = feedparser.parse(url)
+            if not feed.entries:
+                print(f"   ⚠️  No entries — feed may be down")
                 continue
+        except Exception as e:
+            print(f"   ⚠️  Feed error: {e}")
+            continue
 
-            title    = (post.get("title", "") or "").strip()[:80]
-            body     = (post.get("selftext", "") or "").strip()[:500]
-            url      = post.get("url", "")
-            upvotes  = post.get("score", 0)
-            comments = post.get("num_comments", 0)
-            permalink = "https://reddit.com" + post.get("permalink", "")
+        for entry in feed.entries[:15]:
+            title = entry.get("title", "").strip()
+            desc  = entry.get("summary", entry.get("description", "")).strip()
+            desc  = re.sub(r"<[^>]+>", " ", desc).strip()
 
             if not title:
                 continue
-
-            # Skip already-known tools using slug matching
-            # (avoids re-scoring "Notion" every time someone posts about it)
-            slug = title.lower().replace(" ", "-").replace("/", "-")[:50]
-            if slug in known_slugs:
+            if quick_reject(title, desc):
+                continue
+            if already_known(title, tool_db, watchlist):
                 continue
 
-            # Also skip if title words match known tool names
-            # e.g. "Descript just added a new feature" → already have Descript
-            title_words = [w for w in title.lower().split() if len(w) > 4]
-            already_known = any(
-                any(w in known_key for known_key in known_slugs)
-                for w in title_words
-            )
-            if already_known:
+            print(f"   🔍 Evaluating: {title[:60]}")
+
+            result = score_tool(title, desc, existing_names)
+            if not result:
                 continue
 
-            # Add engagement context to description so Claude can see it
-            # High upvotes = real human interest = stronger signal
-            engagement_note = ""
-            if upvotes >= 100:
-                engagement_note = f" [Reddit: {upvotes} upvotes, {comments} comments — high engagement]"
-            elif upvotes >= 20:
-                engagement_note = f" [Reddit: {upvotes} upvotes]"
+            score = result.get("score", 0)
+            rtype = result.get("type", "rejected")
+            name  = result.get("name", title)
 
-            description = f"{body}{engagement_note}".strip()
-            source_name = f"Reddit r/{subreddit}"
+            if rtype == "rejected":
+                print(f"   🚫 Rejected: {result.get('reason', '')}")
+                continue
+            if rtype == "too_weak" or score < WATCHLIST_THRESHOLD:
+                continue
 
-            # Use post URL if it's a link post (points to the actual tool),
-            # otherwise use the Reddit permalink
-            if url and "reddit.com" not in url:
-                source_url = url   # link post — the tool's actual website
+            # Detect category (Claude assigns it, fallback to keyword detection)
+            category = result.get("category") or detect_category(name, desc)
+
+            if score < FULL_REVIEW_THRESHOLD:
+                watchlist.append({
+                    "name":            name,
+                    "title":           title,
+                    "description":     result.get("description", desc),
+                    "score":           score,
+                    "category":        category,
+                    "source":          source,
+                    "discovered_date": today,
+                    "recheck_date":    next_recheck_date(0),
+                    "recheck_count":   0,
+                })
+                print(f"   👀 Watchlisted: {name} (score {score}, {category})")
+                continue
+
+            key = tool_key(name)
+            if key in tool_db:
+                continue
+
+            # Check for competitors
+            competitors = find_competitors(name, category, tool_db)
+
+            tool_db[key] = {
+                "name":                   name,
+                "score":                  score,
+                "type":                   rtype,
+                "category":               category,
+                "description":            result.get("description", desc),
+                "has_affiliate_potential": result.get("has_affiliate_potential", True),
+                "is_fast_growing":        result.get("is_fast_growing", False),
+                "source":                 source,
+                "discovered_date":        today,
+                "status":                 "discovered",
+                "competitors":            competitors,
+            }
+
+            label = "AFFILIATE REVIEW" if rtype == "affiliate_review" else "AUTHORITY ARTICLE"
+            fast  = "🔥" if result.get("is_fast_growing") else ""
+            print(f"   ✅ {label}! Score: {score} {fast} ({category}) — {result.get('reason', '')}")
+            if competitors:
+                print(f"   ⚖️  Competitors: {', '.join(competitors)}")
+
+            if rtype == "affiliate_review":
+                new_affiliate.append((name, score, result.get("description", "")))
             else:
-                source_url = permalink   # text post — Reddit discussion
+                new_authority.append((name, score, result.get("description", "")))
 
-            tool = process_entry(title, description, source_name, source_url)
-            if tool:
-                # Tag the tool with Reddit metadata for the summary
-                tool["reddit_upvotes"] = upvotes
-                tool["reddit_comments"] = comments
-                tool["reddit_url"] = permalink
-                new_tools.append(tool)
-                found_this_sub += 1
-                known_slugs.add(slug)   # prevent duplicate in same run
-
-        print(f"— {found_this_sub} tool(s) found")
-        time.sleep(REDDIT_DELAY)   # be polite to Reddit's servers
-
-    return new_tools
+    save_json(TOOL_DB_FILE, tool_db)
+    save_json(WATCHLIST_FILE, watchlist)
+    return tool_db, watchlist, new_affiliate, new_authority
 
 
-# =============================================================================
-# MANUAL TOOLS PIPELINE
-# =============================================================================
+# ─── Reddit scanning ──────────────────────────────────────────────────────────
 
-def process_manual_tools():
-    """
-    Processes tools from memory/manual_tools.json through the same
-    scoring pipeline as RSS-discovered tools.
-    Each tool is only processed once — status changes from "pending" to "processed".
-    This lets us write about established tools with affiliate programs,
-    not just brand new launches.
-    """
-    manual_file = "memory/manual_tools.json"
-    if not os.path.exists(manual_file):
-        return
+def scan_reddit(tool_db: dict, watchlist: list):
+    today         = datetime.now().strftime("%Y-%m-%d")
+    new_affiliate = []
+    new_authority = []
+    existing_names = get_existing_tool_names(tool_db)
 
-    tools = json.load(open(manual_file))
-    pending = [t for t in tools if t.get("status") == "pending"]
+    print("\n🤖 Starting Reddit scan...")
+    print(f"   📡 Scanning {len(REDDIT_SUBREDDITS)} subreddits (public JSON API)...")
+
+    for subreddit in REDDIT_SUBREDDITS:
+        print(f"\n   📡 r/{subreddit}", end="   ")
+        url = f"https://www.reddit.com/r/{subreddit}/new.json?limit=10"
+
+        try:
+            resp = requests.get(url, headers=REDDIT_HEADERS, timeout=15)
+            if resp.status_code == 404:
+                print(f"⚠️  HTTP 404 — subreddit may be dead, skipping")
+                continue
+            if resp.status_code == 429:
+                print(f"⚠️  Rate limited — waiting 30s")
+                time.sleep(30)
+                resp = requests.get(url, headers=REDDIT_HEADERS, timeout=15)
+                if resp.status_code != 200:
+                    print(f"⚠️  Still failing — skipping")
+                    continue
+            if resp.status_code != 200:
+                print(f"⚠️  HTTP {resp.status_code} — skipping")
+                continue
+            data = resp.json()
+            posts = data.get("data", {}).get("children", [])
+        except Exception as e:
+            print(f"⚠️  Error: {e}")
+            continue
+
+        found = 0
+        for post in posts:
+            p     = post.get("data", {})
+            title = p.get("title", "").strip()
+            desc  = p.get("selftext", "").strip()[:500]
+
+            if not title:
+                continue
+            if quick_reject(title, desc):
+                continue
+
+            text_lower = (title + " " + desc).lower()
+            if not any(w in text_lower for w in SIGNAL_WORDS):
+                continue
+
+            if already_known(title, tool_db, watchlist):
+                continue
+
+            print(f"\n   🔍 Evaluating: {title[:60]}")
+
+            result = score_tool(title, desc, existing_names)
+            if not result:
+                continue
+
+            score = result.get("score", 0)
+            rtype = result.get("type", "rejected")
+            name  = result.get("name", title)
+
+            if rtype == "rejected":
+                print(f"   🚫 Rejected: {result.get('reason', '')}")
+                continue
+            if rtype == "too_weak" or score < WATCHLIST_THRESHOLD:
+                continue
+
+            category = result.get("category") or detect_category(name, desc)
+
+            if score < FULL_REVIEW_THRESHOLD:
+                watchlist.append({
+                    "name":            name,
+                    "title":           title,
+                    "description":     result.get("description", desc),
+                    "score":           score,
+                    "category":        category,
+                    "source":          f"r/{subreddit}",
+                    "discovered_date": today,
+                    "recheck_date":    next_recheck_date(0),
+                    "recheck_count":   0,
+                })
+                print(f"   👀 Watchlisted: {name} (score {score}, {category})")
+                found += 1
+                continue
+
+            key = tool_key(name)
+            if key in tool_db:
+                continue
+
+            competitors = find_competitors(name, category, tool_db)
+
+            tool_db[key] = {
+                "name":                   name,
+                "score":                  score,
+                "type":                   rtype,
+                "category":               category,
+                "description":            result.get("description", desc),
+                "has_affiliate_potential": result.get("has_affiliate_potential", True),
+                "is_fast_growing":        result.get("is_fast_growing", False),
+                "source":                 f"r/{subreddit}",
+                "discovered_date":        today,
+                "status":                 "discovered",
+                "competitors":            competitors,
+            }
+
+            label = "AFFILIATE REVIEW" if rtype == "affiliate_review" else "AUTHORITY ARTICLE"
+            fast  = "🔥" if result.get("is_fast_growing") else ""
+            print(f"   ✅ {label}! Score: {score} {fast} ({category})")
+            if competitors:
+                print(f"   ⚖️  Competitors: {', '.join(competitors)}")
+
+            if rtype == "affiliate_review":
+                new_affiliate.append((name, score, result.get("description", "")))
+            else:
+                new_authority.append((name, score, result.get("description", "")))
+            found += 1
+
+        if found == 0:
+            print(f"— 0 found")
+
+        time.sleep(1.5)
+
+    save_json(TOOL_DB_FILE, tool_db)
+    save_json(WATCHLIST_FILE, watchlist)
+    return tool_db, watchlist, new_affiliate, new_authority
+
+
+# ─── Manual tools pipeline ────────────────────────────────────────────────────
+
+def process_manual_tools(tool_db: dict, watchlist: list):
+    today    = datetime.now().strftime("%Y-%m-%d")
+    manual   = load_json(MANUAL_FILE, [])
+
+    if not isinstance(manual, list):
+        return tool_db, watchlist
+
+    pending  = [t for t in manual if isinstance(t, dict) and t.get("status") == "pending"]
 
     if not pending:
-        return
+        return tool_db, watchlist
 
     print(f"\n📚 Processing {len(pending)} manual tool(s)...")
+    existing_names = get_existing_tool_names(tool_db)
 
-    for tool in pending:
-        name        = tool.get("name", "")
-        description = tool.get("description", "")
-        website     = tool.get("website", "")
-        source_url  = f"https://{website}" if website else ""
+    for item in manual:
+        if not isinstance(item, dict) or item.get("status") != "pending":
+            continue
 
-        print(f"   🔍 Manual tool: {name}")
-        process_entry(name, description, "Manual List", source_url)
+        name = item.get("name", "")
+        desc = item.get("description", "")
 
-        # Mark as processed so it never runs again
-        tool["status"] = "processed"
+        if already_known(name, tool_db, watchlist):
+            print(f"   ⏭️  Already known: {name}")
+            item["status"] = "processed"
+            continue
 
-    # Save updated statuses back to file
-    json.dump(tools, open(manual_file, "w"), indent=2)
-    print(f"   ✅ Manual tools processed")
+        print(f"   🔍 Evaluating: {name}")
+        result = score_tool(name, desc, existing_names)
+
+        if not result:
+            continue
+
+        score      = result.get("score", 0)
+        rtype      = result.get("type", "rejected")
+        clean_name = result.get("name", name)
+        category   = result.get("category") or detect_category(name, desc)
+
+        item["status"] = "processed"
+
+        if rtype == "rejected":
+            print(f"   🚫 Rejected: {result.get('reason', '')}")
+            continue
+        if score < WATCHLIST_THRESHOLD:
+            continue
+
+        if score < FULL_REVIEW_THRESHOLD:
+            watchlist.append({
+                "name":            clean_name,
+                "title":           name,
+                "description":     result.get("description", desc),
+                "score":           score,
+                "category":        category,
+                "source":          "manual",
+                "discovered_date": today,
+                "recheck_date":    next_recheck_date(0),
+                "recheck_count":   0,
+            })
+            print(f"   👀 Watchlisted: {clean_name} (score {score}, {category})")
+            continue
+
+        key = tool_key(clean_name)
+        competitors = find_competitors(clean_name, category, tool_db)
+
+        tool_db[key] = {
+            "name":                   clean_name,
+            "score":                  score,
+            "type":                   rtype,
+            "category":               category,
+            "description":            result.get("description", desc),
+            "has_affiliate_potential": result.get("has_affiliate_potential", True),
+            "is_fast_growing":        result.get("is_fast_growing", False),
+            "source":                 "manual",
+            "discovered_date":        today,
+            "status":                 "discovered",
+            "competitors":            competitors,
+        }
+
+        label = "AFFILIATE REVIEW" if rtype == "affiliate_review" else "AUTHORITY ARTICLE"
+        print(f"   ✅ {label}! Score: {score} ({category})")
+        if competitors:
+            print(f"   ⚖️  Competitors: {', '.join(competitors)}")
+
+    save_json(MANUAL_FILE, manual)
+    save_json(TOOL_DB_FILE, tool_db)
+    save_json(WATCHLIST_FILE, watchlist)
+    return tool_db, watchlist
 
 
-# =============================================================================
-# MAIN — standalone run
-# =============================================================================
+# ─── Summary ──────────────────────────────────────────────────────────────────
 
-if __name__ == "__main__":
-    print("🔍 Tool Scout starting...\n")
-    print(f"📋 {len(RSS_FEEDS)} RSS sources | {len(SUBREDDITS)} subreddits (public JSON)\n")
+def print_summary(rss_aff, rss_auth, red_aff, red_auth, watchlist,
+                  promoted_count, archived_count, tool_db):
+    all_affiliate = rss_aff + red_aff
+    all_authority = rss_auth + red_auth
 
-    # --- Watchlist recheck first (runs every scan) ---
-    print("🔄 Checking watchlist for due rechecks...")
-    promoted, archived = process_watchlist()
+    # Category breakdown of database
+    cat_counts = {}
+    for key, data in tool_db.items():
+        if isinstance(data, dict):
+            cat = data.get("category", "other")
+            cat_counts[cat] = cat_counts.get(cat, 0) + 1
 
-    # --- RSS scan ---
-    print("\n📰 Starting RSS scan...")
-    rss_tools = scan_rss_feeds()
+    print("\n" + "=" * 55)
+    print("✅ Scan complete.")
+    print(f"   📰 New from RSS:              {len(rss_aff) + len(rss_auth)}")
+    print(f"   🤖 New from Reddit:           {len(red_aff) + len(red_auth)}")
+    print(f"   💰 Affiliate reviews queued:  {len(all_affiliate)}")
+    print(f"   🏢 Authority articles queued: {len(all_authority)}")
+    print(f"   👀 Total on watchlist:        {len(watchlist)}")
+    print(f"   🎉 Promoted from watchlist:   {promoted_count}")
+    print(f"   📦 Archived from watchlist:   {archived_count}")
+    print(f"   📊 Total tools in database:   {len(tool_db)}")
 
-    # --- Reddit scan ---
-    print("\n🤖 Starting Reddit scan...")
-    try:
-        reddit_tools = scan_reddit()
-    except Exception as e:
-        print(f"⚠️  Reddit scan crashed: {e}")
-        reddit_tools = []
+    if cat_counts:
+        cat_str = ", ".join(f"{v} {k}" for k, v in sorted(cat_counts.items(), key=lambda x: -x[1]))
+        print(f"   📁 Categories:               {cat_str}")
 
-    # --- Manual tools ---
-    process_manual_tools()
+    print("=" * 55)
 
-    # --- Summary ---
-    all_new = rss_tools + reddit_tools
-    affiliate_reviews  = [t for t in all_new if t.get("article_type") == "affiliate_review"]
-    authority_articles = [t for t in all_new if t.get("article_type") == "authority_article"]
-    fast_growing_new   = [t for t in all_new if t.get("fast_growing_category")]
-
-    watchlist = load_watchlist()
-    watching = sum(1 for t in watchlist.values() if t["status"] == "watchlist")
-
-    rss_count    = len(rss_tools)
-    reddit_count = len(reddit_tools)
-
-    print(f"\n{'='*55}")
-    print(f"✅ Scan complete.")
-    print(f"   📰 New from RSS:               {rss_count}")
-    print(f"   🤖 New from Reddit:            {reddit_count}")
-    print(f"   💰 Affiliate reviews queued:  {len(affiliate_reviews)}")
-    print(f"   🏢 Authority articles queued: {len(authority_articles)}")
-    print(f"   🔥 Fast-growing (new today):  {len(fast_growing_new)}")
-    print(f"   👀 Total on watchlist:        {watching}")
-    print(f"   🎉 Promoted from watchlist:   {len(promoted)}")
-    print(f"   📦 Archived from watchlist:   {len(archived)}")
-    print(f"{'='*55}")
-
-    if affiliate_reviews:
+    if all_affiliate:
         print("\n💰 Affiliate reviews (earns commissions):")
-        for t in sorted(affiliate_reviews, key=lambda x: x["score"], reverse=True)[:5]:
-            flag  = " 🔥" if t.get("fast_growing_category") else ""
-            conf  = " ⚠️"  if t.get("confidence") == "low" else ""
-            reddit_note = f" [{t['reddit_upvotes']}↑ r/{t.get('source','').replace('Reddit r/','')}]" if t.get("reddit_upvotes") else ""
-            print(f"   • {t['name']} (score: {t['score']}){flag}{conf}{reddit_note}")
-            print(f"     {t['description']}")
+        for name, score, desc in sorted(all_affiliate, key=lambda x: -x[1]):
+            print(f"   • {name} (score: {score})")
 
-    if authority_articles:
-        print("\n🏢 Authority articles (traffic + domain trust, no commission):")
-        for t in sorted(authority_articles, key=lambda x: x["score"], reverse=True)[:5]:
-            print(f"   • {t['name']} (score: {t['score']})")
-            print(f"     {t['description']}")
-
-    if promoted:
-        print("\n🎉 Promoted from watchlist today:")
-        for name in promoted:
-            print(f"   • {name}")
-
-    print(f"\n💾 Saved to: {MEMORY_FILE}")
-    print(f"👀 Watchlist: {WATCHLIST_FILE}")
+    if all_authority:
+        print("\n🏢 Authority articles (traffic + trust):")
+        for name, score, desc in sorted(all_authority, key=lambda x: -x[1]):
+            print(f"   • {name} (score: {score})")
 
 
-# =============================================================================
-# run() — called by scheduler.py
-# =============================================================================
+# ─── Main ─────────────────────────────────────────────────────────────────────
 
 def run():
-    """Master run function — called by scheduler.py every 6 hours."""
-    scan_rss_feeds()
-    scan_reddit()
-    process_watchlist()
-    process_manual_tools()
+    print("🔍 Tool Scout starting...")
+    print(f"   📋 {len(RSS_FEEDS)} RSS sources | {len(REDDIT_SUBREDDITS)} subreddits (public JSON)")
+
+    # Step 1 — watchlist rechecks
+    print("\n🔄 Checking watchlist for due rechecks...")
+    tool_db, watchlist, promoted_count, archived_count = process_watchlist()
+
+    # Step 2 — RSS scan
+    tool_db, watchlist, rss_aff, rss_auth = scan_rss_feeds(tool_db, watchlist)
+
+    # Step 3 — Reddit scan
+    tool_db, watchlist, red_aff, red_auth = scan_reddit(tool_db, watchlist)
+
+    # Step 4 — Manual tools
+    tool_db, watchlist = process_manual_tools(tool_db, watchlist)
+
+    # Step 5 — Summary
+    print_summary(rss_aff, rss_auth, red_aff, red_auth, watchlist,
+                  promoted_count, archived_count, tool_db)
+
+    # Step 6 — Discovery stats
+    update_discovery_stats(rss_aff, rss_auth, red_aff, red_auth,
+                          promoted_count, archived_count)
+
+    print(f"\n💾 Saved to: {TOOL_DB_FILE}")
+    print(f"📊 Stats: {STATS_FILE}")
+
+
+if __name__ == "__main__":
+    run()

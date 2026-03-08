@@ -1,0 +1,61 @@
+2026-03-08 00:35:39 — Image Agent starting
+2026-03-08 00:35:39 —   🔁 Queuing Notion — screenshot needs injection
+2026-03-08 00:35:39 — Found 4 articles needing images
+2026-03-08 00:35:39 — Processing: Krisp | hero: ❌ | screenshot: ❌ | logo: ❌
+2026-03-08 00:35:42 —   Screenshotting homepage: https://krisp.ai
+2026-03-08 00:36:00 —   ✅ Homepage screenshot: passed (76KB)
+2026-03-08 00:36:02 —   Uploaded → media ID: 236
+2026-03-08 00:36:02 —   ✅ Tool image uploaded (homepage_screenshot) — media ID: 236
+2026-03-08 00:36:02 —   Falling back to stock photo for hero image
+2026-03-08 00:36:02 —   Trying Pexels stock: 'remote worker video call headset home office'
+2026-03-08 00:36:04 —   Pexels: got image (121KB) for 'remote worker video call headset home office'
+2026-03-08 00:36:04 —   ✅ Stock hero quality: passed (121KB from Pexels)
+2026-03-08 00:36:06 —   Uploaded → media ID: 237
+2026-03-08 00:36:06 —   Fetching logo: https://logo.clearbit.com/krisp.ai
+2026-03-08 00:36:06 —   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /krisp.ai (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-08 00:36:06 —   ⚠️  Logo not found for Krisp
+2026-03-08 00:36:06 —   ℹ️  No wp_post_id yet — injection queued for publish time
+2026-03-08 00:36:06 —   ✅ COMPLETE — hero + screenshot
+2026-03-08 00:36:06 — Processing: Notion | hero: ❌ | screenshot: ✅ | logo: ❌
+2026-03-08 00:36:09 —   Falling back to stock photo for hero image
+2026-03-08 00:36:09 —   Trying Pexels stock: 'productivity workspace notes organisation'
+2026-03-08 00:36:12 —   Pexels: got image (350KB) for 'productivity workspace notes organisation'
+2026-03-08 00:36:12 —   ✅ Stock hero quality: passed (350KB from Pexels)
+2026-03-08 00:36:14 —   Uploaded → media ID: 238
+2026-03-08 00:36:18 —   ✅ Stock photo set as featured image
+2026-03-08 00:36:18 —   Fetching logo: https://logo.clearbit.com/notion.so
+2026-03-08 00:36:18 —   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /notion.so (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-08 00:36:18 —   ⚠️  Logo not found for Notion
+2026-03-08 00:36:21 —   ✅ Screenshot injected into article body
+2026-03-08 00:36:21 —   ✅ COMPLETE — hero + screenshot
+2026-03-08 00:36:21 — Processing: Luma Agents | hero: ❌ | screenshot: ❌ | logo: ❌
+2026-03-08 00:36:24 —   Screenshotting homepage: https://lumalabs.ai
+2026-03-08 00:36:42 —   ✅ Homepage screenshot: passed (95KB)
+2026-03-08 00:36:44 —   Uploaded → media ID: 240
+2026-03-08 00:36:44 —   ✅ Tool image uploaded (homepage_screenshot) — media ID: 240
+2026-03-08 00:36:44 —   Falling back to stock photo for hero image
+2026-03-08 00:36:44 —   Trying Pexels stock: 'video creator reviewing footage storyboard planning'
+2026-03-08 00:36:46 —   Pexels: got image (215KB) for 'video creator reviewing footage storyboard planning'
+2026-03-08 00:36:46 —   ✅ Stock hero quality: passed (215KB from Pexels)
+2026-03-08 00:36:48 —   Uploaded → media ID: 241
+2026-03-08 00:36:48 —   Fetching logo: https://logo.clearbit.com/lumalabs.ai
+2026-03-08 00:36:48 —   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /lumalabs.ai (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-08 00:36:48 —   ⚠️  Logo not found for Luma Agents
+2026-03-08 00:36:48 —   ℹ️  No wp_post_id yet — injection queued for publish time
+2026-03-08 00:36:48 —   ✅ COMPLETE — hero + screenshot
+2026-03-08 00:36:48 — Processing: Vois | hero: ❌ | screenshot: ❌ | logo: ❌
+2026-03-08 00:36:52 —   Screenshotting homepage: https://vois.ai
+2026-03-08 00:37:08 —   ❌ Homepage screenshot quality failed: too small — likely bot challenge (17KB)
+2026-03-08 00:37:08 —   Homepage screenshot failed — trying press kit for Vois
+2026-03-08 00:37:08 —   No press kit URL for Vois
+2026-03-08 00:37:08 —   ❌ Screenshot + press kit both failed — falling back to stock photo
+2026-03-08 00:37:08 —   Falling back to stock photo for hero image
+2026-03-08 00:37:08 —   Trying Pexels stock: 'podcaster recording voice microphone home studio'
+2026-03-08 00:37:10 —   Pexels: got image (118KB) for 'podcaster recording voice microphone home studio'
+2026-03-08 00:37:10 —   ✅ Stock hero quality: passed (118KB from Pexels)
+2026-03-08 00:37:12 —   Uploaded → media ID: 242
+2026-03-08 00:37:12 —   Fetching logo: https://logo.clearbit.com/vois.ai
+2026-03-08 00:37:12 —   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /vois.ai (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-08 00:37:12 —   ⚠️  Logo not found for Vois
+2026-03-08 00:37:12 —   ✅ COMPLETE — hero ready
+2026-03-08 00:37:12 — Image Agent complete — Complete: 4 | Partial: 0 | Failed: 0
