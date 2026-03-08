@@ -59,3 +59,24 @@
 2026-03-08 00:37:12 —   ⚠️  Logo not found for Vois
 2026-03-08 00:37:12 —   ✅ COMPLETE — hero ready
 2026-03-08 00:37:12 — Image Agent complete — Complete: 4 | Partial: 0 | Failed: 0
+2026-03-08 16:26:36 — Image Agent starting
+2026-03-08 16:26:36 — Found 1 articles needing images
+2026-03-08 16:26:36 — Processing: Thinking Line | hero: ❌ | screenshot: ❌ | logo: ❌
+2026-03-08 16:26:40 —   No URL for Thinking Line — trying https://www.thinkingline.com
+2026-03-08 16:26:40 —   Screenshotting https://www.thinkingline.com (standard)
+2026-03-08 16:26:58 —   ❌ Screenshot quality failed (standard): too small — likely bot challenge (39KB)
+2026-03-08 16:26:58 —   Screenshotting https://www.thinkingline.com (retry (wider + longer wait))
+2026-03-08 16:27:16 —   ❌ Screenshot quality failed (retry (wider + longer wait)): too small — likely bot challenge (40KB)
+2026-03-08 16:27:16 —   Homepage screenshot failed — trying press kit for Thinking Line
+2026-03-08 16:27:16 —   No press kit URL for Thinking Line
+2026-03-08 16:27:16 —   ❌ Screenshot + press kit both failed — falling back to stock photo
+2026-03-08 16:27:16 —   Falling back to stock photo for hero image
+2026-03-08 16:27:16 —   Trying Pexels stock: 'video creator editing timeline laptop'
+2026-03-08 16:27:18 —   Pexels: got image (83KB) for 'video creator editing timeline laptop'
+2026-03-08 16:27:18 —   ✅ Stock hero quality: passed (83KB from Pexels)
+2026-03-08 16:27:21 —   Uploaded → media ID: 253
+2026-03-08 16:27:21 —   Fetching logo: https://logo.clearbit.com/thinkingline.com
+2026-03-08 16:27:21 —   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /thinkingline.com (Caused by NameResolutionError("HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-08 16:27:21 —   ⚠️  Logo not found for Thinking Line
+2026-03-08 16:27:21 —   ✅ COMPLETE — hero
+2026-03-08 16:27:21 — Image Agent complete — Success: 1 | Failed: 0

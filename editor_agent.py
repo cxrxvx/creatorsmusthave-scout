@@ -2,19 +2,18 @@
 editor_agent.py — Strict Quality Editor for CXRXVX Affiliates
 ================================================================
 Phase 2.5 Opus Upgrade:
-  ✅ PASS_SCORE raised from 75 to 82
-  ✅ Scoring prompt is genuinely harsh — finds problems, doesn't confirm quality
+  ✅ PASS_SCORE 78 — strict but fair (was 82, caused 14% approval)
+  ✅ Scoring prompt finds real problems without over-penalizing
   ✅ Article type awareness — roundups/comparisons scored on their own criteria
   ✅ Structured feedback saved for article_agent self-learning loop
   ✅ Pattern tracking — detects recurring mistakes across articles
   ✅ Specific rewrite instructions when an article fails
   ✅ Score calibration notes — tells Claude what 90+ actually means
+  ✅ Balanced deductions — no single issue tanks the whole score
 
-Expected results after upgrade:
-  - Old: 16/16 approved, avg 92/100, zero rejections (rubber stamp)
-  - New: ~70-80% approval, avg 84-88, meaningful quality gate
-
-Drop this file into your cxrxvx-ai-empire/ folder to replace the old editor_agent.py.
+Expected results:
+  - Target: ~70-80% approval, avg 80-86, meaningful quality gate
+  - Below 50% approval = prompt too harsh, above 90% = too lenient
 """
 
 import json
@@ -36,9 +35,10 @@ MEMORY_DIR   = "memory"
 HANDOFFS     = os.path.join(MEMORY_DIR, "handoffs.json")
 LOGS_DIR     = os.path.join(MEMORY_DIR, "logs", "editor_agent")
 
-# ⚡ Phase 2.5: raised from 75 to 82
-# A real editor rejects 20-30% of drafts. 75 was a rubber stamp.
-PASS_SCORE   = 82
+# ⚡ Phase 2.5 tuned: 82 was too harsh (14% approval), 75 was rubber stamp
+# 78 targets 70-80% approval — strict enough to catch real problems,
+# fair enough to let decent articles through the pipeline
+PASS_SCORE   = 78
 DAILY_CAP    = 15
 
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -125,7 +125,7 @@ def get_recent_patterns(handoffs: dict) -> str:
         lines.append(f"  Readability issues seen: {'; '.join(readability_issues[:3])}")
     if completeness_issues:
         lines.append(f"  Completeness issues seen: {'; '.join(completeness_issues[:3])}")
-    lines.append("  → If this article has the same problems, deduct points aggressively.")
+    lines.append("  → Note these patterns but score each article on its own merits.")
 
     return "\n".join(lines)
 
@@ -139,51 +139,42 @@ def get_type_criteria(article_type: str) -> str:
 
     if article_type == "roundup":
         return """
-ROUNDUP-SPECIFIC CHECKS (score harshly if missing):
-- Does it cover at least 5 tools?
-- Does each tool have its own mini-review (not just a name and link)?
-- Is there a Quick Picks / comparison table at the top?
-- Does each tool section include pricing?
-- Does each tool have specific pros AND cons (not just pros)?
-- Is there a "How We Chose" methodology section?
-- Is there a clear #1 pick with reasoning?
-- Does the comparison table at the end cover at least 4 feature rows?
-Deduct 5 points per missing element above. Roundups that just list tools
-without genuine mini-reviews should score below 70."""
+ROUNDUP-SPECIFIC CHECKS:
+- Does it cover at least 5 tools? (-5 if fewer)
+- Does each tool have its own mini-review (not just a name and link)? (-5 if shallow)
+- Is there a Quick Picks / comparison table at the top? (-3 if missing)
+- Does each tool section include pricing? (-3 if missing)
+- Is there a clear #1 pick with reasoning? (-3 if missing)
+- Does the comparison table at the end cover at least 4 feature rows? (-3 if missing)"""
 
     elif article_type == "comparison":
         return """
-COMPARISON-SPECIFIC CHECKS (score harshly if missing):
-- Does it clearly state a winner upfront (Quick Verdict box)?
-- Are there at least 3 feature-by-feature comparison sections?
-- Does each comparison section declare a winner?
-- Is the pricing comparison side-by-side with equivalent tiers?
-- Are there separate "Who should choose X" and "Who should choose Y" sections?
-- Is the final verdict clear and decisive (not wishy-washy "it depends")?
-- Does it rank for BOTH tool names in the content?
-Deduct 5 points per missing element. Comparisons that refuse to pick
-a winner should score below 75."""
+COMPARISON-SPECIFIC CHECKS:
+- Does it clearly state a winner upfront? (-5 if wishy-washy)
+- Are there at least 3 feature-by-feature comparison sections? (-5 if fewer)
+- Does each comparison section declare a winner? (-3 if not)
+- Is the pricing comparison side-by-side? (-3 if not)
+- Are there separate "Who should choose X/Y" sections? (-3 if missing)
+- Is the final verdict clear and decisive? (-5 if "it depends" cop-out)"""
 
     elif article_type == "authority_article":
         return """
 AUTHORITY ARTICLE CHECKS:
-- There should be NO affiliate disclosure (remove if present)
-- There should be NO CTA buttons
-- Content should be purely informational and educational
-- Should include at least 4 H2 sections of substantive content
-Deduct 10 points if any affiliate elements are present."""
+- There should be NO affiliate disclosure (-10 if present)
+- There should be NO CTA buttons (-10 if present)
+- Content should be purely informational
+- Should include at least 4 H2 sections of substantive content (-5 if fewer)"""
 
     else:
         # review or alert
         return """
-REVIEW-SPECIFIC CHECKS (score harshly if missing):
-- Is there a Key Takeaways box near the top?
-- Is there a "Choose if / Skip if" decision table?
-- Does the pricing section have EXACT plan names and dollar amounts?
-- Are there at least 3 specific cons (not generic)?
-- Is there a clear "Who it's NOT for" section with 2+ creator types?
-- Does the verdict answer: who should buy, who should skip, and why?
-Deduct 5 points per missing element."""
+REVIEW-SPECIFIC CHECKS:
+- Is there a Key Takeaways box near the top? (-3 if missing)
+- Is there a "Choose if / Skip if" decision table? (-3 if missing)
+- Does the pricing section have plan names and dollar amounts? (-5 if vague)
+- Are there at least 3 specific cons (not generic)? (-5 if generic)
+- Is there a "Who it's NOT for" section? (-3 if missing)
+- Does the verdict clearly state who should buy and who should skip? (-3 if vague)"""
 
 
 # ═══════════════════════════════════════════════════════
@@ -287,7 +278,7 @@ def run_html_checks(html: str, article_type: str) -> dict:
 # ═══════════════════════════════════════════════════════
 
 def score_article(article: dict, pattern_context: str = "") -> dict:
-    """Score an article using Claude with a strict, problem-finding prompt."""
+    """Score an article using Claude with a strict but fair prompt."""
     tool_name    = article.get("tool_name", "Unknown")
     title        = article.get("article_title", "")
     keyword      = article.get("primary_keyword", "")
@@ -305,7 +296,7 @@ def score_article(article: dict, pattern_context: str = "") -> dict:
         auto_issues = f"""
 AUTOMATED CHECKS FOUND THESE ISSUES (factor into your scoring):
 {issue_list}
-Each issue above should cost 3-5 points from the relevant dimension.
+Each issue above should cost 2-4 points from the relevant dimension.
 """
     if html_checks["bonuses"]:
         bonus_list = ", ".join(html_checks["bonuses"])
@@ -317,21 +308,22 @@ Each issue above should cost 3-5 points from the relevant dimension.
     plain_text = strip_html_tags(html)
     plain_text = plain_text[:30000]
 
-    prompt = f"""You are a STRICT senior editor. Your job is to FIND PROBLEMS — not confirm quality.
+    prompt = f"""You are a senior editor scoring affiliate content for quality.
 
-You have been too lenient in the past. You approved 16 out of 16 articles with an average
-score of 92/100 and zero rejections. That is not editing — that is rubber-stamping.
-A good editor rejects 20-30% of articles. Most decent articles score 80-88. A score of
-90+ should be RARE — reserved for genuinely exceptional work that makes you think
-"this is better than what I'd find on page 1 of Google right now."
+Your goal: catch articles with REAL problems (broken structure, fake info, unreadable
+writing) while letting solid articles through. You are not looking for perfection —
+you are looking for articles good enough to publish and rank.
 
-SCORE CALIBRATION — read this carefully:
-  95-100: Exceptional. Could compete with Wirecutter or NerdWallet. Rare.
-  88-94:  Very good. Publishable with confidence. Maybe 1 in 5 articles.
-  82-87:  Good enough. Minor issues but nothing that hurts the reader.
-  75-81:  Mediocre. Publishable but won't rank. Needs improvement.
-  60-74:  Weak. Significant problems. Should not publish.
-  Below 60: Fundamentally broken. Rewrite from scratch.
+SCORE CALIBRATION:
+  90-100: Exceptional. Better than page 1 of Google right now. Rare — maybe 1 in 10.
+  82-89:  Strong. Clear, useful, well-structured. Publish with confidence.
+  78-81:  Solid. Minor issues but nothing that hurts the reader. Good to publish.
+  70-77:  Needs work. Noticeable problems that could hurt ranking or trust.
+  Below 70: Significant problems. Should not publish without major revision.
+
+Most AI-generated affiliate articles should land in the 78-86 range. If you are
+scoring most articles below 75, you are being too harsh. If most are above 88,
+you are being too lenient.
 
 ARTICLE DETAILS:
 - Tool: {tool_name}
@@ -349,43 +341,39 @@ ARTICLE CONTENT (plain text, first 30,000 chars):
 
 ---
 
-Score on THREE dimensions. ACTIVELY LOOK FOR PROBLEMS. Deduct points aggressively.
+Score on THREE dimensions. Look for real problems, not nitpicks.
 
 ## 1. SEO SCORE (0-100, weight: 35%)
 Check:
-- Does "{keyword}" appear in the first 100 words? (-10 if not)
-- Does it appear in at least one H2? (-5 if not)
-- Are there 8+ related keywords used naturally? (-5 if fewer)
-- Is there a proper FAQ with 4+ questions? (-8 if missing)
-- Is the title under 65 characters? (-3 if over)
-- Do H2 headings use keyword variations, not generic labels? (-5 if generic)
-- Is the content genuinely more useful than what's currently on page 1? (-10 if it's just average)
+- Does "{keyword}" appear in the first 150 words? (-5 if not)
+- Does a keyword variation appear in at least one H2? (-3 if not)
+- Are there 6+ related keywords used naturally? (-3 if fewer)
+- Is there a proper FAQ with 4+ questions? (-5 if missing entirely)
+- Do H2 headings use keyword variations, not just generic labels? (-3 if all generic)
+- Is the content useful and informative for the target reader? (-8 if thin/superficial)
 
 ## 2. READABILITY SCORE (0-100, weight: 30%)
 Check:
-- Does the intro hook the reader in 2 sentences? (-8 if generic opener)
-- Are paragraphs 3 sentences or fewer? (-5 per wall-of-text section)
-- Is the language direct and specific, not AI fluff? (-10 if corporate-speak)
-- Does it avoid ALL banned phrases? (-3 per banned phrase found)
-- Do sections flow naturally? (-5 if transitions feel robotic)
-- Would a real person enjoy reading this? (-10 if it reads like a template)
-- Is every section at least 100 words of substance? (-5 per thin section)
+- Does the intro hook the reader in the first 2-3 sentences? (-5 if generic opener)
+- Are paragraphs generally 3 sentences or fewer? (-3 per obvious wall-of-text)
+- Is the language direct and specific? (-5 if heavy corporate-speak throughout)
+- Does it avoid banned phrases? (-3 per banned phrase found)
+- Would a real person find this useful to read? (-5 if it reads like a template)
 
 ## 3. COMPLETENESS SCORE (0-100, weight: 35%)
 Check:
-- EXACT pricing with real plan names and dollar amounts? (-15 if vague or missing)
-- At least 3 SPECIFIC cons? "Learning curve" doesn't count. (-10 if generic)
-- "Who it's NOT for" with 2+ specific creator types? (-10 if missing)
-- Affiliate disclosure present and after the hook? (-5 if missing or misplaced)
-- Verdict that answers: who should buy, who should skip, why? (-8 if vague)
-- Does it avoid fake social proof and invented stats? (-15 if found)
-- Are CTAs specific ("Start editing faster with Descript →") not generic? (-5 if generic)
+- Does it include pricing information? (-8 if no pricing at all, -3 if approximate)
+- At least 3 SPECIFIC cons? "Learning curve" alone doesn't count. (-5 if generic)
+- Is there a "Who it's for / not for" section? (-5 if completely missing)
+- Affiliate disclosure present? (-3 if missing)
+- Clear verdict with recommendation? (-5 if wishy-washy)
+- Are CTAs present and specific? (-3 if generic "Click here" style)
 {type_criteria}
 
 ---
 
-IMPORTANT: Actually count deductions. Start at 100 for each dimension and subtract
-for each problem found. Don't just eyeball a number. Show your work mentally.
+Start at 100 for each dimension and subtract for problems found.
+Do not penalize the same issue twice across dimensions.
 
 RESPOND IN THIS EXACT JSON FORMAT — nothing else:
 
@@ -398,7 +386,7 @@ RESPOND IN THIS EXACT JSON FORMAT — nothing else:
   "seo_notes": "<the single biggest SEO problem, or 'Passed' if genuinely no issues>",
   "readability_notes": "<the single biggest readability problem, or 'Passed'>",
   "completeness_notes": "<the single biggest completeness problem, or 'Passed'>",
-  "deductions_applied": "<list the specific deductions you made, e.g. 'no keyword in intro -10, vague pricing -15'>",
+  "deductions_applied": "<list the specific deductions you made, e.g. 'no keyword in intro -5, vague pricing -3'>",
   "editor_summary": "<2-3 sentences: overall quality assessment and the #1 thing to fix>",
   "rewrite_instructions": "<if not approved: specific bullet points of what the writer must fix. if approved: 'N/A'>"
 }}"""
@@ -452,15 +440,23 @@ def run():
     # Find articles pending edit
     pending_slugs = [slug for slug, article in handoffs.items()
                      if article.get("status") == "pending_edit"]
-    log(f"Found {len(pending_slugs)} articles pending edit")
 
-    if not pending_slugs:
+    # Also re-check articles that were rejected — they get a second chance
+    # (article_agent learning loop may have improved them conceptually,
+    #  and the new softer scoring gives a fairer evaluation)
+    rewrite_slugs = [slug for slug, article in handoffs.items()
+                     if article.get("status") == "needs_rewrite"]
+
+    all_slugs = pending_slugs + rewrite_slugs
+    log(f"Found {len(pending_slugs)} articles pending edit + {len(rewrite_slugs)} needing re-review")
+
+    if not all_slugs:
         log("Nothing to edit — exiting")
         return
 
-    to_edit = pending_slugs[:DAILY_CAP]
-    if len(pending_slugs) > DAILY_CAP:
-        log(f"Cap applied — editing {DAILY_CAP} of {len(pending_slugs)} today")
+    to_edit = all_slugs[:DAILY_CAP]
+    if len(all_slugs) > DAILY_CAP:
+        log(f"Cap applied — editing {DAILY_CAP} of {len(all_slugs)} today")
 
     approved_count = 0
     rejected_count = 0

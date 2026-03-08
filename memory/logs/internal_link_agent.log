@@ -371,3 +371,64 @@
 [2026-03-07 18:12:54]   💰 Run cost:           $0.0002
 [2026-03-07 18:12:54] ============================================================
 
+[2026-03-08 16:27:29] ============================================================
+[2026-03-08 16:27:29] Internal Link Agent starting
+[2026-03-08 16:27:29] Keyword clusters loaded: 46 articles
+[2026-03-08 16:27:29] Published articles available: 12
+[2026-03-08 16:27:29] Article types: 11 review, 1 alert
+[2026-03-08 16:27:29] Articles needing internal links: 4
+[2026-03-08 16:27:29] Daily cap: 20
+[2026-03-08 16:27:29] 
+→ Processing: Kajabi (type: review, post ID 229)
+[2026-03-08 16:27:29]   Found 3 placeholder(s)
+[2026-03-08 16:27:29]   Live: 3 placeholder(s)
+[2026-03-08 16:27:38]   Tokens: 3102 in / 492 out | Cost: $0.00002
+[2026-03-08 16:27:38]     ✓ Linked: [INTERNAL_LINK: convertkit-review-small-creat → ConvertKit for email automation [topical, cross-link]
+[2026-03-08 16:27:38]     ✓ Linked: [INTERNAL_LINK: beehiiv-review-newsletter-cre → Beehiiv newsletter platform [topical, cross-link]
+[2026-03-08 16:27:38]     ✓ Linked: [INTERNAL_LINK: best-course-platforms-creator → Coursekit AI course platform [topical, cross-link]
+[2026-03-08 16:27:41]   ✓ Done: 3 linked [3 topical, 3 cross-link], 0 removed
+[2026-03-08 16:27:41] 
+→ Processing: Notion (type: review, post ID 230)
+[2026-03-08 16:27:41]   Found 3 placeholder(s)
+[2026-03-08 16:27:42]   Live: 3 placeholder(s)
+[2026-03-08 16:27:47]   Tokens: 3098 in / 369 out | Cost: $0.00001
+[2026-03-08 16:27:47]     ✗ Removed: [INTERNAL_LINK: analytics-dashboard-creators] (confidence: 0)
+[2026-03-08 16:27:47]     ✗ Removed: [INTERNAL_LINK: descript-review-youtube-creat (confidence: 0)
+[2026-03-08 16:27:47]     ✗ Removed: [INTERNAL_LINK: best-productivity-tools-conte (confidence: 0)
+[2026-03-08 16:27:50]   ✓ Done: 0 linked [0 topical, 0 cross-link], 3 removed
+[2026-03-08 16:27:50] 
+→ Processing: Loom (type: review, post ID 231)
+[2026-03-08 16:27:50]   Found 3 placeholder(s)
+[2026-03-08 16:27:50]   Live: 3 placeholder(s)
+[2026-03-08 16:27:57]   Tokens: 3109 in / 459 out | Cost: $0.00002
+[2026-03-08 16:27:57]     ✗ Removed: [INTERNAL_LINK: descript-review-youtube-creat (confidence: 0)
+[2026-03-08 16:27:57]     ✓ Linked: [INTERNAL_LINK: kajabi-review-course-creators → Coursekit for course creators [topical, cross-link]
+[2026-03-08 16:27:57]     ✓ Linked: [INTERNAL_LINK: descript-review-youtube-creat → Opus Clip for short-form content [topical, cross-link]
+[2026-03-08 16:28:01]   ✓ Done: 2 linked [2 topical, 2 cross-link], 1 removed
+[2026-03-08 16:28:01] 
+→ Processing: Opus Clip (type: review, post ID 254)
+[2026-03-08 16:28:01]   Found 4 placeholder(s)
+[2026-03-08 16:28:02]   Live: 4 placeholder(s)
+[2026-03-08 16:28:10]   Tokens: 2962 in / 531 out | Cost: $0.00002
+[2026-03-08 16:28:10]     ✗ Removed: [INTERNAL_LINK: riverside-fm-review-podcaster (confidence: 0)
+[2026-03-08 16:28:10]     ✗ Removed: [INTERNAL_LINK: kajabi-review-course-creators (confidence: 0)
+[2026-03-08 16:28:10]     ✗ Removed: [INTERNAL_LINK: descript-review-youtube-creat (confidence: 0)
+[2026-03-08 16:28:10]     ✓ Linked: [INTERNAL_LINK: best-ai-clip-maker-for-reels- → Trimmr AI for YouTube Shorts [topical, cross-link]
+[2026-03-08 16:28:13]   ✓ Done: 1 linked [1 topical, 1 cross-link], 3 removed
+[2026-03-08 16:28:13] 
+  ⚠️  ORPHAN ARTICLES (1 with no inbound links):
+[2026-03-08 16:28:13]     - ElevenLabs Review 2026: Best AI Voice for Podcaste
+[2026-03-08 16:28:13]       → Suggested: add link FROM 'Coursekit Review 2026: AI Agents for Cou' (score: 3)
+[2026-03-08 16:28:13] 
+============================================================
+[2026-03-08 16:28:13] Internal Link Agent complete
+[2026-03-08 16:28:13]   ✓ Success:             4
+[2026-03-08 16:28:13]   ✗ Failed:              0
+[2026-03-08 16:28:13]   ⏭  Skipped:             0
+[2026-03-08 16:28:13]   🔗 Links added:        6
+[2026-03-08 16:28:13]   🌐 Topical links:      6
+[2026-03-08 16:28:13]   🔄 Cross-links:        6
+[2026-03-08 16:28:13]   🗑  Links removed:      7
+[2026-03-08 16:28:13]   💰 Run cost:           $0.0001
+[2026-03-08 16:28:13] ============================================================
+

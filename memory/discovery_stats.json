@@ -1,15 +1,15 @@
 {
   "daily": {
     "2026-03-08": {
-      "rss_affiliate": 36,
+      "rss_affiliate": 3,
       "rss_authority": 0,
-      "reddit_affiliate": 3,
+      "reddit_affiliate": 0,
       "reddit_authority": 0,
-      "total_discovered": 39,
+      "total_discovered": 3,
       "promoted_from_watchlist": 0,
       "archived_from_watchlist": 0,
-      "timestamp": "2026-03-08T03:32:47.380578"
+      "timestamp": "2026-03-08T16:22:35.782916"
     }
   },
-  "total_ever_discovered": 39
+  "total_ever_discovered": 3
 }

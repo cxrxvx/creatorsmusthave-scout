@@ -1,0 +1,271 @@
+{
+  "timestamp": "2026-03-08T16:28:13.272268",
+  "has_critical": false,
+  "has_warnings": true,
+  "critical_count": 0,
+  "warning_count": 23,
+  "critical_issues": [],
+  "warnings": [
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:35:39 \u2014 Processing: Krisp | hero: \u274c | screenshot: \u274c | logo: \u274c",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 4,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:36:06 \u2014   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /krisp.ai (Caused by NameResolutionError(\"HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname pro",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 15,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:36:06 \u2014 Processing: Notion | hero: \u274c | screenshot: \u2705 | logo: \u274c",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 19,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:36:18 \u2014   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /notion.so (Caused by NameResolutionError(\"HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname pr",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 27,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:36:21 \u2014 Processing: Luma Agents | hero: \u274c | screenshot: \u274c | logo: \u274c",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 31,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:36:48 \u2014   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /lumalabs.ai (Caused by NameResolutionError(\"HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname ",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 42,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:36:48 \u2014 Processing: Vois | hero: \u274c | screenshot: \u274c | logo: \u274c",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 46,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:37:08 \u2014   \u274c Homepage screenshot quality failed: too small \u2014 likely bot challenge (17KB)",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 48,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:37:08 \u2014   \u274c Screenshot + press kit both failed \u2014 falling back to stock photo",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 51,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:37:12 \u2014   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /vois.ai (Caused by NameResolutionError(\"HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor servname prov",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 58,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 00:37:12 \u2014 Image Agent complete \u2014 Complete: 4 | Partial: 0 | Failed: 0",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 61,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 16:26:36 \u2014 Processing: Thinking Line | hero: \u274c | screenshot: \u274c | logo: \u274c",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 64,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 16:26:58 \u2014   \u274c Screenshot quality failed (standard): too small \u2014 likely bot challenge (39KB)",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 67,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 16:27:16 \u2014   \u274c Screenshot quality failed (retry (wider + longer wait)): too small \u2014 likely bot challenge (40KB)",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 69,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 16:27:16 \u2014   \u274c Screenshot + press kit both failed \u2014 falling back to stock photo",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 72,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 16:27:21 \u2014   Logo fetch failed: HTTPSConnectionPool(host='logo.clearbit.com', port=443): Max retries exceeded with url: /thinkingline.com (Caused by NameResolutionError(\"HTTPSConnection(host='logo.clearbit.com', port=443): Failed to resolve 'logo.clearbit.com' ([Errno 8] nodename nor serv",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 79,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "image_agent",
+      "error": "2026-03-08 16:27:21 \u2014 Image Agent complete \u2014 Success: 1 | Failed: 0",
+      "log_file": "memory/logs/image_agent/2026-03-08.log",
+      "line": 82,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in image_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/image_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/image_agent/"
+    },
+    {
+      "agent": "editor_agent",
+      "error": "2026-03-08 16:24:32 \u2014   \u274c REJECTED (74/100) \u2192 needs_rewrite",
+      "log_file": "memory/logs/editor_agent/2026-03-08.log",
+      "line": 6,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in editor_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/editor_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/editor_agent/"
+    },
+    {
+      "agent": "editor_agent",
+      "error": "2026-03-08 16:25:24 \u2014   \u274c REJECTED (79/100) \u2192 needs_rewrite",
+      "log_file": "memory/logs/editor_agent/2026-03-08.log",
+      "line": 27,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in editor_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/editor_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/editor_agent/"
+    },
+    {
+      "agent": "editor_agent",
+      "error": "2026-03-08 16:25:44 \u2014   \u274c REJECTED (76/100) \u2192 needs_rewrite",
+      "log_file": "memory/logs/editor_agent/2026-03-08.log",
+      "line": 32,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in editor_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/editor_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/editor_agent/"
+    },
+    {
+      "agent": "editor_agent",
+      "error": "2026-03-08 16:25:58 \u2014   \u274c REJECTED (80/100) \u2192 needs_rewrite",
+      "log_file": "memory/logs/editor_agent/2026-03-08.log",
+      "line": 38,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in editor_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/editor_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/editor_agent/"
+    },
+    {
+      "agent": "editor_agent",
+      "error": "2026-03-08 16:26:18 \u2014   \u274c REJECTED (76/100) \u2192 needs_rewrite",
+      "log_file": "memory/logs/editor_agent/2026-03-08.log",
+      "line": 43,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in editor_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/editor_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/editor_agent/"
+    },
+    {
+      "agent": "editor_agent",
+      "error": "2026-03-08 16:26:35 \u2014   \u274c REJECTED (74/100) \u2192 needs_rewrite",
+      "log_file": "memory/logs/editor_agent/2026-03-08.log",
+      "line": 48,
+      "matched_pattern": null,
+      "diagnosis": "Unknown error in editor_agent",
+      "fix": "Check the full error in the agent's log file at memory/logs/editor_agent/. Share the error with Opus for diagnosis.",
+      "severity": "warning",
+      "location": "memory/logs/editor_agent/"
+    }
+  ],
+  "checks": {
+    "errors_found": 23,
+    "lock_status": "ok",
+    "cost_status": "ok",
+    "publishing_status": "ok",
+    "pipeline_status": "ok",
+    "output_status": "ok"
+  }
+}

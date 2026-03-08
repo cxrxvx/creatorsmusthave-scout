@@ -35,6 +35,18 @@
     ],
     "trimmr-ai-review-youtube-creators": [
       "riverside-fm-review-podcasters-2026"
+    ],
+    "kajabi-review-course-creators-2026": [
+      "beehiiv-review-newsletter-creators",
+      "coursekit-review-course-creators",
+      "convertkit-review-small-creators-2026"
+    ],
+    "loom-review-content-creators-2026": [
+      "opus-clip-review-youtube-shorts-creators",
+      "coursekit-review-course-creators"
+    ],
+    "opus-clip-review-youtube-shorts-creators": [
+      "trimmr-ai-review-youtube-creators"
     ]
   },
   "inbound": {
@@ -63,15 +75,27 @@
       "canva-review-social-media-managers-2026"
     ],
     "trimmr-ai-review-youtube-creators": [
-      "descript-review-youtube-creators",
-      "canva-review-social-media-managers-2026"
+      "opus-clip-review-youtube-shorts-creators",
+      "canva-review-social-media-managers-2026",
+      "descript-review-youtube-creators"
     ],
     "canva-review-social-media-managers-2026": [
       "convertkit-review-small-creators-2026"
     ],
     "convertkit-review-small-creators-2026": [
+      "kajabi-review-course-creators-2026",
       "beehiiv-review-newsletter-creators"
+    ],
+    "beehiiv-review-newsletter-creators": [
+      "kajabi-review-course-creators-2026"
+    ],
+    "coursekit-review-course-creators": [
+      "kajabi-review-course-creators-2026",
+      "loom-review-content-creators-2026"
+    ],
+    "opus-clip-review-youtube-shorts-creators": [
+      "loom-review-content-creators-2026"
     ]
   },
-  "last_updated": "2026-03-07T18:12:54.983758"
+  "last_updated": "2026-03-08T16:28:12.989724"
 }

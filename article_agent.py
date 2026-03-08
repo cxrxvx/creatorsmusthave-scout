@@ -154,6 +154,7 @@ def enforce_tool_url(html: str, tool_url: str, tool_name: str) -> str:
         "[TOOL_URL]", "[AFFILIATE_LINK]", "[tool_url]", "[affiliate_link]",
         "https://example.com", "https://www.example.com", "http://example.com",
         "[INSERT_AFFILIATE_LINK]", "[INSERT_TOOL_URL]", "[URL]",
+        "REPLACE_WITH_TOOL_URL",
     ]
     for placeholder in replacements:
         if placeholder in html:
@@ -282,6 +283,43 @@ def write_log(entry):
     today = datetime.now().strftime("%Y-%m-%d")
     with open(f"{log_dir}/{today}.md", "a") as f:
         f.write(entry + "\n")
+
+
+# ─────────────────────────────────────────
+# FIELD NORMALIZER — bridges keyword_agent → article_agent
+# Fixed March 8, 2026 — Phase 2.5 bug fix
+# ─────────────────────────────────────────
+
+def normalize_tool_data(tool_data: dict) -> dict:
+    """
+    Map keyword_agent field names to article_agent field names.
+    
+    keyword_agent saves:
+      - roundup_tools: list of {name, slug} for roundup articles
+      - comparison_tools: {tool_a, tool_b} for comparison articles
+    
+    article_agent reads:
+      - tools_to_cover: list of tools for roundup articles
+      - tool_a / tool_b: top-level fields for comparison articles
+    
+    This bridges the gap so both naming conventions work.
+    Runs once per article before any processing starts.
+    """
+
+    # Roundup: keyword_agent saves "roundup_tools", article_agent reads "tools_to_cover"
+    if not tool_data.get("tools_to_cover") and tool_data.get("roundup_tools"):
+        tool_data["tools_to_cover"] = tool_data["roundup_tools"]
+
+    # Comparison: keyword_agent saves nested "comparison_tools" dict,
+    # article_agent reads top-level "tool_a" and "tool_b"
+    comp = tool_data.get("comparison_tools", {})
+    if comp:
+        if not tool_data.get("tool_a") and comp.get("tool_a"):
+            tool_data["tool_a"] = comp["tool_a"]
+        if not tool_data.get("tool_b") and comp.get("tool_b"):
+            tool_data["tool_b"] = comp["tool_b"]
+
+    return tool_data
 
 
 # ─────────────────────────────────────────
@@ -1144,6 +1182,9 @@ def run():
             print(f"\n⏸️  Daily cap of {DAILY_CAP} reached.")
             write_log(f"Cap reached after {written} articles.")
             break
+
+        # ── Normalize field names from keyword_agent → article_agent ──
+        tool_data = normalize_tool_data(tool_data)
 
         tool_name = tool_data.get("tool_name", tool_key)
         article_type = tool_data.get("article_type", "review")

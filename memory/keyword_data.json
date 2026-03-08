@@ -72,7 +72,7 @@
     "status": "article_written",
     "article_written_date": "2026-03-07",
     "wp_post_id": 11,
-    "tool_description": "Krisp is an AI audio tool for professionals. Accent Conversion is one of its features \u2014 it converts the speaker accent in real time during calls and recordings. The article should make clear this is a Krisp feature, not a standalone product."
+    "tool_description": "Krisp is an AI audio tool for professionals. Accent Conversion is one of its features — it converts the speaker accent in real time during calls and recordings. The article should make clear this is a Krisp feature, not a standalone product."
   },
   "willow-voice-for-teams": {
     "primary_keyword": "Willow Voice for Teams review new AI transcription tool 2026",
@@ -1438,7 +1438,8 @@
     "tool_category": "video",
     "tool_score": 82,
     "researched_date": "2026-03-08",
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-08"
   },
   "nemovideo": {
     "primary_keyword": "AI video editor for TikTok creators",
@@ -1491,7 +1492,8 @@
     "tool_category": "video",
     "tool_score": 82,
     "researched_date": "2026-03-08",
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-08"
   },
   "seedance-2.0": {
     "primary_keyword": "seedance ai video generator review for creators",
@@ -1544,7 +1546,8 @@
     "tool_category": "video",
     "tool_score": 82,
     "researched_date": "2026-03-08",
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-08"
   },
   "shortgram": {
     "primary_keyword": "shortgram ai video generator review for beginners",
@@ -1597,7 +1600,8 @@
     "tool_category": "video",
     "tool_score": 82,
     "researched_date": "2026-03-08",
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-08"
   },
   "basedlabs": {
     "primary_keyword": "basedlabs ai video generator review for youtube creators",
@@ -1650,7 +1654,8 @@
     "tool_category": "video",
     "tool_score": 82,
     "researched_date": "2026-03-08",
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-08"
   },
   "pixwit": {
     "primary_keyword": "pixwit ai video generator review for content creators",
@@ -1703,7 +1708,8 @@
     "tool_category": "video",
     "tool_score": 79,
     "researched_date": "2026-03-08",
-    "status": "pending_article"
+    "status": "article_written",
+    "article_written_date": "2026-03-08"
   },
   "roundup-audio": {
     "primary_keyword": "best ai audio tools for creators",
@@ -1736,7 +1742,7 @@
     "tool_category": "audio",
     "tool_score": 85,
     "researched_date": "2026-03-08",
-    "status": "pending_article",
+    "status": "article_written",
     "roundup_tools": [
       {
         "name": "Buzzsprout",
@@ -1770,7 +1776,8 @@
         "name": "Play.ht",
         "slug": ""
       }
-    ]
+    ],
+    "article_written_date": "2026-03-08"
   },
   "comparison-elevenlabs-vs-murf-ai": {
     "primary_keyword": "elevenlabs vs murf ai",
@@ -1800,10 +1807,437 @@
     "tool_category": "audio",
     "tool_score": 80,
     "researched_date": "2026-03-08",
-    "status": "pending_article",
+    "status": "article_written",
     "comparison_tools": {
       "tool_a": "ElevenLabs",
       "tool_b": "Murf AI"
+    },
+    "article_written_date": "2026-03-08"
+  },
+  "seobolt": {
+    "primary_keyword": "SEObolt review for affiliate marketers",
+    "secondary_keywords": [
+      "SEObolt AI visibility tracking",
+      "SEObolt pricing for bloggers",
+      "track brand mentions in ChatGPT",
+      "AI search visibility dashboard",
+      "SEObolt vs traditional SEO tools"
+    ],
+    "keyword_cluster": [
+      "AI assistant brand tracking tool",
+      "monitor brand in Claude and Perplexity",
+      "ChatGPT visibility monitoring",
+      "AI search optimization dashboard",
+      "track website mentions in AI tools",
+      "unified SEO and AI tracking",
+      "SEObolt affiliate marketer benefits",
+      "AI-first SEO tracking platform"
+    ],
+    "search_intent": "buyer",
+    "difficulty_score": 18,
+    "traffic_value": "high",
+    "article_type": "review",
+    "recommended_word_count": 2800,
+    "article_title": "SEObolt Review: Worth It for Affiliate Marketers? (2026)",
+    "url_slug": "seobolt-review-affiliate-marketers",
+    "serp_gap": "No existing reviews specifically address how AI visibility tracking benefits affiliate marketers who need to monitor brand mentions across both traditional search and emerging AI platforms. Missing: real-world affiliate use cases, AI citation tracking ROI, and comparative analysis of unified dashboards vs. separate tools.",
+    "urgency": "high",
+    "supporting_articles": [
+      {
+        "title": "7 Best AI Visibility Tracking Tools for Content Creators (2026)",
+        "slug": "best-ai-visibility-tracking-tools-creators",
+        "content_type": "roundup",
+        "angle": "Positions SEObolt within emerging AI tracking category, captures broader traffic, establishes topical authority"
+      },
+      {
+        "title": "How to Track Your Brand Mentions in ChatGPT and Claude",
+        "slug": "track-brand-mentions-chatgpt-claude",
+        "content_type": "question",
+        "angle": "Tutorial content targets specific pain point, naturally leads to SEObolt as solution, ranks for how-to queries"
+      },
+      {
+        "title": "SEObolt vs Ahrefs vs Semrush: Which Tracks AI Search?",
+        "slug": "seobolt-vs-ahrefs-semrush-ai-tracking",
+        "content_type": "comparison",
+        "angle": "Captures comparison searches from users evaluating traditional tools, highlights SEObolt's unique AI tracking advantage"
+      }
+    ],
+    "tool_name": "SEObolt",
+    "tool_category": "seo",
+    "tool_score": 78,
+    "researched_date": "2026-03-08",
+    "status": "pending_article"
+  },
+  "track-my-visibility": {
+    "primary_keyword": "track my visibility review for bloggers",
+    "secondary_keywords": [
+      "track my visibility pricing",
+      "ai search visibility tracking tool",
+      "monitor brand mentions in AI answers",
+      "track content in chatgpt results"
+    ],
+    "keyword_cluster": [
+      "how to track brand visibility in AI search",
+      "ai answer monitoring tools for bloggers",
+      "track my visibility vs competitors",
+      "does track my visibility work for affiliate sites",
+      "best AI visibility tracking software",
+      "monitor chatgpt mentions of your brand",
+      "ai search optimization tools 2026",
+      "track content performance in AI answers"
+    ],
+    "search_intent": "buyer",
+    "difficulty_score": 18,
+    "traffic_value": "high",
+    "article_type": "review",
+    "recommended_word_count": 2800,
+    "article_title": "Track My Visibility Review: Worth It for Bloggers? 2026",
+    "url_slug": "track-my-visibility-review-bloggers",
+    "serp_gap": "No hands-on testing from blogger perspective showing actual dashboard screenshots, no pricing breakdown for small creators, missing comparison of what AI answers looked like before/after optimization, no discussion of ROI for affiliate marketers specifically",
+    "urgency": "high",
+    "supporting_articles": [
+      {
+        "title": "7 AI Visibility Tracking Tools for Bloggers (Compared 2026)",
+        "slug": "ai-visibility-tracking-tools-bloggers",
+        "content_type": "roundup",
+        "angle": "Positions Track My Visibility within competitive landscape, captures comparison searches, builds topical authority"
+      },
+      {
+        "title": "How to Track Your Brand in ChatGPT Search Results (Step-by-Step)",
+        "slug": "track-brand-chatgpt-search-results",
+        "content_type": "guide",
+        "angle": "Targets informational searchers earlier in journey, naturally links to Track My Visibility as solution, captures growing how-to searches"
+      },
+      {
+        "title": "Does AI Search Visibility Matter for Affiliate Marketers in 2026?",
+        "slug": "ai-search-visibility-affiliate-marketers",
+        "content_type": "question",
+        "angle": "Addresses skepticism and education gap, establishes problem awareness before introducing solution, perfect pre-review content"
+      }
+    ],
+    "tool_name": "Track My Visibility",
+    "tool_category": "seo",
+    "tool_score": 78,
+    "researched_date": "2026-03-08",
+    "status": "pending_article"
+  },
+  "tonimusai": {
+    "primary_keyword": "TonimusAI review for content creators 2026",
+    "secondary_keywords": [
+      "TonimusAI pricing for creators",
+      "is TonimusAI worth it for freelancers",
+      "TonimusAI monetization features review",
+      "best AI content automation for creators"
+    ],
+    "keyword_cluster": [
+      "autonomous AI content platform review",
+      "TonimusAI vs manual content creation",
+      "TonimusAI revenue tracking features",
+      "how TonimusAI finds monetization opportunities",
+      "TonimusAI for solopreneurs honest review",
+      "AI branded content generator for creators",
+      "TonimusAI follower engagement automation",
+      "content creator AI tools 2026"
+    ],
+    "search_intent": "buyer",
+    "difficulty_score": 18,
+    "traffic_value": "high",
+    "article_type": "review",
+    "recommended_word_count": 2800,
+    "article_title": "TonimusAI Review: Is It Worth It for Creators? (2026)",
+    "url_slug": "tonimusai-review-content-creators-2026",
+    "serp_gap": "No hands-on testing exists yet (brand new tool). Missing: real creator results with revenue metrics, actual time saved vs manual work, monetization opportunity discovery examples, pricing breakdown for different creator income levels, and honest cons from someone who tested all features",
+    "urgency": "high",
+    "supporting_articles": [
+      {
+        "title": "TonimusAI vs Hiring a VA: Which Saves Creators More Money?",
+        "slug": "tonimusai-vs-virtual-assistant-creators",
+        "content_type": "comparison",
+        "angle": "Captures creators comparing AI automation to their current solution (hiring help), addresses cost anxiety with concrete ROI calculations"
+      },
+      {
+        "title": "How Does TonimusAI Find Monetization Opportunities? Explained",
+        "slug": "how-tonimusai-finds-monetization-opportunities",
+        "content_type": "question",
+        "angle": "Targets creators skeptical about AI finding revenue streams, positions the unique selling point most competitors lack"
+      },
+      {
+        "title": "7 Best AI Content Tools for Solo Creators in 2026",
+        "slug": "best-ai-content-tools-solo-creators-2026",
+        "content_type": "roundup",
+        "angle": "Ranks TonimusAI within broader category, captures comparison shoppers early in research phase, builds topical authority"
+      }
+    ],
+    "tool_name": "TonimusAI",
+    "tool_category": "productivity",
+    "tool_score": 78,
+    "researched_date": "2026-03-08",
+    "status": "pending_article"
+  },
+  "organicpilot": {
+    "primary_keyword": "organicpilot review for affiliate marketers",
+    "secondary_keywords": [
+      "organicpilot pricing 2026",
+      "organicpilot vs manual seo content",
+      "organicpilot wordpress integration",
+      "is organicpilot worth it for bloggers",
+      "organicpilot ai content quality"
+    ],
+    "keyword_cluster": [
+      "seo automation tools for affiliate sites",
+      "organicpilot editorial calendar features",
+      "organicpilot webflow publishing",
+      "keyword clustering tools for bloggers",
+      "automated content publishing wordpress",
+      "organicpilot for niche sites",
+      "ai seo content generators 2026",
+      "organicpilot alternative tools"
+    ],
+    "search_intent": "buyer",
+    "difficulty_score": 18,
+    "traffic_value": "high",
+    "article_type": "review",
+    "recommended_word_count": 2800,
+    "article_title": "OrganicPilot Review: Worth It for Affiliate Marketers?",
+    "url_slug": "organicpilot-review-affiliate-marketers",
+    "serp_gap": "No hands-on reviews showing actual keyword cluster outputs, editorial calendar screenshots, or real publishing workflow for affiliate sites. Missing content quality comparison vs manual writing and ROI calculations for affiliate marketers specifically.",
+    "urgency": "high",
+    "supporting_articles": [
+      {
+        "title": "OrganicPilot vs Manual SEO Content: Time & Cost Breakdown for Bloggers",
+        "slug": "organicpilot-vs-manual-seo-content-comparison",
+        "content_type": "comparison",
+        "angle": "Helps readers calculate actual time savings and decide if automation ROI justifies the investment for their content volume"
+      },
+      {
+        "title": "Does OrganicPilot Content Rank? I Published 30 AI Articles to Find Out",
+        "slug": "does-organicpilot-content-rank-test",
+        "content_type": "question",
+        "angle": "Addresses main buyer objection about AI content quality and ranking ability with real 30-day ranking data and traffic results"
+      },
+      {
+        "title": "7 Best SEO Automation Tools for Affiliate Sites (Tested March 2026)",
+        "slug": "best-seo-automation-tools-affiliate-sites",
+        "content_type": "roundup",
+        "angle": "Captures broader automation search intent while positioning OrganicPilot in context, funnels readers to detailed review"
+      }
+    ],
+    "tool_name": "Organicpilot",
+    "tool_category": "seo",
+    "tool_score": 78,
+    "researched_date": "2026-03-08",
+    "status": "pending_article"
+  },
+  "writegood": {
+    "primary_keyword": "WriteGood review for content writers",
+    "secondary_keywords": [
+      "WriteGood AI writing tool review",
+      "WriteGood pricing for bloggers",
+      "is WriteGood worth it for content creators",
+      "WriteGood vs Grammarly for content writers"
+    ],
+    "keyword_cluster": [
+      "AI writing partner for bloggers",
+      "inline editing tools for content writers",
+      "real-time collaboration writing tools",
+      "custom style guide software for writers",
+      "tracked changes writing assistant",
+      "WriteGood features for email marketers",
+      "voice preservation AI writing tools",
+      "best AI editor for content creators 2026"
+    ],
+    "search_intent": "buyer",
+    "difficulty_score": 18,
+    "traffic_value": "high",
+    "article_type": "review",
+    "recommended_word_count": 2800,
+    "article_title": "WriteGood Review: Worth It for Content Writers? (2026)",
+    "url_slug": "writegood-review-content-writers",
+    "serp_gap": "No first-hand testing from professional content writers focusing on voice preservation and custom style guide setup; missing real workflow integration examples for bloggers and email marketers; lack of pricing breakdown for small creator budgets",
+    "urgency": "high",
+    "supporting_articles": [
+      {
+        "title": "WriteGood vs Grammarly for Content Writers: Which Preserves Your Voice Better?",
+        "slug": "writegood-vs-grammarly-content-writers",
+        "content_type": "comparison",
+        "angle": "Captures comparison traffic from established tool searchers while highlighting WriteGood's unique voice preservation feature"
+      },
+      {
+        "title": "How to Set Up Custom Style Guides in WriteGood (Step-by-Step for Bloggers)",
+        "slug": "writegood-custom-style-guide-setup",
+        "content_type": "question",
+        "angle": "Targets implementation questions from users already interested, drives bottom-funnel traffic back to main review"
+      },
+      {
+        "title": "7 Best AI Writing Tools with Real-Time Collaboration for Content Teams 2026",
+        "slug": "ai-writing-tools-real-time-collaboration",
+        "content_type": "roundup",
+        "angle": "Positions WriteGood in broader category search while capturing collaboration-focused creators, internal link hub to review"
+      }
+    ],
+    "tool_name": "WriteGood",
+    "tool_category": "writing",
+    "tool_score": 78,
+    "researched_date": "2026-03-08",
+    "status": "pending_article"
+  },
+  "hooktide": {
+    "primary_keyword": "hooktide review for content writers",
+    "secondary_keywords": [
+      "hooktide linkedin tool review",
+      "hooktide ai writing tool",
+      "hooktide pricing for writers",
+      "is hooktide worth it for bloggers",
+      "hooktide alternative for copywriters",
+      "hooktide voice learning feature"
+    ],
+    "keyword_cluster": [
+      "ai linkedin content writer tools",
+      "linkedin post generator for writers",
+      "authentic linkedin writing tool",
+      "linkedin carousel creator for bloggers",
+      "ai tools that learn writing voice",
+      "linkedin engagement tracking tools",
+      "content writer linkedin automation",
+      "hooktide vs manual linkedin posting"
+    ],
+    "search_intent": "buyer",
+    "difficulty_score": 12,
+    "traffic_value": "high",
+    "article_type": "review",
+    "recommended_word_count": 2800,
+    "article_title": "HookTide Review: Worth It for Content Writers? (2026)",
+    "url_slug": "hooktide-review-content-writers",
+    "serp_gap": "No existing reviews from content writer perspective testing voice authenticity and time savings vs quality trade-offs. Missing real workflow integration examples and ROI calculation for freelance writers.",
+    "urgency": "high",
+    "supporting_articles": [
+      {
+        "title": "7 Best AI LinkedIn Tools for Freelance Writers in 2026",
+        "slug": "best-ai-linkedin-tools-freelance-writers",
+        "content_type": "roundup",
+        "angle": "Positions HookTide in competitive landscape while capturing broader comparison traffic"
+      },
+      {
+        "title": "Does HookTide Actually Sound Like You? I Tested the Voice Learning",
+        "slug": "does-hooktide-voice-learning-work",
+        "content_type": "question",
+        "angle": "Addresses main objection (authenticity concern) that blocks purchase decisions for writers"
+      },
+      {
+        "title": "HookTide vs Taplio vs Shield: Which LinkedIn Tool for Bloggers?",
+        "slug": "hooktide-vs-taplio-vs-shield-bloggers",
+        "content_type": "comparison",
+        "angle": "Captures high-intent comparison searches from users already familiar with category leaders"
+      }
+    ],
+    "tool_name": "HookTide",
+    "tool_category": "writing",
+    "tool_score": 78,
+    "researched_date": "2026-03-08",
+    "status": "pending_article"
+  },
+  "roundup-video": {
+    "primary_keyword": "best AI video repurposing tools",
+    "secondary_keywords": [
+      "AI video editing tools for creators",
+      "short form video tools",
+      "video clip generator tools",
+      "AI video tools for social media"
+    ],
+    "keyword_cluster": [
+      "opus clip alternative",
+      "best video repurposing software",
+      "AI short video makers",
+      "TikTok video editing tools",
+      "Instagram Reels editing tools",
+      "YouTube Shorts creator tools"
+    ],
+    "search_intent": "buyer",
+    "difficulty_score": 28,
+    "traffic_value": "high",
+    "article_type": "roundup",
+    "recommended_word_count": 4000,
+    "article_title": "8 Best AI Video Repurposing Tools (2026 Tested)",
+    "url_slug": "best-ai-video-repurposing-tools",
+    "serp_gap": "Existing roundups lack hands-on testing comparisons, pricing transparency for small creators, specific use-case recommendations (long-form to short-form vs AI avatar creation), free tier limitations, and direct tool-to-tool feature matrices. Most are outdated (2024) and miss newer tools like Seedance 2.0 and BasedLabs.",
+    "urgency": "high",
+    "tool_name": "Best Video Tools",
+    "tool_category": "video",
+    "tool_score": 85,
+    "researched_date": "2026-03-08",
+    "status": "pending_article",
+    "roundup_tools": [
+      {
+        "name": "Opus Clip",
+        "slug": "opus-clip-review-youtube-shorts-creators"
+      },
+      {
+        "name": "Pictory",
+        "slug": "pictory-ai-review-youtube-creators"
+      },
+      {
+        "name": "Synthesia",
+        "slug": "synthesia-review-content-creators-2026"
+      },
+      {
+        "name": "Thinking Line",
+        "slug": "thinking-line-review-youtube-creators"
+      },
+      {
+        "name": "NemoVideo",
+        "slug": "nemovideo-review-tiktok-creators"
+      },
+      {
+        "name": "Seedance 2.0",
+        "slug": "seedance-ai-video-generator-review-creators"
+      },
+      {
+        "name": "Shortgram",
+        "slug": "shortgram-review-beginners-2026"
+      },
+      {
+        "name": "BasedLabs",
+        "slug": "basedlabs-review-youtube-creators"
+      }
+    ]
+  },
+  "comparison-heygen-vs-synthesia": {
+    "primary_keyword": "heygen vs synthesia",
+    "secondary_keywords": [
+      "heygen or synthesia",
+      "synthesia vs heygen comparison",
+      "best ai video generator for creators",
+      "heygen synthesia difference"
+    ],
+    "keyword_cluster": [
+      "heygen review for youtube",
+      "synthesia pricing for creators",
+      "ai avatar video tools comparison",
+      "heygen vs synthesia pricing",
+      "which is better heygen or synthesia",
+      "synthesia alternatives for content creators",
+      "heygen for social media videos",
+      "ai video generator for tiktok",
+      "heygen vs synthesia features",
+      "best ai talking head software"
+    ],
+    "search_intent": "comparison",
+    "difficulty_score": 18,
+    "traffic_value": "high",
+    "article_type": "comparison",
+    "recommended_word_count": 3200,
+    "article_title": "HeyGen vs Synthesia: Which Is Better for Creators? (2025)",
+    "url_slug": "heygen-vs-synthesia",
+    "serp_gap": "Existing comparisons focus on corporate use cases and miss creator-specific needs: quick edits for social media, vertical video formats, platform-specific export settings, realistic avatars for personal brands, and affordable plans for solo creators. Missing real examples of TikTok/Reels/Shorts output quality, mobile workflow compatibility, and voice cloning quality comparison for authentic creator branding.",
+    "urgency": "high",
+    "tool_name": "HeyGen vs Synthesia",
+    "tool_category": "video",
+    "tool_score": 80,
+    "researched_date": "2026-03-08",
+    "status": "pending_article",
+    "comparison_tools": {
+      "tool_a": "HeyGen",
+      "tool_b": "Synthesia"
     }
   }
 }

@@ -1068,5 +1068,56 @@
       "Fizzly AI",
       "Redd Studio"
     ]
+  },
+  "getmimic": {
+    "name": "GetMimic",
+    "score": 78,
+    "type": "affiliate_review",
+    "category": "image",
+    "description": "Creates realistic social media and chat conversation mockups for content creators to generate viral-style posts and thumbnails",
+    "has_affiliate_potential": true,
+    "is_fast_growing": true,
+    "source": "Product Hunt - AI",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": [
+      "IMockupper",
+      "Fizzly AI",
+      "Redd Studio"
+    ]
+  },
+  "adobaro": {
+    "name": "adobaRo",
+    "score": 78,
+    "type": "affiliate_review",
+    "category": "video",
+    "description": "AI-powered workflow automation tool that handles translation, localization, subtitles, and cross-platform publishing to help video creators scale content globally without manual work",
+    "has_affiliate_potential": true,
+    "is_fast_growing": true,
+    "source": "BetaList - Content Creators",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": [
+      "Thinking Line",
+      "VFX AI",
+      "NemoVideo"
+    ]
+  },
+  "video_summarizer": {
+    "name": "Video Summarizer",
+    "score": 68,
+    "type": "affiliate_review",
+    "category": "video",
+    "description": "AI-powered tool that converts videos into summaries, mind maps, timelines, and Q&A for faster content research and repurposing",
+    "has_affiliate_potential": true,
+    "is_fast_growing": true,
+    "source": "BetaList - Video",
+    "discovered_date": "2026-03-08",
+    "status": "discovered",
+    "competitors": [
+      "Thinking Line",
+      "VFX AI",
+      "NemoVideo"
+    ]
   }
 }

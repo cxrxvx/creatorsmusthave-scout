@@ -534,6 +534,20 @@ def run():
             if affiliate_injected:
                 log(f"   💰 Affiliate link injected for {tool_name}")
 
+        # ── Safety net: catch ANY remaining placeholders ──────────────
+        placeholders = [
+            "[AFFILIATE_LINK]", "[TOOL_URL]", "[tool_url]", "[affiliate_link]",
+            "REPLACE_WITH_TOOL_URL", "[INSERT_AFFILIATE_LINK]", "[INSERT_TOOL_URL]",
+            "[URL]", "https://example.com", "https://www.example.com",
+        ]
+        placeholder_count = 0
+        for p in placeholders:
+            if p in html:
+                html = html.replace(p, tool_url if tool_url else "#")
+                placeholder_count += 1
+        if placeholder_count:
+            log(f"   🔧 Safety net caught {placeholder_count} placeholder(s) — replaced with {tool_url}")
+
         article["article_html"] = html
 
         # ── Publish to WordPress ──────────────────────────────────────
