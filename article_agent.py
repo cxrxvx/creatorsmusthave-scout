@@ -19,6 +19,8 @@ DAILY_CAP = 10
 # Write-ahead cap — skip writing if this many drafts are queued
 WRITE_AHEAD_LIMIT = 21
 
+CURRENT_YEAR = datetime.now().year
+
 client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 # ─────────────────────────────────────────
@@ -745,6 +747,71 @@ def get_structure(article_type: str) -> str:
 
 
 # ─────────────────────────────────────────
+# E-E-A-T + AEO BLOCK — injected into every prompt
+# Phase 2.7A — improves every article going forward
+# ─────────────────────────────────────────
+
+def get_eeat_aeo_block() -> str:
+    """
+    Returns the E-E-A-T and AEO instruction block injected into all prompts.
+    E-E-A-T = Experience, Expertise, Authoritativeness, Trustworthiness.
+    AEO = Answer Engine Optimization (structured for AI assistants + featured snippets).
+    """
+    return """━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+E-E-A-T SIGNALS — required in every article
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXPERIENCE (most critical for affiliate sites):
+→ Use first-person testing language: "In our testing," "We found," "When we evaluated"
+→ Name specific moments: "The export took 4 minutes — faster than we expected"
+→ Acknowledge what you couldn't access: "We couldn't test enterprise pricing — verify at [URL]"
+→ Mention what surprised you (good or bad) — only real testers get surprised
+→ One credibility signal in the opening: who evaluated this and by what standard
+
+EXPERTISE:
+→ Frame comparisons with criteria: "We evaluated on ease of use, output quality, and pricing"
+→ Name the specific feature or plan you tested when relevant
+→ Use category context: "Compared to other tools in this space..."
+
+AUTHORITATIVENESS:
+→ Comparison tables must declare a winner per row — never leave the winner column blank
+→ "Who this is NOT for" section is mandatory in reviews — it signals honest evaluation
+→ Roundups: "How We Chose These Tools" section (already in structure — make it substantive)
+
+TRUSTWORTHINESS:
+→ Affiliate disclosure always present and prominent (except authority_article)
+→ 3+ specific, non-generic cons — "Limited export formats on the free plan" not "learning curve"
+→ Always include exact pricing or flag: "verify current pricing at [URL]"
+→ No CTAs with fake urgency. No "limited time offer," "act now," "don't miss out."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AEO FORMATTING — structured for AI assistants + featured snippets
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ANSWER FIRST, EXPLAIN SECOND (core rule):
+→ Every H2 section opens with a direct answer in the first sentence
+→ WRONG: "When it comes to pricing, there are several factors to consider..."
+→ RIGHT: "[Tool] starts at $29/month with a free tier that includes [X]."
+
+FEATURED SNIPPET TARGETS:
+→ Key Takeaways box: items under 15 words each — structured for list snippets
+→ FAQ answers: exactly 40-60 words, first sentence = the answer, rest = context
+→ Quick Picks / Quick Verdict tables: one winner declared per row, no "it depends" rows
+→ Decision tree in roundups: "If you need X → choose Tool A" (entity-extraction ready)
+
+STATISTICS:
+→ Use specific numbers with attribution: "according to [source]" or "based on our testing"
+→ Never invent a statistic. No data = "we couldn't find published data on this"
+→ Exact numbers beat round estimates: "3.4 seconds" over "about 3 seconds"
+
+QUESTION-PATTERN H2s (use where natural — matches People Also Ask and AI queries):
+→ "Is [Tool] worth it for [audience]?"
+→ "How much does [Tool] cost?"
+→ "Is [Tool] free?"
+→ "Is [Tool A] better than [Tool B]?"
+→ "What is [Tool] used for?"
+"""
+
+
+# ─────────────────────────────────────────
 # BUILD PROMPTS — one per article type
 # ─────────────────────────────────────────
 
@@ -802,6 +869,7 @@ OPENING HOOK
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {hook_instruction}
 
+{get_eeat_aeo_block()}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TOOL DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -843,6 +911,7 @@ DISCLOSURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- CURRENT YEAR IS {CURRENT_YEAR}. Use {CURRENT_YEAR} whenever a year appears in text. NEVER write any other year.
 - Stay in your persona: {style["name"]}. Grade 7 readability. Short sentences.
 - Max 3 sentences per paragraph. Use "you" and "your".
 - BANNED: "game-changer", "revolutionary", "cutting-edge", "state-of-the-art",
@@ -874,6 +943,9 @@ SELF-CHECK
 ✓ Word count target: {tool_data['recommended_word_count']}
 ✓ Exact pricing in table | 3+ specific cons | "Not for" section
 ✓ FAQ answers 40-60 words | Max 3 CTAs | No banned phrases
+✓ E-E-A-T: first-person testing language used ("In our testing," "We found")
+✓ AEO: every H2 opens with a direct answer in the first sentence
+✓ AEO: FAQ answers are answer-first, 40-60 words, no hedging
 
 Write the complete article now. Return ONLY HTML.
 """
@@ -913,6 +985,7 @@ PERSONA: {style["name"]}
 HOOK: {hook_instruction}
 CRITICAL: Name your #1 pick in the opening — captures featured snippets.
 
+{get_eeat_aeo_block()}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ARTICLE DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -931,6 +1004,7 @@ TOOLS TO COVER (use each tool's actual URL):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ROUNDUP RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. CURRENT YEAR IS {CURRENT_YEAR}. Use {CURRENT_YEAR} whenever a year appears. NEVER write any other year.
 1. 5-8 tools. Each gets H2 + CTA with its own URL.
 2. VARY each section — different lead: feature, pricing, user profile, scenario, uniqueness.
 3. Quick Picks table at top — featured snippet target.
@@ -982,6 +1056,7 @@ PERSONA: {style["name"]}
 HOOK: {hook_instruction}
 CRITICAL: Declare the winner upfront — captures featured snippets.
 
+{get_eeat_aeo_block()}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 COMPARISON DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1000,6 +1075,7 @@ Tool B: {tool_b} — {tool_b_url}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 COMPARISON RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+0. CURRENT YEAR IS {CURRENT_YEAR}. Use {CURRENT_YEAR} whenever a year appears. NEVER write any other year.
 1. Quick Verdict table at top — featured snippet target.
 2. 4-6 head-to-head dimension sections (each H2).
 3. ALTERNATE which tool is discussed first in each section.

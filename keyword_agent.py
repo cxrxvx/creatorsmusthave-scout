@@ -22,6 +22,8 @@ from config import ANTHROPIC_API_KEY, CLAUDE_MODEL, SITE_NAME
 
 client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
+CURRENT_YEAR = datetime.now().year
+
 TOOL_DATABASE = "memory/tool_database.json"
 KEYWORD_DATA = "memory/keyword_data.json"
 TOPICS_USED = "memory/topics_used.json"
@@ -89,9 +91,9 @@ ARTICLE_TYPE_MAP = {
 
 TITLE_TEMPLATES = {
     "review": [
-        "[Tool] Review: Is It Worth It for [Audience]? (2026)",
+        f"[Tool] Review: Is It Worth It for [Audience]? ({CURRENT_YEAR})",
         "I Tested [Tool] for 30 Days — Here's What [Audience] Need to Know",
-        "The Honest [Tool] Review for [Audience] (Tested 2026)",
+        f"The Honest [Tool] Review for [Audience] (Tested {CURRENT_YEAR})",
         "Is [Tool] Worth It for [Audience]? I Found Out",
         "[Tool] Review: What [Audience] Actually Get for Their Money",
         "[Number] Things [Audience] Should Know Before Buying [Tool]",
@@ -99,22 +101,22 @@ TITLE_TEMPLATES = {
         "[Tool] for [Audience]: [Specific Outcome] Without [Pain Point]",
     ],
     "roundup": [
-        "Best [Category] Tools for [Audience] in 2026 (Tested & Ranked)",
+        f"Best [Category] Tools for [Audience] in {CURRENT_YEAR} (Tested & Ranked)",
         "[Number] Best [Category] Tools for [Audience] — Honest Picks",
-        "Best Free [Category] Tools for [Audience] (2026)",
+        f"Best Free [Category] Tools for [Audience] ({CURRENT_YEAR})",
         "Best [Category] Tools Under $[Price] for [Audience]",
     ],
     "comparison": [
-        "[Tool A] vs [Tool B]: Which Is Better for [Audience]? (2026)",
+        f"[Tool A] vs [Tool B]: Which Is Better for [Audience]? ({CURRENT_YEAR})",
         "[Tool A] vs [Tool B] — Honest Comparison for [Audience]",
         "[Tool A] or [Tool B]? The Real Difference for [Audience]",
     ],
     "alert": [
-        "[Tool] Just Launched — First Look for [Audience] (2026)",
+        f"[Tool] Just Launched — First Look for [Audience] ({CURRENT_YEAR})",
         "[Tool] Review: Is This New Tool Worth It for [Audience]?",
     ],
     "authority_article": [
-        "The Complete Guide to [Topic] for [Audience] (2026)",
+        f"The Complete Guide to [Topic] for [Audience] ({CURRENT_YEAR})",
         "[Topic] for Beginners: Everything [Audience] Need to Know",
         "How [Topic] Works: A Plain-English Guide for [Audience]",
     ],
@@ -190,6 +192,39 @@ def build_slug_index(keyword_data):
         if slug:
             index[slug] = tool_key
     return index
+
+
+def is_duplicate_primary_keyword(keyword, existing_keyword_data):
+    """
+    Phase 2.7A — Cannibalization guard.
+
+    Check if a primary keyword is already targeted (exactly or near-exactly)
+    by an existing keyword package. Returns the conflicting tool name/key, or
+    None if the keyword is safe to use.
+
+    Checks:
+    1. Exact match after normalisation (lowercase, stripped)
+    2. Substring match — one keyword fully contains the other
+       e.g. "best AI podcast tools" vs "best AI podcast tools for beginners"
+       catches the highest-risk cannibalization cases without false positives
+       from unrelated short words.
+    """
+    keyword_norm = keyword.lower().strip()
+    for key, data in existing_keyword_data.items():
+        if not isinstance(data, dict):
+            continue
+        existing_kw = data.get("primary_keyword", "").lower().strip()
+        if not existing_kw:
+            continue
+        if keyword_norm == existing_kw:
+            return data.get("tool_name", key)
+        # Only flag substring match when the shorter string is at least 4 words
+        # (avoids false positives from very short generic phrases)
+        shorter = keyword_norm if len(keyword_norm) <= len(existing_kw) else existing_kw
+        if len(shorter.split()) >= 4:
+            if keyword_norm in existing_kw or existing_kw in keyword_norm:
+                return data.get("tool_name", key)
+    return None
 
 
 # ═══════════════════════════════════════════════════════
@@ -697,6 +732,15 @@ def run():
 
             try:
                 result = research_keywords_single(tool, keyword_data)
+
+                # ── Cannibalization check (Phase 2.7A) ──────────────────────
+                dup_kw = is_duplicate_primary_keyword(result["primary_keyword"], keyword_data)
+                if dup_kw:
+                    print(f"   ⚠️  Cannibalization: \"{result['primary_keyword']}\" conflicts with \"{dup_kw}\" — skipping")
+                    write_log(f"### SKIP (cannibalization): {tool['name']} — keyword conflicts with {dup_kw}")
+                    continue
+                # ─────────────────────────────────────────────────────────────
+
                 keyword_data[tool_key] = result
 
                 print(f"   ✅ Keyword: \"{result['primary_keyword']}\"")
@@ -732,17 +776,24 @@ def run():
 
                 try:
                     result = research_keywords_roundup(opp, keyword_data)
-                    roundup_key = f"roundup-{opp['category']}"
-                    keyword_data[roundup_key] = result
 
-                    print(f"   ✅ Keyword: \"{result['primary_keyword']}\"")
-                    print(f"   📝 Type: roundup | {result['recommended_word_count']} words")
-                    print(f"   🏆 Title: {result['article_title']}")
-                    print(f"   🔗 Slug: {result['url_slug']}")
-                    print(f"   🔧 Tools included: {len(result.get('roundup_tools', []))}")
+                    # ── Cannibalization check (Phase 2.7A) ──────────────────
+                    dup_kw = is_duplicate_primary_keyword(result["primary_keyword"], keyword_data)
+                    if dup_kw:
+                        print(f"   ⚠️  Cannibalization: \"{result['primary_keyword']}\" conflicts with \"{dup_kw}\" — skipping")
+                        write_log(f"### SKIP (cannibalization): Roundup {opp['category']} — keyword conflicts with {dup_kw}")
+                    else:
+                        roundup_key = f"roundup-{opp['category']}"
+                        keyword_data[roundup_key] = result
 
-                    write_log(f"### ROUNDUP: {result['article_title']} → \"{result['primary_keyword']}\" | {len(result.get('roundup_tools', []))} tools")
-                    processed += 1
+                        print(f"   ✅ Keyword: \"{result['primary_keyword']}\"")
+                        print(f"   📝 Type: roundup | {result['recommended_word_count']} words")
+                        print(f"   🏆 Title: {result['article_title']}")
+                        print(f"   🔗 Slug: {result['url_slug']}")
+                        print(f"   🔧 Tools included: {len(result.get('roundup_tools', []))}")
+
+                        write_log(f"### ROUNDUP: {result['article_title']} → \"{result['primary_keyword']}\" | {len(result.get('roundup_tools', []))} tools")
+                        processed += 1
 
                 except Exception as e:
                     print(f"   ❌ Roundup error: {e}")
@@ -763,16 +814,23 @@ def run():
 
                 try:
                     result = research_keywords_comparison(opp, keyword_data)
-                    comp_key = f"comparison-{opp['tool_a'].lower().replace(' ', '-')}-vs-{opp['tool_b'].lower().replace(' ', '-')}"
-                    keyword_data[comp_key] = result
 
-                    print(f"   ✅ Keyword: \"{result['primary_keyword']}\"")
-                    print(f"   📝 Type: comparison | {result['recommended_word_count']} words")
-                    print(f"   🏆 Title: {result['article_title']}")
-                    print(f"   🔗 Slug: {result['url_slug']}")
+                    # ── Cannibalization check (Phase 2.7A) ──────────────────
+                    dup_kw = is_duplicate_primary_keyword(result["primary_keyword"], keyword_data)
+                    if dup_kw:
+                        print(f"   ⚠️  Cannibalization: \"{result['primary_keyword']}\" conflicts with \"{dup_kw}\" — skipping")
+                        write_log(f"### SKIP (cannibalization): {opp['tool_a']} vs {opp['tool_b']} — keyword conflicts with {dup_kw}")
+                    else:
+                        comp_key = f"comparison-{opp['tool_a'].lower().replace(' ', '-')}-vs-{opp['tool_b'].lower().replace(' ', '-')}"
+                        keyword_data[comp_key] = result
 
-                    write_log(f"### COMPARISON: {result['article_title']} → \"{result['primary_keyword']}\"")
-                    processed += 1
+                        print(f"   ✅ Keyword: \"{result['primary_keyword']}\"")
+                        print(f"   📝 Type: comparison | {result['recommended_word_count']} words")
+                        print(f"   🏆 Title: {result['article_title']}")
+                        print(f"   🔗 Slug: {result['url_slug']}")
+
+                        write_log(f"### COMPARISON: {result['article_title']} → \"{result['primary_keyword']}\"")
+                        processed += 1
 
                 except Exception as e:
                     print(f"   ❌ Comparison error: {e}")

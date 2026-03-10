@@ -88,6 +88,7 @@ def edit_message_text(chat_id, message_id: int, text: str):
 
 def wp_publish(wp_post_id: int) -> bool:
     """Set WordPress post status to publish."""
+    log(f"  WP publish → POST {WP_URL}/wp-json/wp/v2/posts/{wp_post_id}")
     try:
         resp = requests.post(
             f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
@@ -95,9 +96,10 @@ def wp_publish(wp_post_id: int) -> bool:
             auth=WP_AUTH,
             timeout=30,
         )
+        log(f"  WP response: HTTP {resp.status_code} | {resp.text[:300]}")
         return resp.status_code in (200, 201)
     except Exception as e:
-        log(f"WordPress publish failed for post {wp_post_id}: {e}")
+        log(f"  WP publish EXCEPTION for post {wp_post_id}: {e}")
         return False
 
 
@@ -119,14 +121,19 @@ def handle_callback(callback_query: dict):
     message_id  = message.get("message_id")
     chat_id     = message.get("chat", {}).get("id")
 
+    log(f"CALLBACK received: data='{data}' chat_id={chat_id} msg_id={message_id}")
+
     if "|" not in data:
+        log(f"CALLBACK parse error: no '|' in data='{data}'")
         answer_callback(callback_id, "Unknown action")
         return
 
     action, wp_post_id_str = data.split("|", 1)
+    log(f"CALLBACK action='{action}' wp_post_id_str='{wp_post_id_str}'")
     try:
         wp_post_id = int(wp_post_id_str)
     except ValueError:
+        log(f"CALLBACK invalid post ID: '{wp_post_id_str}'")
         answer_callback(callback_id, "Invalid post ID")
         return
 
@@ -134,10 +141,11 @@ def handle_callback(callback_query: dict):
     slug     = find_slug_by_wp_post_id(handoffs, wp_post_id)
     if not slug:
         answer_callback(callback_id, "Article not found in handoffs")
-        log(f"No slug found for wp_post_id={wp_post_id}")
+        log(f"CALLBACK no slug for wp_post_id={wp_post_id} — handoffs has {len(handoffs)} entries")
         return
 
     title = handoffs[slug].get("article_title", slug)
+    log(f"CALLBACK matched slug='{slug}' title='{title[:60]}'  current status='{handoffs[slug].get('status')}'")
 
     if action == "approve":
         ok = wp_publish(wp_post_id)

@@ -47,9 +47,13 @@ except Exception as _e:
     print(f"[scheduler] approval_bot import failed ({_e}) — Telegram bot disabled")
 
 
+_bot_thread = None   # set by start_approval_bot(); checked in --now mode
+
+
 def start_approval_bot():
+    global _bot_thread
     if _start_bot_thread:
-        _start_bot_thread()
+        _bot_thread = _start_bot_thread()
     else:
         log("⚠️  Approval bot unavailable — Telegram callbacks will not be processed")
 
@@ -408,14 +412,15 @@ def run_pipeline_once():
     log(f"   {get_pipeline_summary()}")
 
     steps = [
-        ("scout",     "tool_scout.py",         None,  True),
-        ("keyword",   "keyword_agent.py",       None,  True),
-        ("article",   "article_agent.py",       None,  "write_ahead"),  # special check
-        ("editor",    "editor_agent.py",        None,  True),
-        ("image",     "image_agent.py",         None,  True),
-        ("seo",       "seo_agent.py",           None,  True),
-        ("links",     "internal_link_agent.py", None,  True),
+        ("scout",     "tool_scout.py",         None,             True),
+        ("keyword",   "keyword_agent.py",       None,             True),
+        ("article",   "article_agent.py",       None,             "write_ahead"),  # special check
+        ("editor",    "editor_agent.py",        None,             True),
+        ("image",     "image_agent.py",         None,             True),
+        ("links",     "internal_link_agent.py", None,             True),
         ("publisher", "publisher_agent.py",     ["--cap", str(cap)], True),
+        # SEO runs AFTER publisher so it can process newly draft_live articles
+        ("seo",       "seo_agent.py",           None,             True),
     ]
 
     results = []
@@ -460,6 +465,17 @@ if __name__ == "__main__":
 
     if "--now" in sys.argv:
         run_pipeline_once()
+        # If the Telegram bot thread is alive, keep the process running so
+        # Alex can tap Accept/Decline on the notification that was just sent.
+        # sys.exit() would kill the daemon thread immediately.
+        if _bot_thread and _bot_thread.is_alive():
+            log("")
+            log("📱 Bot running — waiting for Telegram callbacks (Ctrl+C to exit)")
+            try:
+                while True:
+                    time.sleep(10)
+            except KeyboardInterrupt:
+                log("👋 Exiting")
         sys.exit(0)
 
     setup_schedule()

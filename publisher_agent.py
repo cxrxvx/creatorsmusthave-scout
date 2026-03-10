@@ -260,22 +260,45 @@ def sort_articles(articles: list, affiliate_links: dict,
 #  AFFILIATE LINK INJECTION — broader matching
 # ══════════════════════════════════════════════════════════════════════════
 
+def _resolve_affiliate_entry(affiliate_links: dict, tool_name: str) -> str:
+    """
+    Case-insensitive lookup into affiliate_links.
+    Handles both plain string URLs and {url, status} dict format.
+    Returns the affiliate URL string, or "" if not found / not active.
+    """
+    needle = tool_name.lower().strip()
+    matched_value = None
+    for k, v in affiliate_links.items():
+        if k.lower().strip() == needle:
+            matched_value = v
+            break
+    if matched_value is None:
+        return ""
+    # Plain string — always active
+    if isinstance(matched_value, str):
+        return matched_value
+    # Dict format — check status
+    if isinstance(matched_value, dict):
+        if matched_value.get("status", "active") != "active":
+            return ""
+        return matched_value.get("url", "")
+    return ""
+
+
 def inject_affiliate_links(html: str, tool_name: str, tool_url: str,
                             affiliate_links: dict) -> tuple[str, bool]:
     """
     Replace plain tool URLs with affiliate links in CTAs.
     Returns (updated_html, was_injected).
-    
-    Phase 2.5: Uses tool_url from article data for broader matching.
+
+    Handles both plain-string and {url, status} dict entries.
+    Lookup is case-insensitive.
     """
-    key = tool_name.lower().strip()
-    if key not in affiliate_links:
-        return html, False
-    entry = affiliate_links[key]
-    if entry.get("status") != "active":
+    affiliate_url = _resolve_affiliate_entry(affiliate_links, tool_name)
+    if not affiliate_url:
         return html, False
 
-    affiliate_url = entry["url"]
+    key = tool_name.lower().strip()
     injected = False
 
     # Method 1: Replace the exact tool_url from article data
@@ -302,21 +325,20 @@ def inject_roundup_affiliate_links(html: str, roundup_tools: list,
     """
     For roundup articles: inject affiliate links for each tool mentioned.
     Returns (updated_html, count_of_injections).
+
+    Handles both plain-string and {url, status} dict entries.
+    Lookup is case-insensitive.
     """
     injections = 0
     for tool_info in roundup_tools:
         t_name = tool_info if isinstance(tool_info, str) else tool_info.get("name", "")
         if not t_name:
             continue
-        t_key = t_name.lower().strip()
-        if t_key not in affiliate_links:
-            continue
-        entry = affiliate_links[t_key]
-        if entry.get("status") != "active":
+        aff_url = _resolve_affiliate_entry(affiliate_links, t_name)
+        if not aff_url:
             continue
 
-        aff_url = entry["url"]
-        # Try to find and replace this tool's URLs in the HTML
+        t_key = t_name.lower().strip()
         domain_slug = re.sub(r"[^a-z0-9]", "", t_key)
         pattern = re.compile(
             r'href="https?://(?:www\.)?' + re.escape(domain_slug)
@@ -402,14 +424,21 @@ def publish_to_wordpress(article: dict, status: str = PUBLISH_MODE) -> dict | No
     if featured_id:
         payload["featured_media"] = featured_id
 
-    # RankMath SEO fields (if seo_agent has run)
+    # RankMath SEO fields (if seo_agent has already run for this article)
     meta_title = article.get("meta_title", "")
     if meta_title:
+        focus_kw = article.get("focus_keyword", article.get("primary_keyword", ""))
+        meta_desc = article.get("meta_description", "")
         payload["meta"] = {
-            "rank_math_title":         meta_title,
-            "rank_math_description":   article.get("meta_description", ""),
-            "rank_math_focus_keyword": article.get("focus_keyword", article.get("primary_keyword", "")),
+            "rank_math_title":                meta_title,
+            "rank_math_description":          meta_desc,
+            "rank_math_focus_keyword":        focus_kw,
+            "rank_math_facebook_title":       meta_title,
+            "rank_math_facebook_description": meta_desc,
         }
+        log(f"   🔍 Meta payload: title='{meta_title[:50]}' | kw='{focus_kw[:40]}' | desc={len(meta_desc)}ch")
+    else:
+        log(f"   ℹ️  No meta_title yet — SEO agent will push RankMath fields after draft approval")
 
     try:
         resp = requests.post(

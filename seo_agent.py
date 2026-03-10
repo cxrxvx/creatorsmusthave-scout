@@ -604,23 +604,45 @@ def push_to_rankmath(wp_post_id, meta_title, meta_description, schema_json, keyw
     auth     = (WP_USERNAME, WP_APP_PASSWORD)
     endpoint = f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}"
 
-    payload = {
-        "meta": {
-            "rank_math_title":                meta_title,
-            "rank_math_description":          meta_description,
-            "rank_math_focus_keyword":        keyword,
-            "rank_math_facebook_title":       meta_title,
-            "rank_math_facebook_description": meta_description,
-            "rank_math_twitter_use_facebook": "on",
-        }
+    meta_payload = {
+        "rank_math_title":                meta_title,
+        "rank_math_description":          meta_description,
+        "rank_math_focus_keyword":        keyword,
+        "rank_math_facebook_title":       meta_title,
+        "rank_math_facebook_description": meta_description,
+        "rank_math_twitter_use_facebook": "on",
     }
-
     if og_image:
-        payload["meta"]["rank_math_facebook_image"] = og_image
+        meta_payload["rank_math_facebook_image"] = og_image
+
+    payload = {"meta": meta_payload}
+
+    log(f"  → Pushing to {endpoint}")
+    log(f"  → Meta keys: {list(meta_payload.keys())}")
+    log(f"  → rank_math_title:         {meta_title[:60]}")
+    log(f"  → rank_math_focus_keyword: {keyword[:60]}")
+    log(f"  → rank_math_description:   {meta_description[:80]}")
 
     resp = requests.post(endpoint, json=payload, auth=auth, timeout=30)
+    log(f"  → WP response: HTTP {resp.status_code}")
+
     if resp.status_code not in (200, 201):
+        log(f"  → Response body: {resp.text[:400]}")
         return False, f"Push error {resp.status_code}: {resp.text[:200]}"
+
+    # Verify the meta was actually saved by reading it back
+    try:
+        saved_meta = resp.json().get("meta", {})
+        saved_kw   = saved_meta.get("rank_math_focus_keyword", "NOT FOUND")
+        saved_title = saved_meta.get("rank_math_title", "NOT FOUND")
+        log(f"  → Saved rank_math_focus_keyword: {saved_kw!r}")
+        log(f"  → Saved rank_math_title:         {saved_title!r}")
+        if saved_kw == "NOT FOUND" and saved_title == "NOT FOUND":
+            log(f"  ⚠️  rank_math_* fields not in response meta — RankMath REST API may not be registered")
+            log(f"  ⚠️  Check: RankMath → Titles & Meta → enable REST API support, or add register_meta() to theme")
+    except Exception:
+        pass
+
     return True, "OK"
 
 
@@ -639,7 +661,11 @@ def get_articles_needing_seo(handoffs):
             and article.get("wp_post_id")
         ):
             pending.append((slug, article))
-    pending.sort(key=lambda x: x[1].get("published_date", ""))
+    # draft_live articles use draft_pushed_date; published use published_date
+    def sort_key(item):
+        _, a = item
+        return a.get("published_date") or a.get("draft_pushed_date") or ""
+    pending.sort(key=sort_key)
     return pending
 
 
