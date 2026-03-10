@@ -39,6 +39,20 @@ import threading
 from datetime import datetime, date
 from pathlib import Path
 
+# ── Approval bot (Telegram callbacks) ─────────────────────────────────────────
+try:
+    from approval_bot import start_bot_thread as _start_bot_thread
+except Exception as _e:
+    _start_bot_thread = None
+    print(f"[scheduler] approval_bot import failed ({_e}) — Telegram bot disabled")
+
+
+def start_approval_bot():
+    if _start_bot_thread:
+        _start_bot_thread()
+    else:
+        log("⚠️  Approval bot unavailable — Telegram callbacks will not be processed")
+
 # ── paths ──────────────────────────────────────────────────────────────────────
 BASE_DIR   = Path(__file__).parent
 MEMORY_DIR = BASE_DIR / "memory"
@@ -102,6 +116,7 @@ def should_write_articles() -> bool:
                 and data.get("status") in ("pending_edit", "pending_publish")
             )
         else:
+            log(f"⚠️  Unexpected handoffs format ({type(handoffs).__name__}) — allowing writes as safety fallback")
             return True
 
         if unpublished >= WRITE_AHEAD_CAP:
@@ -399,8 +414,8 @@ def run_pipeline_once():
         ("editor",    "editor_agent.py",        None,  True),
         ("image",     "image_agent.py",         None,  True),
         ("seo",       "seo_agent.py",           None,  True),
-        ("publisher", "publisher_agent.py",     ["--cap", str(cap)], True),
         ("links",     "internal_link_agent.py", None,  True),
+        ("publisher", "publisher_agent.py",     ["--cap", str(cap)], True),
     ]
 
     results = []
@@ -440,6 +455,8 @@ if __name__ == "__main__":
     log("🚀 Creators Must Have — Decoupled Pipeline Scheduler")
     log(f"   Phase 2.5 — Google-safe ramp + write-ahead cap")
     log("=" * 60)
+
+    start_approval_bot()
 
     if "--now" in sys.argv:
         run_pipeline_once()

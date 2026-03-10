@@ -41,6 +41,17 @@ from config import (WP_URL, WP_USERNAME, WP_APP_PASSWORD,
 
 WP_AUTH = (WP_USERNAME, WP_APP_PASSWORD)
 
+# ── Telegram approval config ───────────────────────────────────────────────
+try:
+    from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+    TELEGRAM_ENABLED = bool(TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)
+except ImportError:
+    TELEGRAM_BOT_TOKEN = ""
+    TELEGRAM_CHAT_ID   = ""
+    TELEGRAM_ENABLED   = False
+
+TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}" if TELEGRAM_BOT_TOKEN else ""
+
 # ⚡ Phase 2.5: --cap CLI argument support (scheduler passes --cap N)
 DEFAULT_CAP = 3
 DAILY_PUBLISH_CAP = DEFAULT_CAP
@@ -357,7 +368,7 @@ def get_category_for_article(article: dict) -> str:
     return CATEGORY_DISPLAY_NAMES.get(raw_category, "Creator Tools")
 
 
-def publish_to_wordpress(article: dict) -> dict | None:
+def publish_to_wordpress(article: dict, status: str = PUBLISH_MODE) -> dict | None:
     """Post article to WordPress. Returns WP response dict or None."""
     html    = article.get("article_html", "")
     title   = strip_emojis(article.get("article_title", article.get("title", "Untitled")))
@@ -375,7 +386,7 @@ def publish_to_wordpress(article: dict) -> dict | None:
     payload = {
         "title":   title,
         "content": html,
-        "status":  PUBLISH_MODE,
+        "status":  status,
         "slug":    slug,
     }
     if cat_id:
@@ -415,6 +426,93 @@ def publish_to_wordpress(article: dict) -> dict | None:
     except Exception as e:
         log(f"   ❌ Request failed: {e}")
         return None
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  TELEGRAM APPROVAL
+# ══════════════════════════════════════════════════════════════════════════
+
+def get_tools_covered(article: dict) -> str:
+    """Return a human-readable string of tools covered in this article."""
+    article_type = article.get("article_type", "review")
+    if article_type == "roundup":
+        # Try roundup_tools (list), then tools_covered (may be JSON string or list)
+        tools = article.get("roundup_tools", [])
+        if not tools:
+            raw = article.get("tools_covered", [])
+            if isinstance(raw, str):
+                try:
+                    import json as _json
+                    tools = _json.loads(raw)
+                except Exception:
+                    tools = []
+            elif isinstance(raw, list):
+                tools = raw
+        names = []
+        for t in tools:
+            if isinstance(t, str):
+                names.append(t)
+            elif isinstance(t, dict):
+                names.append(t.get("name", ""))
+        return ", ".join(n for n in names if n) or article.get("tool_name", "")
+    elif article_type == "comparison":
+        # Try flat tool_a/tool_b first, then nested comparison_tools
+        a = article.get("tool_a", "") or ""
+        b = article.get("tool_b", "") or ""
+        if not (a and b):
+            comp = article.get("comparison_tools", {}) or {}
+            a = comp.get("tool_a", "") or a
+            b = comp.get("tool_b", "") or b
+        if a and b:
+            return f"{a} vs {b}"
+        return a or b or article.get("tool_name", "")
+    else:
+        return article.get("tool_name", "")
+
+
+def send_telegram_approval_request(article: dict, wp_post_id: int, slug: str):
+    """Send Telegram message with Accept/Decline inline keyboard."""
+    if not TELEGRAM_ENABLED:
+        return
+
+    title        = article.get("article_title", slug)
+    tools        = get_tools_covered(article)
+    word_count   = article.get("word_count", 0)
+    editor_score = article.get("editor_score", "N/A")
+    keyword      = article.get("primary_keyword", "")
+    editor_notes = article.get("editor_feedback", "No editor notes")
+    draft_url    = f"{WP_URL}/?p={wp_post_id}&preview=true"
+
+    text = (
+        f"📝 ARTICLE READY TO REVIEW\n"
+        f"Title: {title}\n"
+        f"Tools covered: {tools}\n"
+        f"Word count: {word_count}\n"
+        f"Editor score: {editor_score}/100\n"
+        f"Keyword: {keyword}\n"
+        f"Editor notes:\n{editor_notes}\n"
+        f"Draft preview: {draft_url}"
+    )
+
+    keyboard = {
+        "inline_keyboard": [[
+            {"text": "Accept", "callback_data": f"approve|{wp_post_id}"},
+            {"text": "Decline", "callback_data": f"decline|{wp_post_id}"},
+        ]]
+    }
+
+    try:
+        resp = requests.post(
+            f"{TELEGRAM_API}/sendMessage",
+            json={"chat_id": TELEGRAM_CHAT_ID, "text": text, "reply_markup": keyboard},
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            log(f"   📱 Telegram notification sent for: {title}")
+        else:
+            log(f"   ⚠️  Telegram send failed {resp.status_code}: {resp.text[:100]}")
+    except Exception as e:
+        log(f"   ⚠️  Telegram error: {e}")
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -550,33 +648,42 @@ def run():
 
         article["article_html"] = html
 
-        # ── Publish to WordPress ──────────────────────────────────────
-        wp_result = publish_to_wordpress(article)
+        # ── Push to WordPress (always as draft first when Telegram is enabled) ──
+        push_status = "draft" if TELEGRAM_ENABLED else PUBLISH_MODE
+        wp_result = publish_to_wordpress(article, status=push_status)
 
         if wp_result:
             wp_id  = wp_result.get("id")
             wp_url = wp_result.get("link", "")
-            log(f"   ✅ Published! Post ID: {wp_id}")
-            log(f"      🔗 {wp_url}")
 
-            # ⚡ Phase 2.5: Save all fields downstream agents need
-            handoffs[slug]["status"]              = "published"
-            handoffs[slug]["wp_post_id"]          = wp_id
-            handoffs[slug]["wp_post_url"]         = wp_url  # internal_link_agent needs this
-            handoffs[slug]["wp_url"]              = wp_url  # backward compat
-            handoffs[slug]["published_date"]      = datetime.now().strftime("%Y-%m-%d %H:%M")
-            handoffs[slug]["priority_score"]      = priority
-            handoffs[slug]["affiliate_injected"]  = affiliate_injected
-            handoffs[slug]["publish_category"]    = get_category_for_article(article)
+            # ⚡ Save all fields downstream agents need
+            handoffs[slug]["wp_post_id"]         = wp_id
+            handoffs[slug]["wp_post_url"]        = wp_url  # internal_link_agent needs this
+            handoffs[slug]["wp_url"]             = wp_url  # backward compat
+            handoffs[slug]["priority_score"]     = priority
+            handoffs[slug]["affiliate_injected"] = affiliate_injected
+            handoffs[slug]["publish_category"]   = get_category_for_article(article)
 
-            # Update keyword_data status
-            if slug in keyword_data:
-                keyword_data[slug]["status"] = "published"
+            if TELEGRAM_ENABLED:
+                # Send for approval — article lives as draft until Alex accepts
+                send_telegram_approval_request(article, wp_id, slug)
+                handoffs[slug]["status"]           = "draft_live"
+                handoffs[slug]["draft_pushed_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                log(f"   📋 Draft pushed (post {wp_id}) — waiting for Telegram approval")
+            else:
+                # No Telegram — publish directly as before
+                handoffs[slug]["status"]         = "published"
+                handoffs[slug]["published_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                log(f"   ✅ Published! Post ID: {wp_id}")
+                log(f"      🔗 {wp_url}")
+                # Update keyword_data status
+                if slug in keyword_data:
+                    keyword_data[slug]["status"] = "published"
 
             increment_daily_count()
             published += 1
         else:
-            log(f"   ❌ Failed to publish: {tool_name}")
+            log(f"   ❌ Failed to push: {tool_name}")
 
     # ── Save updated files ─────────────────────────────────────────────
     save_json(HANDOFFS_FILE, handoffs)
@@ -588,7 +695,8 @@ def run():
     log(f"   📊 Total published today: {total_today}/{DAILY_PUBLISH_CAP}")
 
     remaining = [a for a in sorted_articles
-                 if handoffs.get(a.get("_slug", ""), {}).get("status") != "published"]
+                 if handoffs.get(a.get("_slug", ""), {}).get("status")
+                 not in ("published", "draft_live", "declined")]
     if remaining:
         log(f"   📬 {len(remaining)} articles still queued for next run.")
 
