@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 """
 image_agent.py — Image Agent for CXRXVX Affiliates
 =====================================================
@@ -13,6 +14,7 @@ Phase 2.5 Opus Upgrade:
 Drop this file into your cxrxvx-ai-empire/ folder to replace the old image_agent.py.
 """
 
+import db_helpers
 import json
 import os
 import re
@@ -39,7 +41,6 @@ except ImportError:
 client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 MEMORY_DIR  = "memory"
-HANDOFFS    = os.path.join(MEMORY_DIR, "handoffs.json")
 LOGS_DIR    = os.path.join(MEMORY_DIR, "logs", "image_agent")
 USED_IMAGES_FILE = os.path.join(MEMORY_DIR, "used_stock_images.json")
 DAILY_CAP   = 15
@@ -993,7 +994,7 @@ def process_roundup_images(slug: str, article: dict) -> dict:
 
 def run():
     log("Image Agent starting")
-    handoffs = load_json(HANDOFFS, {})
+    handoffs = db_helpers.load_all_handoffs()
 
     # ── Find candidates ───────────────────────────────────────────────────
     candidates = {}
@@ -1046,11 +1047,10 @@ def run():
         now_has_shot = bool(images_data.get("screenshot_media_id"))
         now_has_logo = bool(images_data.get("logo_media_id"))
 
-        article["image_data"]  = images_data
-        article["images_date"] = datetime.now().strftime("%Y-%m-%d")
+        images_date = datetime.now().strftime("%Y-%m-%d")
 
         if now_has_hero or now_has_shot:
-            article["images_added"] = True
+            images_added = True
             success_count += 1
             parts = []
             if now_has_hero: parts.append("hero")
@@ -1062,11 +1062,15 @@ def run():
                     parts.append(f"{roundup_count} roundup screenshots")
             log(f"  ✅ COMPLETE — {' + '.join(parts)}")
         else:
-            article["images_added"] = False
+            images_added = False
             fail_count += 1
             log(f"  ❌ FAILED — no images added — retrying next run")
 
-    save_json(HANDOFFS, handoffs)
+        db_helpers.update_handoff(slug, {
+            "image_data":   images_data,
+            "images_date":  images_date,
+            "images_added": images_added,
+        })
 
     log(f"Image Agent complete — Success: {success_count} | Failed: {fail_count}")
     print(f"\n✅ Image Agent done — {success_count} complete, {fail_count} failed\n")

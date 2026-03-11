@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 import json
 import os
 import re
@@ -5,9 +6,9 @@ import random
 from datetime import datetime
 from anthropic import Anthropic
 from config import ANTHROPIC_API_KEY, CLAUDE_MODEL
+import db_helpers
 
 KEYWORD_DATA_FILE = "memory/keyword_data.json"
-HANDOFFS_FILE = "memory/handoffs.json"
 TOPICS_USED_FILE = "memory/topics_used.json"
 LEARNINGS_FILE = "memory/learnings.json"
 STYLE_TRACKER_FILE = "memory/.style_tracker.json"
@@ -1172,20 +1173,9 @@ def should_write_articles() -> bool:
     Skip writing if 21+ unpublished drafts are waiting.
     Saves API budget — no point writing articles that sit for weeks.
     """
-    handoffs = load_json(HANDOFFS_FILE, {})
-    
-    if isinstance(handoffs, dict):
-        unpublished = [
-            key for key, data in handoffs.items()
-            if data.get("status") in ("pending_edit", "pending_publish")
-        ]
-    else:
-        unpublished = [
-            h for h in handoffs
-            if h.get("status") in ("pending_edit", "pending_publish")
-        ]
-    
-    count = len(unpublished)
+    pending_edit = db_helpers.get_handoffs_by_status("pending_edit")
+    pending_pub  = db_helpers.get_handoffs_by_status("pending_publish")
+    count = len(pending_edit) + len(pending_pub)
     
     if count >= WRITE_AHEAD_LIMIT:
         print(f"   📦 Write-ahead cap: {count} drafts queued (limit: {WRITE_AHEAD_LIMIT})")
@@ -1210,7 +1200,7 @@ def run():
         return
 
     keyword_data = load_json(KEYWORD_DATA_FILE, {})
-    handoffs = load_json(HANDOFFS_FILE, {})
+    handoffs = db_helpers.load_all_handoffs()
     topics_used = load_json(TOPICS_USED_FILE, [])
 
     published_slugs = [
@@ -1292,12 +1282,13 @@ def run():
             write_log(f"Written: {word_count} words | Style: {last_style} | Hook: {last_hook}")
 
             handoff_key = tool_data.get("url_slug", tool_key)
-            handoffs[handoff_key] = {
+            db_helpers.insert_handoff({
+                "slug": handoff_key,
                 "tool_name": tool_name,
                 "tool_key": tool_key,
                 "article_type": article_type,
                 "article_title": tool_data.get("article_title", ""),
-                "url_slug": tool_data.get("url_slug", ""),
+                "url_slug": tool_data.get("url_slug", handoff_key),
                 "primary_keyword": tool_data.get("primary_keyword", ""),
                 "word_count": word_count,
                 "article_html": article_html,
@@ -1311,7 +1302,7 @@ def run():
                 "tools_covered": tool_data.get("tools_to_cover", []),
                 "tool_a": tool_data.get("tool_a", ""),
                 "tool_b": tool_data.get("tool_b", ""),
-            }
+            })
 
             keyword_data[tool_key]["status"] = "article_written"
             keyword_data[tool_key]["article_written_date"] = datetime.now().strftime("%Y-%m-%d")
@@ -1323,7 +1314,7 @@ def run():
             written += 1
             if tool_data.get("url_slug") and tool_data["url_slug"] not in published_slugs:
                 published_slugs.append(tool_data["url_slug"])
-            print(f"   💾 Saved to handoffs.json\n")
+            print(f"   💾 Saved to pipeline.db\n")
 
         except Exception as e:
             print(f"   ❌ Failed: {e}")
@@ -1331,7 +1322,6 @@ def run():
             continue
 
     save_json(KEYWORD_DATA_FILE, keyword_data)
-    save_json(HANDOFFS_FILE, handoffs)
     save_json(TOPICS_USED_FILE, topics_used)
 
     print(f"✅ Article Agent done. Wrote {written} article(s) this run.")

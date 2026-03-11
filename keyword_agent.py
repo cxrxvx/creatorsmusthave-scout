@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 """
 keyword_agent.py — SEO Keyword Research Agent for CXRXVX Affiliates
 =====================================================================

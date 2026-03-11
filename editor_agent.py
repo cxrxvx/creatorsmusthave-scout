@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 """
 editor_agent.py — Strict Quality Editor for CXRXVX Affiliates
 ================================================================
@@ -21,6 +22,7 @@ import os
 import re
 from datetime import datetime
 from anthropic import Anthropic
+import db_helpers
 
 # ── Config ──────────────────────────────────────────────────────────────────
 try:
@@ -32,7 +34,6 @@ except ImportError:
 client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 MEMORY_DIR   = "memory"
-HANDOFFS     = os.path.join(MEMORY_DIR, "handoffs.json")
 LOGS_DIR     = os.path.join(MEMORY_DIR, "logs", "editor_agent")
 
 # ⚡ Phase 2.5 tuned: 82 was too harsh (14% approval), 75 was rubber stamp
@@ -432,7 +433,7 @@ RESPOND IN THIS EXACT JSON FORMAT — nothing else:
 
 def run():
     log("Editor Agent starting")
-    handoffs = load_json(HANDOFFS, {})
+    handoffs = db_helpers.load_all_handoffs()
 
     # Get pattern context from recent edits
     pattern_context = get_recent_patterns(handoffs)
@@ -442,8 +443,6 @@ def run():
                      if article.get("status") == "pending_edit"]
 
     # Also re-check articles that were rejected — they get a second chance
-    # (article_agent learning loop may have improved them conceptually,
-    #  and the new softer scoring gives a fairer evaluation)
     rewrite_slugs = [slug for slug, article in handoffs.items()
                      if article.get("status") == "needs_rewrite"]
 
@@ -474,17 +473,6 @@ def run():
             log(f"  ⚠️  Scoring failed — leaving as pending_edit")
             continue
 
-        # ── Save scores in TWO formats: ──
-        # 1. Full scores object (for debugging and display)
-        article["editor_scores"] = scores
-        article["editor_reviewed"] = datetime.now().strftime("%Y-%m-%d")
-
-        # 2. Flat fields that article_agent can easily read for self-learning
-        article["editor_score"] = scores.get("overall_score", 0)
-        article["editor_feedback"] = scores.get("editor_summary", "")
-        article["editor_rewrite_instructions"] = scores.get("rewrite_instructions", "")
-        article["editor_deductions"] = scores.get("deductions_applied", "")
-
         overall  = scores.get("overall_score", 0)
         approved = scores.get("approved", False)
         scores_this_run.append(overall)
@@ -492,17 +480,25 @@ def run():
         log(f"  SEO: {scores.get('seo_score')} | Read: {scores.get('readability_score')} | Comp: {scores.get('completeness_score')} | Overall: {overall}")
         log(f"  Deductions: {scores.get('deductions_applied', 'none listed')}")
 
+        new_status = "pending_publish" if approved else "needs_rewrite"
+
         if approved:
-            article["status"] = "pending_publish"
             approved_count += 1
             log(f"  ✅ APPROVED ({overall}/100) → pending_publish")
         else:
-            article["status"] = "needs_rewrite"
             rejected_count += 1
             log(f"  ❌ REJECTED ({overall}/100) → needs_rewrite")
             log(f"  Rewrite: {scores.get('rewrite_instructions', 'no instructions')[:200]}")
 
-    save_json(HANDOFFS, handoffs)
+        db_helpers.update_handoff(slug, {
+            "editor_scores":               scores,
+            "editor_reviewed":             datetime.now().strftime("%Y-%m-%d"),
+            "editor_score":                overall,
+            "editor_feedback":             scores.get("editor_summary", ""),
+            "editor_rewrite_instructions": scores.get("rewrite_instructions", ""),
+            "editor_deductions":           scores.get("deductions_applied", ""),
+            "status":                      new_status,
+        })
 
     # ── Run summary with statistics ──
     total_edited = approved_count + rejected_count

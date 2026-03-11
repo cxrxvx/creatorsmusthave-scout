@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 """
 scheduler.py — Decoupled pipeline scheduler for Creators Must Have
 ===================================================================
@@ -29,6 +30,7 @@ Why these publisher times?
 Drop this file into your cxrxvx-ai-empire/ folder to replace the old scheduler.py.
 """
 
+import db_helpers
 import subprocess
 import sys
 import os
@@ -62,7 +64,6 @@ BASE_DIR   = Path(__file__).parent
 MEMORY_DIR = BASE_DIR / "memory"
 LOCK_FILE  = MEMORY_DIR / ".pipeline_lock"
 COST_FILE  = MEMORY_DIR / ".daily_cost.json"
-HANDOFFS_FILE = MEMORY_DIR / "handoffs.json"
 
 # ── cost circuit breaker ───────────────────────────────────────────────────────
 MAX_DAILY_COST = 20.00   # hard stop if API spend exceeds this today
@@ -109,19 +110,9 @@ def should_write_articles() -> bool:
     Returns True if writing should proceed, False to skip.
     """
     try:
-        if not HANDOFFS_FILE.exists():
-            return True
-        handoffs = json.loads(HANDOFFS_FILE.read_text())
-        
-        if isinstance(handoffs, dict):
-            unpublished = sum(
-                1 for data in handoffs.values()
-                if isinstance(data, dict)
-                and data.get("status") in ("pending_edit", "pending_publish")
-            )
-        else:
-            log(f"⚠️  Unexpected handoffs format ({type(handoffs).__name__}) — allowing writes as safety fallback")
-            return True
+        pending_edit    = db_helpers.get_handoffs_by_status("pending_edit")
+        pending_publish = db_helpers.get_handoffs_by_status("pending_publish")
+        unpublished = len(pending_edit) + len(pending_publish)
 
         if unpublished >= WRITE_AHEAD_CAP:
             log(f"⏸️  Write-ahead cap: {unpublished} drafts queued (max {WRITE_AHEAD_CAP}) — skipping article writing")
@@ -138,17 +129,10 @@ def should_write_articles() -> bool:
 def get_pipeline_summary() -> str:
     """Get a quick summary of pipeline state for logging."""
     try:
-        if not HANDOFFS_FILE.exists():
-            return "No handoffs file yet"
-        handoffs = json.loads(HANDOFFS_FILE.read_text())
-        if not isinstance(handoffs, dict):
-            return "Handoffs format unexpected"
-
+        handoffs = db_helpers.load_all_handoffs()
         status_counts = {}
         type_counts = {}
         for slug, data in handoffs.items():
-            if not isinstance(data, dict):
-                continue
             status = data.get("status", "unknown")
             status_counts[status] = status_counts.get(status, 0) + 1
             atype = data.get("article_type", "review")

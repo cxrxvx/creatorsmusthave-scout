@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 """
 approval_bot.py — Telegram approval bot for CXRXVX publisher pipeline
 =======================================================================
@@ -10,6 +11,7 @@ Callback data format (set by publisher_agent.py):
   decline|{wp_post_id}   → leaves as draft, status set to "declined"
 """
 
+import db_helpers
 import json
 import time
 import threading
@@ -19,7 +21,6 @@ from pathlib import Path
 
 BASE_DIR      = Path(__file__).parent
 MEMORY_DIR    = BASE_DIR / "memory"
-HANDOFFS_FILE = MEMORY_DIR / "handoffs.json"
 KEYWORD_FILE  = MEMORY_DIR / "keyword_data.json"
 LOGS_DIR      = MEMORY_DIR / "logs" / "approval_bot"
 
@@ -103,15 +104,6 @@ def wp_publish(wp_post_id: int) -> bool:
         return False
 
 
-# ── Handoffs lookup ────────────────────────────────────────────────────────
-
-def find_slug_by_wp_post_id(handoffs: dict, wp_post_id: int) -> str | None:
-    for slug, article in handoffs.items():
-        if isinstance(article, dict) and article.get("wp_post_id") == wp_post_id:
-            return slug
-    return None
-
-
 # ── Callback handler ───────────────────────────────────────────────────────
 
 def handle_callback(callback_query: dict):
@@ -137,21 +129,23 @@ def handle_callback(callback_query: dict):
         answer_callback(callback_id, "Invalid post ID")
         return
 
-    handoffs = load_json(HANDOFFS_FILE, {})
-    slug     = find_slug_by_wp_post_id(handoffs, wp_post_id)
-    if not slug:
+    article = db_helpers.get_handoff_by_wp_post_id(wp_post_id)
+    if not article:
         answer_callback(callback_id, "Article not found in handoffs")
-        log(f"CALLBACK no slug for wp_post_id={wp_post_id} — handoffs has {len(handoffs)} entries")
+        log(f"CALLBACK no slug for wp_post_id={wp_post_id}")
         return
 
-    title = handoffs[slug].get("article_title", slug)
-    log(f"CALLBACK matched slug='{slug}' title='{title[:60]}'  current status='{handoffs[slug].get('status')}'")
+    slug  = article["slug"]
+    title = article.get("article_title", slug)
+    log(f"CALLBACK matched slug='{slug}' title='{title[:60]}'  current status='{article.get('status')}'")
 
     if action == "approve":
         ok = wp_publish(wp_post_id)
         if ok:
-            handoffs[slug]["status"]         = "published"
-            handoffs[slug]["published_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+            db_helpers.update_handoff(slug, {
+                "status":         "published",
+                "published_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            })
 
             # Update keyword_data status
             keyword_data = load_json(KEYWORD_FILE, {})
@@ -159,7 +153,6 @@ def handle_callback(callback_query: dict):
                 keyword_data[slug]["status"] = "published"
                 save_json(KEYWORD_FILE, keyword_data)
 
-            save_json(HANDOFFS_FILE, handoffs)
             answer_callback(callback_id, "Published!")
             edit_message_text(chat_id, message_id, f"✅ PUBLISHED: {title}")
             log(f"Approved and published: {slug} (post {wp_post_id})")
@@ -168,9 +161,10 @@ def handle_callback(callback_query: dict):
             log(f"Failed to publish post {wp_post_id} for slug: {slug}")
 
     elif action == "decline":
-        handoffs[slug]["status"]       = "declined"
-        handoffs[slug]["declined_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
-        save_json(HANDOFFS_FILE, handoffs)
+        db_helpers.update_handoff(slug, {
+            "status":        "declined",
+            "declined_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        })
         answer_callback(callback_id, "Declined — article stays as draft")
         edit_message_text(chat_id, message_id, f"❌ DECLINED: {title}")
         log(f"Declined: {slug} (post {wp_post_id}) — stays as WordPress draft")

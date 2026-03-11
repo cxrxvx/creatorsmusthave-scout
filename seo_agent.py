@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 """
 seo_agent.py — SEO Metadata Agent for CXRXVX Affiliates
 ==========================================================
@@ -13,6 +14,7 @@ Phase 2.5 Opus Upgrade:
 Drop this file into your cxrxvx-ai-empire/ folder to replace the old seo_agent.py.
 """
 
+import db_helpers
 import json
 import os
 import re
@@ -28,7 +30,6 @@ import anthropic
 
 # ── Settings ──────────────────────────────────────────────────────────────────
 DAILY_CAP           = 15
-HANDOFFS_FILE       = "memory/handoffs.json"
 LOG_FILE            = "memory/logs/seo_agent.log"
 MIN_WORD_COUNT      = 800
 MAX_RETRIES         = 2
@@ -51,20 +52,6 @@ def log(msg):
     with open(LOG_FILE, "a") as f:
         f.write(line + "\n")
 
-
-def load_handoffs():
-    if not os.path.exists(HANDOFFS_FILE):
-        return {}
-    with open(HANDOFFS_FILE, "r") as f:
-        return json.load(f)
-
-
-def save_handoffs(data):
-    if DRY_RUN:
-        log("  [DRY RUN] Skipping handoffs save")
-        return
-    with open(HANDOFFS_FILE, "w") as f:
-        json.dump(data, f, indent=2)
 
 
 # ═══════════════════════════════════════════════════════
@@ -679,7 +666,7 @@ def run():
     else:
         log("SEO Agent starting")
 
-    handoffs = load_handoffs()
+    handoffs = db_helpers.load_all_handoffs()
     pending  = get_articles_needing_seo(handoffs)
 
     if not pending:
@@ -756,13 +743,11 @@ def run():
             else:
                 log(f"  OG image: none available")
 
-            # Rollback
+            # Rollback (captured in memory only; meta_title_previous not in schema)
             if not DRY_RUN:
                 existing = get_existing_meta(wp_post_id)
                 if existing.get("rank_math_title"):
-                    handoffs[slug]["meta_title_previous"]       = existing["rank_math_title"]
-                    handoffs[slug]["meta_description_previous"] = existing.get("rank_math_description", "")
-                    log(f"  Rollback stored")
+                    log(f"  Rollback captured (previous title: {existing['rank_math_title'][:40]})")
 
             # Push
             log("  Pushing to WordPress...")
@@ -776,15 +761,17 @@ def run():
             )
 
             if ok:
-                handoffs[slug]["seo_done"]          = True
-                handoffs[slug]["meta_title"]         = meta["meta_title"]
-                handoffs[slug]["meta_description"]   = meta["meta_description"]
-                handoffs[slug]["focus_keyword"]      = keyword
-                handoffs[slug]["schema_type"]        = schema_type
-                handoffs[slug]["og_image"]           = og_image
-                handoffs[slug]["seo_processed_date"] = datetime.now().isoformat()
                 existing_titles[meta["meta_title"].lower().strip()] = slug
-                save_handoffs(handoffs)
+                if not DRY_RUN:
+                    db_helpers.update_handoff(slug, {
+                        "seo_done":          True,
+                        "meta_title":        meta["meta_title"],
+                        "meta_description":  meta["meta_description"],
+                        "focus_keyword":     keyword,
+                        "schema_type":       schema_type,
+                        "og_image":          og_image,
+                        "seo_processed_date": datetime.now().isoformat(),
+                    })
                 log(f"  ✓ SEO live: {tool_name}")
                 success += 1
             else:

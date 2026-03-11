@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 """
 watchdog.py — Pipeline Error Watchdog for CXRXVX Affiliates
 =============================================================
@@ -37,6 +38,7 @@ FUTURE (Phase 5):
   Until then, check this file manually or after seeing errors in scheduler output.
 """
 
+import db_helpers
 import json
 import os
 from datetime import datetime, timedelta
@@ -46,7 +48,6 @@ MEMORY_DIR = "memory"
 LOGS_DIR = "memory/logs"
 WATCHDOG_ALERTS_FILE = "memory/watchdog_alerts.json"
 WATCHDOG_LOG_DIR = "memory/logs/watchdog"
-HANDOFFS_FILE = "memory/handoffs.json"
 LOCK_FILE = "memory/.pipeline_lock"
 DAILY_COUNTER_FILE = "memory/.daily_counter.json"
 
@@ -393,7 +394,7 @@ def check_publishing_overcap() -> dict:
 
 def check_pipeline_stuck() -> dict:
     """Check if articles are stuck at any stage (nothing moved in 24h)."""
-    handoffs = load_json(HANDOFFS_FILE, {})
+    handoffs = db_helpers.load_all_handoffs()
     now = datetime.now()
     stuck = []
 

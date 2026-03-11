@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 """
 internal_link_agent.py — Internal Linking Agent for CXRXVX Affiliates
 =======================================================================
@@ -12,6 +13,7 @@ Phase 2.5 Opus Upgrade:
 Drop this file into your cxrxvx-ai-empire/ folder to replace the old internal_link_agent.py.
 """
 
+import db_helpers
 import json
 import os
 import re
@@ -26,7 +28,6 @@ import anthropic
 
 # ── Settings ──────────────────────────────────────────────────────────────────
 DAILY_CAP               = 20
-HANDOFFS_FILE           = "memory/handoffs.json"
 KEYWORD_DATA_FILE       = "memory/keyword_data.json"
 LINK_MAP_FILE           = "memory/link_map.json"
 LOG_FILE                = "memory/logs/internal_link_agent.log"
@@ -67,20 +68,6 @@ def log(msg):
     os.makedirs("memory/logs", exist_ok=True)
     with open(LOG_FILE, "a") as f:
         f.write(line + "\n")
-
-
-def load_handoffs():
-    if not os.path.exists(HANDOFFS_FILE):
-        return {}
-    with open(HANDOFFS_FILE, "r") as f:
-        return json.load(f)
-
-
-def save_handoffs(data):
-    if DRY_RUN:
-        return
-    with open(HANDOFFS_FILE, "w") as f:
-        json.dump(data, f, indent=2)
 
 
 def load_keyword_data():
@@ -733,7 +720,7 @@ def run():
     else:
         log("Internal Link Agent starting")
 
-    handoffs     = load_handoffs()
+    handoffs     = db_helpers.load_all_handoffs()
     link_map     = load_link_map()
     keyword_data = load_keyword_data()
 
@@ -807,8 +794,7 @@ def run():
             live_placeholders = re.findall(r'\[INTERNAL_LINK:[^\]]+\]', live_content)
             if not live_placeholders:
                 log(f"  Placeholders already replaced — marking done")
-                handoffs[slug]["internal_links_done"] = True
-                save_handoffs(handoffs)
+                db_helpers.update_handoff(slug, {"internal_links_done": True})
                 skipped += 1
                 processed += 1
                 continue
@@ -818,9 +804,7 @@ def run():
             # Step 3: Positions
             placeholder_positions = get_placeholder_positions(live_content, live_placeholders)
 
-            # Step 4: Rollback snapshot
-            if not DRY_RUN:
-                handoffs[slug]["content_before_internal_links"] = live_content[:500] + "..."
+            # Step 4: Rollback snapshot (content_before_internal_links not in schema — omitted)
 
             # Step 5: Existing outbound
             existing_outbound = set(link_map.get("outbound", {}).get(slug, []))
@@ -847,11 +831,12 @@ def run():
                 if not DRY_RUN:
                     ok, msg = push_updated_content(wp_post_id, updated_content)
                     if ok:
-                        handoffs[slug]["internal_links_done"]    = True
-                        handoffs[slug]["internal_links_added"]   = 0
-                        handoffs[slug]["internal_links_removed"] = len(live_placeholders)
-                        handoffs[slug]["internal_links_date"]    = datetime.now().isoformat()
-                        save_handoffs(handoffs)
+                        db_helpers.update_handoff(slug, {
+                            "internal_links_done":    True,
+                            "internal_links_added":   0,
+                            "internal_links_removed": len(live_placeholders),
+                            "internal_links_date":    datetime.now().isoformat(),
+                        })
                         success += 1
                     else:
                         failed += 1
@@ -916,12 +901,12 @@ def run():
             save_link_map(link_map)
 
             # Step 11: Mark done
-            handoffs[slug]["internal_links_done"]    = True
-            handoffs[slug]["internal_links_added"]   = links_added
-            handoffs[slug]["internal_links_removed"] = links_removed
-            handoffs[slug]["internal_links_date"]    = datetime.now().isoformat()
-            handoffs[slug]["link_replacements"]      = replacements
-            save_handoffs(handoffs)
+            db_helpers.update_handoff(slug, {
+                "internal_links_done":    True,
+                "internal_links_added":   links_added,
+                "internal_links_removed": links_removed,
+                "internal_links_date":    datetime.now().isoformat(),
+            })
 
             log(f"  ✓ Done: {links_added} linked [{topical_links} topical, {cross_links} cross-link], {links_removed} removed")
             success += 1

@@ -1,3 +1,4 @@
+# NOTE: handoffs.json is now READ-ONLY archive. All reads/writes use pipeline.db via db_helpers.py
 """
 publisher_agent.py — Publishing Agent for CXRXVX Affiliates
 ==============================================================
@@ -14,6 +15,7 @@ Phase 2.5 Opus Upgrade:
 Drop this file into your cxrxvx-ai-empire/ folder to replace the old publisher_agent.py.
 """
 
+import db_helpers
 import json
 import re
 import sys
@@ -27,7 +29,6 @@ import requests
 BASE_DIR   = Path(__file__).parent
 MEMORY_DIR = BASE_DIR / "memory"
 
-HANDOFFS_FILE    = MEMORY_DIR / "handoffs.json"
 KEYWORD_FILE     = MEMORY_DIR / "keyword_data.json"
 AFFILIATE_FILE   = MEMORY_DIR / "affiliate_links.json"
 TOOL_DB_FILE     = MEMORY_DIR / "tool_database.json"
@@ -553,7 +554,7 @@ def run():
     log(f"   Mode: {PUBLISH_MODE.upper()} | Cap: {DAILY_PUBLISH_CAP}/day")
 
     # ── Load data ──────────────────────────────────────────────────────
-    handoffs        = load_json(HANDOFFS_FILE, {})
+    handoffs        = db_helpers.load_all_handoffs()
     affiliate_links = load_json(AFFILIATE_FILE, {})
     keyword_data    = load_json(KEYWORD_FILE, {})
     tool_db         = load_json(TOOL_DB_FILE, {})
@@ -626,6 +627,7 @@ def run():
 
     # ── Publish top N articles ─────────────────────────────────────────
     published = 0
+    published_slugs = set()
     for article in sorted_articles:
         if published >= remaining_slots:
             break
@@ -686,36 +688,39 @@ def run():
             wp_url = wp_result.get("link", "")
 
             # ⚡ Save all fields downstream agents need
-            handoffs[slug]["wp_post_id"]         = wp_id
-            handoffs[slug]["wp_post_url"]        = wp_url  # internal_link_agent needs this
-            handoffs[slug]["wp_url"]             = wp_url  # backward compat
-            handoffs[slug]["priority_score"]     = priority
-            handoffs[slug]["affiliate_injected"] = affiliate_injected
-            handoffs[slug]["publish_category"]   = get_category_for_article(article)
+            handoff_updates = {
+                "wp_post_id":        wp_id,
+                "wp_post_url":       wp_url,  # internal_link_agent needs this
+                "wp_url":            wp_url,  # backward compat
+                "priority_score":    priority,
+                "affiliate_injected": affiliate_injected,
+                "publish_category":  get_category_for_article(article),
+            }
 
             if TELEGRAM_ENABLED:
                 # Send for approval — article lives as draft until Alex accepts
                 send_telegram_approval_request(article, wp_id, slug)
-                handoffs[slug]["status"]           = "draft_live"
-                handoffs[slug]["draft_pushed_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                handoff_updates["status"]           = "draft_live"
+                handoff_updates["draft_pushed_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
                 log(f"   📋 Draft pushed (post {wp_id}) — waiting for Telegram approval")
             else:
                 # No Telegram — publish directly as before
-                handoffs[slug]["status"]         = "published"
-                handoffs[slug]["published_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                handoff_updates["status"]         = "published"
+                handoff_updates["published_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
                 log(f"   ✅ Published! Post ID: {wp_id}")
                 log(f"      🔗 {wp_url}")
                 # Update keyword_data status
                 if slug in keyword_data:
                     keyword_data[slug]["status"] = "published"
 
+            db_helpers.update_handoff(slug, handoff_updates)
+            published_slugs.add(slug)
             increment_daily_count()
             published += 1
         else:
             log(f"   ❌ Failed to push: {tool_name}")
 
-    # ── Save updated files ─────────────────────────────────────────────
-    save_json(HANDOFFS_FILE, handoffs)
+    # ── Save keyword file (handoffs now written per-article above) ──────
     save_json(KEYWORD_FILE, keyword_data)
 
     # ── Summary ────────────────────────────────────────────────────────
@@ -724,8 +729,7 @@ def run():
     log(f"   📊 Total published today: {total_today}/{DAILY_PUBLISH_CAP}")
 
     remaining = [a for a in sorted_articles
-                 if handoffs.get(a.get("_slug", ""), {}).get("status")
-                 not in ("published", "draft_live", "declined")]
+                 if a.get("_slug", "") not in published_slugs]
     if remaining:
         log(f"   📬 {len(remaining)} articles still queued for next run.")
 

@@ -1,0 +1,31 @@
+HANDOFFS.JSON IS NOW A READ-ONLY ARCHIVE
+=========================================
+
+Date archived: 2026-03-11
+Records: 38
+
+memory/handoffs.json was the original source of truth for the CXRXVX pipeline.
+
+As of 2026-03-11, all pipeline agents have been migrated to read/write
+memory/pipeline.db (SQLite, WAL mode) via db_helpers.py.
+
+handoffs.json is now a static snapshot exported from SQLite at migration time.
+It exists for reference and debugging only. DO NOT write to it.
+
+The authoritative data is in: memory/pipeline.db → table: handoffs
+
+Agents that now use db_helpers.py (SQLite only):
+  - article_agent.py
+  - editor_agent.py
+  - image_agent.py
+  - publisher_agent.py
+  - seo_agent.py
+  - internal_link_agent.py
+  - keyword_agent.py  (NOTE only — does not use handoffs)
+  - scheduler.py
+  - health_monitor.py (NOTE only — does not use handoffs)
+  - watchdog.py
+  - approval_bot.py
+
+To inspect current pipeline state:
+  python3 -c "import db_helpers; h=db_helpers.load_all_handoffs(); print(len(h), 'records')"
