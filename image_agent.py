@@ -929,7 +929,7 @@ def process_roundup_images(slug: str, article: dict) -> dict:
     keyword    = article.get("primary_keyword", "")
 
     existing   = article.get("image_data", {})
-    images_data = existing.copy()
+    images_data = existing.copy() if existing is not None else {}
 
     log(f"Processing roundup: {title}")
 
@@ -1002,7 +1002,7 @@ def run():
         if not isinstance(article, dict):
             continue
         status = article.get("status")
-        if status not in ("pending_publish", "draft_live", "published"):
+        if status not in ("pending_publish", "pending_approval", "published"):
             continue
 
         images_added     = article.get("images_added")

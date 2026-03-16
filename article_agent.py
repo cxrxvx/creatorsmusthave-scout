@@ -7,11 +7,13 @@ from datetime import datetime
 from anthropic import Anthropic
 from config import ANTHROPIC_API_KEY, CLAUDE_MODEL
 import db_helpers
+import sqlite3
 
 KEYWORD_DATA_FILE = "memory/keyword_data.json"
 TOPICS_USED_FILE = "memory/topics_used.json"
 LEARNINGS_FILE = "memory/learnings.json"
 STYLE_TRACKER_FILE = "memory/.style_tracker.json"
+AFFILIATE_LINKS_FILE = "memory/affiliate_links.json"
 
 # Max articles per run — each costs ~$0.066
 # Write-ahead cap in run() prevents overproduction
@@ -328,6 +330,134 @@ def normalize_tool_data(tool_data: dict) -> dict:
 # ─────────────────────────────────────────
 # SELF-LEARNING — reads past performance data
 # ─────────────────────────────────────────
+
+EDITOR_FEEDBACK_FILE = "memory/editor_feedback.json"
+
+
+def get_editor_feedback() -> str:
+    """
+    Load memory/editor_feedback.json (written by editor_agent after each run)
+    and return a warning block to inject into article prompts.
+    Returns empty string if file doesn't exist or is invalid.
+    """
+    try:
+        feedback = load_json(EDITOR_FEEDBACK_FILE, None)
+        if not feedback or not isinstance(feedback, dict):
+            return ""
+        top_deductions = feedback.get("top_deductions", [])
+        if not top_deductions:
+            return ""
+        issues = ", ".join(top_deductions)
+        return (
+            "\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "AVOID THESE MISTAKES (editor flagged these last run)\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"{issues}.\n"
+            "The editor will auto-reject articles with placeholder URLs or emoji in headings.\n"
+            "→ Review the list above and make sure none of these appear in your article.\n"
+        )
+    except (FileNotFoundError, json.JSONDecodeError):
+        return ""
+    except Exception:
+        return ""
+
+
+# ─────────────────────────────────────────
+# REWRITE HELPERS (Phase 2.7G)
+# ─────────────────────────────────────────
+
+def _handoff_to_tool_data(handoff: dict) -> dict:
+    """Convert a handoff record back to tool_data format for re-writing."""
+    comparison_tools = handoff.get("comparison_tools") or {}
+    return {
+        "tool_name":             handoff.get("tool_name", ""),
+        "tool_key":              handoff.get("tool_key", handoff.get("slug", "")),
+        "article_type":          handoff.get("article_type", "review"),
+        "article_title":         handoff.get("article_title", ""),
+        "url_slug":              handoff.get("url_slug", handoff.get("slug", "")),
+        "primary_keyword":       handoff.get("primary_keyword", ""),
+        "tool_category":         handoff.get("category", "AI tool"),
+        "tool_score":            handoff.get("tool_score", 0),
+        "tool_url":              handoff.get("tool_url", ""),
+        "recommended_word_count": 2500,
+        "search_intent":         "buyer",
+        "serp_gap":              "",
+        "keyword_cluster":       [],
+        "secondary_keywords":    [],
+        "tools_to_cover":        handoff.get("roundup_tools", []),
+        "tool_a":                comparison_tools.get("tool_a", "") if isinstance(comparison_tools, dict) else "",
+        "tool_b":                comparison_tools.get("tool_b", "") if isinstance(comparison_tools, dict) else "",
+    }
+
+
+def calculate_rewrite_priority(slug: str, handoff: dict) -> int:
+    """
+    Score a needs_rewrite article to decide processing order.
+    Higher score = process first.
+      +50  affiliate link exists for this tool
+      +30  previous editor_score below 85 (most room to improve)
+      +20  tool score above 80 in tools table (important tool)
+    """
+    score = 0
+    tool_name = (handoff.get("tool_name") or slug).lower().strip()
+
+    # +50 — affiliate link exists (case-insensitive match)
+    try:
+        affiliate_links = load_json(AFFILIATE_LINKS_FILE, {})
+        if any(k.lower() == tool_name for k in affiliate_links):
+            score += 50
+    except Exception:
+        pass
+
+    # +30 — previous editor_score below 85
+    editor_score = handoff.get("editor_score", 0) or 0
+    if 0 < editor_score < 85:
+        score += 30
+
+    # +20 — tool score above 80 from tools table
+    try:
+        conn = sqlite3.connect("memory/pipeline.db")
+        conn.row_factory = sqlite3.Row
+        row = conn.execute(
+            "SELECT score FROM tools WHERE LOWER(name) = ?", (tool_name,)
+        ).fetchone()
+        conn.close()
+        if row and (row["score"] or 0) > 80:
+            score += 20
+    except Exception:
+        pass
+
+    return score
+
+
+def get_tool_source_url(tool_name: str) -> str:
+    """
+    Look up a tool's source_url (and website fallback) from the tools table.
+    Returns an injection string for the writing prompt, or empty string.
+    """
+    try:
+        conn = sqlite3.connect("memory/pipeline.db")
+        conn.row_factory = sqlite3.Row
+        row = conn.execute(
+            "SELECT source_url FROM tools WHERE LOWER(name) = ?",
+            (tool_name.lower().strip(),)
+        ).fetchone()
+        conn.close()
+        if row:
+            real_url = row["source_url"] if row["source_url"] else None
+            if real_url:
+                return (
+                    f"The tool's real URL is: {real_url} — "
+                    "use this exact URL, do not guess or fabricate a URL."
+                )
+    except Exception:
+        pass
+    return (
+        "WARNING: No verified URL found for this tool. "
+        "Do not fabricate a URL like www.[toolname].com — "
+        "instead write [TOOL_WEBSITE] as a placeholder which the editor will catch and reject."
+    )
+
 
 def get_learnings() -> str:
     """
@@ -848,7 +978,9 @@ def build_single_tool_prompt(tool_data, published_slugs=None):
     style = get_next_style(article_type)
     hook_instruction = get_hook_instruction(style["hook_type"], tool_name, category)
     learnings_context = get_learnings()
+    editor_feedback_context = get_editor_feedback()
     internal_link_context = _build_internal_link_context(published_slugs)
+    source_url_context = get_tool_source_url(tool_name)
 
     return f"""You are a world-class SEO article writer for affiliate content about creator tools.
 
@@ -897,11 +1029,12 @@ FEATURED SNIPPET TIPS:
 PEOPLE ALSO ASK TARGETING:
 → Use patterns: "Is [tool] worth it?", "How much does [tool] cost?",
   "Is [tool] free?", "Is [tool] better than [competitor]?"
-{learnings_context}
+{learnings_context}{editor_feedback_context}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TOOL URL — use this everywhere
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {tool_url}
+{source_url_context}
 FORBIDDEN: [TOOL_URL], [AFFILIATE_LINK], https://example.com, href=""
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -972,6 +1105,7 @@ def build_roundup_prompt(tool_data, published_slugs=None):
     style = get_next_style("roundup")
     hook_instruction = get_hook_instruction(style["hook_type"], "these tools", category)
     learnings_context = get_learnings()
+    editor_feedback_context = get_editor_feedback()
     internal_link_context = _build_internal_link_context(published_slugs)
 
     return f"""You are a world-class SEO writer creating a "Best X for Y" roundup — the highest-converting affiliate format. Each tool gets its own CTA = 5-8 affiliate links per article.
@@ -1001,7 +1135,7 @@ SERP gap:        "{tool_data.get('serp_gap', '')}"
 
 TOOLS TO COVER (use each tool's actual URL):
 {tools_block}
-{learnings_context}
+{learnings_context}{editor_feedback_context}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ROUNDUP RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1039,11 +1173,14 @@ def build_comparison_prompt(tool_data, published_slugs=None):
     tool_b = tool_data.get("tool_b", "")
     tool_a_url = get_tool_url(tool_a)
     tool_b_url = get_tool_url(tool_b) if tool_b else ""
-    
+
     style = get_next_style("comparison")
     hook_instruction = get_hook_instruction(style["hook_type"], f"{tool_a} vs {tool_b}", category)
     learnings_context = get_learnings()
+    editor_feedback_context = get_editor_feedback()
     internal_link_context = _build_internal_link_context(published_slugs)
+    source_url_a = get_tool_source_url(tool_a)
+    source_url_b = get_tool_source_url(tool_b) if tool_b else ""
 
     return f"""You are a world-class SEO writer creating an "X vs Y" comparison — ranks for BOTH tool names, doubling traffic.
 
@@ -1071,8 +1208,10 @@ Category:        {category}
 SERP gap:        "{tool_data.get('serp_gap', '')}"
 
 Tool A: {tool_a} — {tool_a_url}
+{source_url_a}
 Tool B: {tool_b} — {tool_b_url}
-{learnings_context}
+{source_url_b}
+{learnings_context}{editor_feedback_context}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 COMPARISON RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1200,7 +1339,6 @@ def run():
         return
 
     keyword_data = load_json(KEYWORD_DATA_FILE, {})
-    handoffs = db_helpers.load_all_handoffs()
     topics_used = load_json(TOPICS_USED_FILE, [])
 
     published_slugs = [
@@ -1210,116 +1348,189 @@ def run():
            and data.get("url_slug")
     ]
 
+    # ── Phase 2.7G: Rewrites-first ──────────────────────────────────────────
+    rewrites = db_helpers.get_handoffs_by_status("needs_rewrite")
+
     pending = [
         (key, data) for key, data in keyword_data.items()
         if data.get("status") == "pending_article"
     ]
 
-    if not pending:
+    if not rewrites and not pending:
         print("   ℹ️  No tools waiting for articles.")
         write_log("No pending tools found.")
         return
 
-    # Sort: roundups first (most revenue), then comparisons, then by score
-    def sort_priority(item):
-        key, data = item
-        article_type = data.get("article_type", "review")
-        score = data.get("tool_score", 0)
-        type_bonus = {"roundup": 300, "comparison": 200}.get(article_type, 0)
-        return type_bonus + score
-    
-    pending.sort(key=sort_priority, reverse=True)
-
-    print(f"📋 Found {len(pending)} tool(s) waiting for articles")
-    print(f"📝 Writing up to {DAILY_CAP} articles this run")
-    
-    type_counts = {}
-    for _, data in pending:
-        t = data.get("article_type", "review")
-        type_counts[t] = type_counts.get(t, 0) + 1
-    type_summary = " | ".join(f"{t}: {c}" for t, c in type_counts.items())
-    print(f"📊 Queue: {type_summary}\n")
-    write_log(f"Found {len(pending)}. Cap: {DAILY_CAP}. Types: {type_summary}")
-
     written = 0
 
-    for tool_key, tool_data in pending:
-        if written >= DAILY_CAP:
-            print(f"\n⏸️  Daily cap of {DAILY_CAP} reached.")
-            write_log(f"Cap reached after {written} articles.")
-            break
+    # ── Process rewrites first ───────────────────────────────────────────────
+    if rewrites:
+        # Sort by priority score (Task 2)
+        scored = []
+        for h in rewrites:
+            slug = h.get("slug", "")
+            pri = calculate_rewrite_priority(slug, h)
+            print(f"[article_agent] Rewrite priority: {slug} = {pri}")
+            write_log(f"[article_agent] Rewrite priority: {slug} = {pri}")
+            scored.append((pri, h))
+        scored.sort(key=lambda x: -x[0])
 
-        # ── Normalize field names from keyword_agent → article_agent ──
-        tool_data = normalize_tool_data(tool_data)
+        print(f"📋 Found {len(rewrites)} rewrite(s) — processing before new articles")
+        write_log(f"Found {len(rewrites)} rewrites. Processing first.")
 
-        tool_name = tool_data.get("tool_name", tool_key)
-        article_type = tool_data.get("article_type", "review")
-        score = tool_data.get("tool_score", "?")
-        tool_url = get_tool_url(tool_name)
+        for _, handoff in scored:
+            if written >= DAILY_CAP:
+                print(f"\n⏸️  Daily cap of {DAILY_CAP} reached during rewrites.")
+                write_log(f"Cap reached after {written} rewrites.")
+                break
 
-        style_tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
+            slug      = handoff.get("slug", "")
+            tool_name = handoff.get("tool_name", slug)
+            print(f"[article_agent] REWRITE: processing {slug} (was needs_rewrite)")
+            write_log(f"[article_agent] REWRITE: {slug}")
 
-        print(f"🔧 Writing: {tool_name}")
-        print(f"   Type: {article_type} | Score: {score} | URL: {tool_url}")
-        
-        if article_type == "roundup":
-            tools_list = tool_data.get("tools_to_cover", [])
-            print(f"   Roundup: {len(tools_list)} tools")
-        elif article_type == "comparison":
-            print(f"   Comparing: {tool_data.get('tool_a', '?')} vs {tool_data.get('tool_b', '?')}")
-        
-        write_log(f"\n### {tool_name} ({article_type}) — {tool_url}")
-
-        try:
-            article_html, word_count = write_article(tool_data, published_slugs)
-            
-            style_tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
-            last_style = (style_tracker.get("last_styles") or ["unknown"])[-1]
-            last_hook = (style_tracker.get("last_hooks") or ["unknown"])[-1]
-            
-            print(f"   🎨 Style: {last_style} | Hook: {last_hook}")
-            print(f"   ✅ Done — {word_count} words")
-            write_log(f"Written: {word_count} words | Style: {last_style} | Hook: {last_hook}")
-
-            handoff_key = tool_data.get("url_slug", tool_key)
-            db_helpers.insert_handoff({
-                "slug": handoff_key,
-                "tool_name": tool_name,
-                "tool_key": tool_key,
-                "article_type": article_type,
-                "article_title": tool_data.get("article_title", ""),
-                "url_slug": tool_data.get("url_slug", handoff_key),
-                "primary_keyword": tool_data.get("primary_keyword", ""),
-                "word_count": word_count,
-                "article_html": article_html,
-                "status": "pending_edit",
-                "written_date": datetime.now().strftime("%Y-%m-%d"),
-                "tool_score": score,
-                "category": tool_data.get("tool_category", "ai-tools"),
-                "tool_url": tool_url,
-                "writing_style": last_style,
-                "hook_type": last_hook,
-                "tools_covered": tool_data.get("tools_to_cover", []),
-                "tool_a": tool_data.get("tool_a", ""),
-                "tool_b": tool_data.get("tool_b", ""),
+            # Reset pipeline fields before rewriting
+            db_helpers.update_handoff(slug, {
+                "status":               "pending_edit",
+                "seo_done":             0,
+                "internal_links_done":  0,
+                "images_added":         0,
+                "wp_post_id":           None,
             })
 
-            keyword_data[tool_key]["status"] = "article_written"
-            keyword_data[tool_key]["article_written_date"] = datetime.now().strftime("%Y-%m-%d")
+            tool_data = _handoff_to_tool_data(handoff)
+            tool_data["tool_url"] = get_tool_url(tool_name)
 
-            slug = tool_data.get("url_slug", "")
-            if slug and slug not in topics_used:
-                topics_used.append(slug)
+            try:
+                article_html, word_count = write_article(tool_data, published_slugs)
 
-            written += 1
-            if tool_data.get("url_slug") and tool_data["url_slug"] not in published_slugs:
-                published_slugs.append(tool_data["url_slug"])
-            print(f"   💾 Saved to pipeline.db\n")
+                style_tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
+                last_style = (style_tracker.get("last_styles") or ["unknown"])[-1]
+                last_hook  = (style_tracker.get("last_hooks")  or ["unknown"])[-1]
 
-        except Exception as e:
-            print(f"   ❌ Failed: {e}")
-            write_log(f"ERROR: {e}")
-            continue
+                db_helpers.update_handoff(slug, {
+                    "article_html":  article_html,
+                    "word_count":    word_count,
+                    "status":        "pending_edit",
+                    "written_date":  datetime.now().strftime("%Y-%m-%d"),
+                    "tool_url":      tool_data["tool_url"],
+                    "prompt_version": "v2",
+                })
+                print(f"   ✅ Rewrite done — {word_count} words")
+                write_log(f"Rewrite complete: {slug} | {word_count} words")
+                written += 1
+                if slug not in published_slugs:
+                    published_slugs.append(slug)
+
+            except Exception as e:
+                print(f"   ❌ Rewrite failed for {slug}: {e}")
+                write_log(f"ERROR (rewrite {slug}): {e}")
+                continue
+
+    # ── Process new articles (if cap not reached) ────────────────────────────
+    if written < DAILY_CAP and pending:
+        # Sort: roundups first (most revenue), then comparisons, then by score
+        def sort_priority(item):
+            key, data = item
+            article_type = data.get("article_type", "review")
+            score = data.get("tool_score", 0)
+            type_bonus = {"roundup": 300, "comparison": 200}.get(article_type, 0)
+            return type_bonus + score
+
+        pending.sort(key=sort_priority, reverse=True)
+
+        slots = DAILY_CAP - written
+        print(f"📋 Found {len(pending)} new tool(s) waiting for articles")
+        print(f"📝 Writing up to {slots} new article(s) this run")
+
+        type_counts = {}
+        for _, data in pending:
+            t = data.get("article_type", "review")
+            type_counts[t] = type_counts.get(t, 0) + 1
+        type_summary = " | ".join(f"{t}: {c}" for t, c in type_counts.items())
+        print(f"📊 Queue: {type_summary}\n")
+        write_log(f"Found {len(pending)} new. Slots remaining: {slots}. Types: {type_summary}")
+
+        for tool_key, tool_data in pending:
+            if written >= DAILY_CAP:
+                print(f"\n⏸️  Daily cap of {DAILY_CAP} reached.")
+                write_log(f"Cap reached after {written} articles total.")
+                break
+
+            # ── Normalize field names from keyword_agent → article_agent ──
+            tool_data = normalize_tool_data(tool_data)
+
+            tool_name    = tool_data.get("tool_name", tool_key)
+            article_type = tool_data.get("article_type", "review")
+            score        = tool_data.get("tool_score", "?")
+            tool_url     = get_tool_url(tool_name)
+            url_slug     = tool_data.get("url_slug", tool_key)
+
+            style_tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
+
+            print(f"[article_agent] NEW: writing {url_slug}")
+            print(f"🔧 Writing: {tool_name}")
+            print(f"   Type: {article_type} | Score: {score} | URL: {tool_url}")
+
+            if article_type == "roundup":
+                tools_list = tool_data.get("tools_to_cover", [])
+                print(f"   Roundup: {len(tools_list)} tools")
+            elif article_type == "comparison":
+                print(f"   Comparing: {tool_data.get('tool_a', '?')} vs {tool_data.get('tool_b', '?')}")
+
+            write_log(f"\n### {tool_name} ({article_type}) — {tool_url}")
+
+            try:
+                article_html, word_count = write_article(tool_data, published_slugs)
+
+                style_tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
+                last_style = (style_tracker.get("last_styles") or ["unknown"])[-1]
+                last_hook  = (style_tracker.get("last_hooks")  or ["unknown"])[-1]
+
+                print(f"   🎨 Style: {last_style} | Hook: {last_hook}")
+                print(f"   ✅ Done — {word_count} words")
+                write_log(f"Written: {word_count} words | Style: {last_style} | Hook: {last_hook}")
+
+                handoff_key = tool_data.get("url_slug", tool_key)
+                db_helpers.insert_handoff({
+                    "slug":            handoff_key,
+                    "tool_name":       tool_name,
+                    "tool_key":        tool_key,
+                    "article_type":    article_type,
+                    "article_title":   tool_data.get("article_title", ""),
+                    "url_slug":        tool_data.get("url_slug", handoff_key),
+                    "primary_keyword": tool_data.get("primary_keyword", ""),
+                    "word_count":      word_count,
+                    "article_html":    article_html,
+                    "status":          "pending_edit",
+                    "written_date":    datetime.now().strftime("%Y-%m-%d"),
+                    "tool_score":      score,
+                    "category":        tool_data.get("tool_category", "ai-tools"),
+                    "tool_url":        tool_url,
+                    "writing_style":   last_style,
+                    "hook_type":       last_hook,
+                    "tools_covered":   tool_data.get("tools_to_cover", []),
+                    "tool_a":          tool_data.get("tool_a", ""),
+                    "tool_b":          tool_data.get("tool_b", ""),
+                    "prompt_version":  "v2",
+                })
+
+                keyword_data[tool_key]["status"] = "article_written"
+                keyword_data[tool_key]["article_written_date"] = datetime.now().strftime("%Y-%m-%d")
+
+                slug = tool_data.get("url_slug", "")
+                if slug and slug not in topics_used:
+                    topics_used.append(slug)
+
+                written += 1
+                if tool_data.get("url_slug") and tool_data["url_slug"] not in published_slugs:
+                    published_slugs.append(tool_data["url_slug"])
+                print(f"   💾 Saved to pipeline.db\n")
+
+            except Exception as e:
+                print(f"   ❌ Failed: {e}")
+                write_log(f"ERROR: {e}")
+                continue
 
     save_json(KEYWORD_DATA_FILE, keyword_data)
     save_json(TOPICS_USED_FILE, topics_used)
@@ -1328,10 +1539,10 @@ def run():
     write_log(f"Complete. Written: {written}")
 
     if written > 0:
-        remaining = len(pending) - written
+        remaining_new = max(0, len(pending) - max(0, written - len(rewrites)))
         print(f"\n📬 Next: editor_agent.py → image_agent.py → publisher_agent.py")
-        if remaining > 0:
-            print(f"   {remaining} tool(s) still queued.")
+        if remaining_new > 0:
+            print(f"   {remaining_new} new tool(s) still queued.")
 
 
 if __name__ == "__main__":

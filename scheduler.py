@@ -403,7 +403,7 @@ def run_pipeline_once():
         ("image",     "image_agent.py",         None,             True),
         ("links",     "internal_link_agent.py", None,             True),
         ("publisher", "publisher_agent.py",     ["--cap", str(cap)], True),
-        # SEO runs AFTER publisher so it can process newly draft_live articles
+        # SEO runs AFTER publisher so it can process newly pending_approval articles
         ("seo",       "seo_agent.py",           None,             True),
     ]
 

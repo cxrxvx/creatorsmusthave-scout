@@ -71,7 +71,7 @@ except Exception as e:
 
 # ── 3. get_handoffs_by_status ─────────────────────────────────
 print("\n[3] get_handoffs_by_status()...")
-statuses_to_check = ["pending_edit", "pending_publish", "published", "draft_live"]
+statuses_to_check = ["pending_edit", "pending_publish", "published", "pending_approval"]
 for s in statuses_to_check:
     try:
         results = db_helpers.get_handoffs_by_status(s)

@@ -380,7 +380,7 @@ class PipelineDatabase:
         """Get all published articles — used by internal_link_agent."""
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT * FROM handoffs WHERE status IN ('published', 'draft_live') ORDER BY published_date DESC"
+                "SELECT * FROM handoffs WHERE status IN ('published', 'pending_approval') ORDER BY published_date DESC"
             ).fetchall()
             return [self._row_to_dict(r) for r in rows]
 

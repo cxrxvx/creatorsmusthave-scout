@@ -257,6 +257,16 @@ def sort_articles(articles: list, affiliate_links: dict,
     return sorted(articles, key=lambda x: -x["_priority_score"])
 
 
+def get_recent_published_types(n: int = 3) -> list:
+    """Return article_type values of the last N published articles (newest first)."""
+    published = db_helpers.get_published()
+    published.sort(
+        key=lambda x: x.get("published_date", "") or "",
+        reverse=True,
+    )
+    return [a.get("article_type", "review") for a in published[:n]]
+
+
 # ══════════════════════════════════════════════════════════════════════════
 #  AFFILIATE LINK INJECTION — broader matching
 # ══════════════════════════════════════════════════════════════════════════
@@ -608,6 +618,25 @@ def run():
     # ── Smart priority sort ────────────────────────────────────────────
     sorted_articles = sort_articles(ready, affiliate_links, tool_db)
 
+    # ── Type rotation: avoid publishing same type 3x in a row ─────────
+    recent_types = get_recent_published_types(2)
+    if (
+        len(recent_types) >= 2
+        and recent_types[0] == recent_types[1]
+        and sorted_articles
+        and sorted_articles[0].get("article_type", "review") == recent_types[0]
+    ):
+        repeated_type   = recent_types[0]
+        original_slug   = sorted_articles[0].get("_slug", "?")
+        for i, candidate in enumerate(sorted_articles[1:], 1):
+            if candidate.get("article_type", "review") != repeated_type:
+                bumped_slug = candidate.get("_slug", "?")
+                bumped_type = candidate.get("article_type", "review")
+                log(f"   [publisher_agent] Type rotation: bumping {bumped_slug} ({bumped_type})"
+                    f" ahead of {original_slug} to avoid {repeated_type} repeat")
+                sorted_articles.insert(0, sorted_articles.pop(i))
+                break
+
     # ── Print queue preview ────────────────────────────────────────────
     log("\n   📋 Publish queue (top 10):")
     for i, a in enumerate(sorted_articles[:10], 1):
@@ -700,7 +729,7 @@ def run():
             if TELEGRAM_ENABLED:
                 # Send for approval — article lives as draft until Alex accepts
                 send_telegram_approval_request(article, wp_id, slug)
-                handoff_updates["status"]           = "draft_live"
+                handoff_updates["status"]           = "pending_approval"
                 handoff_updates["draft_pushed_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
                 log(f"   📋 Draft pushed (post {wp_id}) — waiting for Telegram approval")
             else:

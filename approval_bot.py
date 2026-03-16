@@ -162,12 +162,12 @@ def handle_callback(callback_query: dict):
 
     elif action == "decline":
         db_helpers.update_handoff(slug, {
-            "status":        "declined",
+            "status":        "rejected",
             "declined_date": datetime.now().strftime("%Y-%m-%d %H:%M"),
         })
         answer_callback(callback_id, "Declined — article stays as draft")
         edit_message_text(chat_id, message_id, f"❌ DECLINED: {title}")
-        log(f"Declined: {slug} (post {wp_post_id}) — stays as WordPress draft")
+        log(f"Rejected: {slug} (post {wp_post_id}) — stays as WordPress draft")
 
     else:
         answer_callback(callback_id, "Unknown action")

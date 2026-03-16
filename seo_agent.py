@@ -643,12 +643,12 @@ def get_articles_needing_seo(handoffs):
         if not isinstance(article, dict):
             continue
         if (
-            article.get("status") in ("published", "draft_live")
+            article.get("status") in ("published", "pending_approval")
             and not article.get("seo_done")
             and article.get("wp_post_id")
         ):
             pending.append((slug, article))
-    # draft_live articles use draft_pushed_date; published use published_date
+    # pending_approval articles use draft_pushed_date; published use published_date
     def sort_key(item):
         _, a = item
         return a.get("published_date") or a.get("draft_pushed_date") or ""

@@ -23,6 +23,44 @@ _BOOL_COLUMNS = {"images_added", "seo_done", "internal_links_done", "affiliate_i
 
 
 # ══════════════════════════════════════════════════════════════════════════
+#  MIGRATIONS
+# ══════════════════════════════════════════════════════════════════════════
+
+def run_migrations(db_path: str = DB_PATH):
+    """
+    Run safe, idempotent schema migrations.
+    Each ALTER TABLE is wrapped in try/except — safe to run even if the
+    column already exists (SQLite raises OperationalError in that case).
+    """
+    conn = get_db_connection(db_path)
+    try:
+        try:
+            conn.execute(
+                "ALTER TABLE handoffs ADD COLUMN prompt_version TEXT DEFAULT 'v1'"
+            )
+            conn.commit()
+        except Exception:
+            pass  # Column already exists — ignore
+
+        try:
+            conn.execute(
+                "ALTER TABLE tools ADD COLUMN source_url TEXT DEFAULT ''"
+            )
+            conn.commit()
+        except Exception:
+            pass  # Column already exists or tools table not yet created — ignore
+    finally:
+        conn.close()
+
+
+# Run migrations automatically when this module is imported
+try:
+    run_migrations()
+except Exception:
+    pass  # DB may not exist yet during tests — fail silently
+
+
+# ══════════════════════════════════════════════════════════════════════════
 #  CONNECTION
 # ══════════════════════════════════════════════════════════════════════════
 
@@ -207,8 +245,9 @@ def insert_handoff(article: dict, db_path: str = DB_PATH):
              editor_score, editor_feedback, editor_rewrite_instructions, editor_deductions,
              editor_scores, editor_reviewed, images_added, image_data, images_date,
              seo_done, internal_links_done, wp_post_id, priority_score,
-             affiliate_injected, roundup_tools, comparison_tools, created_at, updated_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+             affiliate_injected, roundup_tools, comparison_tools,
+             prompt_version, created_at, updated_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (
             slug,
             article.get("tool_name"),
@@ -242,6 +281,7 @@ def insert_handoff(article: dict, db_path: str = DB_PATH):
             1 if article.get("affiliate_injected") else 0,
             json.dumps(roundup_tools),
             json.dumps(comparison_tools),
+            article.get("prompt_version", "v1"),
             now,
             now,
         ))

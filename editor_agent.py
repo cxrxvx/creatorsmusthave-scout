@@ -73,6 +73,48 @@ def strip_html_tags(html):
     return re.sub(r"<[^>]+>", " ", html or "")
 
 
+EDITOR_FEEDBACK_FILE = os.path.join(MEMORY_DIR, "editor_feedback.json")
+
+
+def _save_editor_feedback(deductions_list: list, total_reviewed: int, approved: int):
+    """
+    Parse deduction strings from this run, find the top 3 most common reasons,
+    and save to memory/editor_feedback.json for article_agent to consume.
+    """
+    if not deductions_list:
+        return
+
+    # Split each deduction string on commas/semicolons, strip, lowercase, dedupe
+    from collections import Counter
+    phrase_counter: Counter = Counter()
+    for deduction_str in deductions_list:
+        # Split on comma or semicolon, clean up each phrase
+        parts = re.split(r"[,;]", deduction_str)
+        for part in parts:
+            phrase = part.strip().lower()
+            # Remove trailing score like " -5" or " -3"
+            phrase = re.sub(r"\s*[-−]\d+\s*$", "", phrase).strip()
+            if phrase and len(phrase) > 4:
+                phrase_counter[phrase] += 1
+
+    top_3 = [phrase for phrase, _ in phrase_counter.most_common(3)]
+    if not top_3:
+        return
+
+    approval_rate = round(approved / total_reviewed, 2) if total_reviewed else 0.0
+    feedback = {
+        "run_date":              datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "top_deductions":        top_3,
+        "total_articles_reviewed": total_reviewed,
+        "approval_rate":         approval_rate,
+    }
+    try:
+        save_json(EDITOR_FEEDBACK_FILE, feedback)
+        log(f"  📝 Editor feedback saved → top issues: {', '.join(top_3)}")
+    except Exception as e:
+        log(f"  ⚠️  Could not save editor feedback: {e}")
+
+
 # ═══════════════════════════════════════════════════════
 # PATTERN TRACKING — detect recurring mistakes
 # ═══════════════════════════════════════════════════════
@@ -176,6 +218,55 @@ REVIEW-SPECIFIC CHECKS:
 - Are there at least 3 specific cons (not generic)? (-5 if generic)
 - Is there a "Who it's NOT for" section? (-3 if missing)
 - Does the verdict clearly state who should buy and who should skip? (-3 if vague)"""
+
+
+# ═══════════════════════════════════════════════════════
+# HARD-FAIL CHECKS — run before any scoring
+# ═══════════════════════════════════════════════════════
+
+# Emoji unicode ranges for heading checks
+_EMOJI_RE = re.compile(
+    r"[\U00010000-\U0010ffff"
+    r"\U0001F300-\U0001F9FF"
+    r"\U00002600-\U000027BF"
+    r"\U0001FA00-\U0001FAFF"
+    r"\U0001F600-\U0001F64F"
+    r"🏆💰🆓✅❌⭐🔥⚡✨📚]",
+    re.UNICODE,
+)
+
+
+def check_hard_fails(article: dict) -> list:
+    """
+    Check for conditions that auto-reject an article (score 0) before Claude runs.
+    Returns a list of failure reason strings. Empty list = no hard fails.
+    """
+    html       = article.get("article_html", "")
+    word_count = article.get("word_count", 0)
+    fails      = []
+
+    # 1. Placeholder URLs
+    if "[AFFILIATE_LINK]" in html:
+        fails.append("placeholder URL [AFFILIATE_LINK] found in article body")
+    if "REPLACE_WITH_TOOL_URL" in html:
+        fails.append("placeholder REPLACE_WITH_TOOL_URL found in article body")
+    # Any href containing square-bracket placeholder like href="[TOOL_URL]"
+    if re.search(r'href="[^"]*\[[^\]]+\][^"]*"', html):
+        fails.append("href attribute contains a square-bracket placeholder (e.g. [TOOL_URL])")
+
+    # 2. Emoji in H1, H2, or H3 headings
+    headings = re.findall(r"<h[123][^>]*>(.*?)</h[123]>", html, re.IGNORECASE | re.DOTALL)
+    for heading in headings:
+        plain = re.sub(r"<[^>]+>", "", heading)
+        if _EMOJI_RE.search(plain):
+            fails.append(f"emoji found in H1/H2/H3 heading: \"{plain[:60].strip()}\"")
+            break  # one example is enough
+
+    # 3. Empty or too short
+    if not html or word_count < 500:
+        fails.append(f"article body too short: {word_count} words (minimum 500)")
+
+    return fails
 
 
 # ═══════════════════════════════════════════════════════
@@ -311,6 +402,36 @@ Each issue above should cost 2-4 points from the relevant dimension.
 
     prompt = f"""You are a senior editor scoring affiliate content for quality.
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HARD-FAIL CHECKS — do these FIRST before scoring anything
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Check for these conditions BEFORE you score anything. If ANY are true, stop
+and return a hard-fail response (score 0, approved false).
+
+1. PLACEHOLDER URLS: Does the article contain [AFFILIATE_LINK], REPLACE_WITH_TOOL_URL,
+   or any href attribute with square brackets like href="[TOOL_URL]"?
+2. EMOJI IN HEADINGS: Are there any emoji characters inside H1, H2, or H3 tags?
+3. TOO SHORT: Is the article body empty or under 500 words?
+
+If ANY hard-fail condition is true, return ONLY this JSON:
+{{
+  "seo_score": 0,
+  "readability_score": 0,
+  "completeness_score": 0,
+  "overall_score": 0,
+  "approved": false,
+  "seo_notes": "HARD FAIL: <reason>",
+  "readability_notes": "HARD FAIL: <reason>",
+  "completeness_notes": "HARD FAIL: <reason>",
+  "deductions_applied": "Hard fail — auto-rejected before scoring",
+  "editor_summary": "HARD FAIL: <reason>. Article must be fixed before re-review.",
+  "rewrite_instructions": "<specific fix required>",
+  "usefulness_q1": "N/A — hard fail",
+  "usefulness_q2": "N/A — hard fail"
+}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 Your goal: catch articles with REAL problems (broken structure, fake info, unreadable
 writing) while letting solid articles through. You are not looking for perfection —
 you are looking for articles good enough to publish and rank.
@@ -373,6 +494,16 @@ Check:
 
 ---
 
+USEFULNESS TEST — answer both questions about this article:
+1. Would this article still be useful if search engines didn't exist?
+2. If someone bookmarked this page and came back in 6 months, would it still provide value?
+
+If the answer to EITHER question is No, reduce the overall_score by 10 points and
+include your answers in editor_summary. Always include both answers in the response
+even when the article passes.
+
+---
+
 Start at 100 for each dimension and subtract for problems found.
 Do not penalize the same issue twice across dimensions.
 
@@ -388,8 +519,10 @@ RESPOND IN THIS EXACT JSON FORMAT — nothing else:
   "readability_notes": "<the single biggest readability problem, or 'Passed'>",
   "completeness_notes": "<the single biggest completeness problem, or 'Passed'>",
   "deductions_applied": "<list the specific deductions you made, e.g. 'no keyword in intro -5, vague pricing -3'>",
-  "editor_summary": "<2-3 sentences: overall quality assessment and the #1 thing to fix>",
-  "rewrite_instructions": "<if not approved: specific bullet points of what the writer must fix. if approved: 'N/A'>"
+  "editor_summary": "<2-3 sentences: overall quality assessment and the #1 thing to fix. Always include usefulness answers here>",
+  "rewrite_instructions": "<if not approved: specific bullet points of what the writer must fix. if approved: 'N/A'>",
+  "usefulness_q1": "<Yes or No — would this article be useful without search engines?>",
+  "usefulness_q2": "<Yes or No — would this article still provide value in 6 months?>"
 }}"""
 
     try:
@@ -460,12 +593,35 @@ def run():
     approved_count = 0
     rejected_count = 0
     scores_this_run = []
+    deductions_this_run = []  # collects deduction strings for feedback loop
 
     for slug in to_edit:
         article   = handoffs[slug]
         tool_name = article.get("tool_name", slug)
         article_type = article.get("article_type", "review")
         log(f"Editing: {tool_name} ({slug}) — type: {article_type}")
+
+        # ── Hard-fail check (before any Claude call) ──────────────────────
+        hard_fails = check_hard_fails(article)
+        if hard_fails:
+            reason = hard_fails[0]
+            log(f"  [editor_agent] HARD FAIL: {reason} in {slug}")
+            rejected_count += 1
+            scores_this_run.append(0)
+            db_helpers.update_handoff(slug, {
+                "editor_scores":               {"overall_score": 0, "approved": False,
+                                                "seo_score": 0, "readability_score": 0,
+                                                "completeness_score": 0,
+                                                "deductions_applied": f"HARD FAIL: {reason}",
+                                                "editor_summary": f"HARD FAIL: {reason}"},
+                "editor_reviewed":             datetime.now().strftime("%Y-%m-%d"),
+                "editor_score":                0,
+                "editor_feedback":             f"HARD FAIL: {reason}",
+                "editor_rewrite_instructions": "; ".join(hard_fails),
+                "editor_deductions":           f"HARD FAIL: {reason}",
+                "status":                      "needs_rewrite",
+            })
+            continue
 
         scores = score_article(article, pattern_context)
 
@@ -476,6 +632,11 @@ def run():
         overall  = scores.get("overall_score", 0)
         approved = scores.get("approved", False)
         scores_this_run.append(overall)
+
+        # Collect deduction phrases for feedback loop
+        deductions_str = scores.get("deductions_applied", "")
+        if deductions_str and deductions_str.lower() not in ("none", "n/a", "none listed"):
+            deductions_this_run.append(deductions_str)
 
         log(f"  SEO: {scores.get('seo_score')} | Read: {scores.get('readability_score')} | Comp: {scores.get('completeness_score')} | Overall: {overall}")
         log(f"  Deductions: {scores.get('deductions_applied', 'none listed')}")
@@ -517,6 +678,9 @@ def run():
             log(f"  ⚠️  Approval rate {approval_rate:.0f}% is suspiciously high — editor may be too lenient")
         elif approval_rate < 50 and total_edited >= 5:
             log(f"  ⚠️  Approval rate {approval_rate:.0f}% is very low — check if scoring prompt is too harsh")
+
+        # ── Save editor feedback for article_agent self-learning ──────────
+        _save_editor_feedback(deductions_this_run, total_edited, approved_count)
 
         print(f"\n✅ Editor done — {approved_count} approved, {rejected_count} rejected")
         print(f"   Avg score: {avg_score:.1f} | Approval rate: {approval_rate:.0f}%\n")

@@ -41,6 +41,7 @@ FUTURE (Phase 5):
 import db_helpers
 import json
 import os
+import re
 from datetime import datetime, timedelta
 
 # ── Config ──────────────────────────────────────────────────────────────────
@@ -260,11 +261,21 @@ def diagnose_error(error_text: str, agent_name: str = "") -> dict:
                 "location": pattern["location"],
             }
 
-    # Generic fallback
+    # Generic fallback — include actual error detail instead of vague message
+    ts_match  = re.search(r'\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]', error_text)
+    timestamp = ts_match.group(1) if ts_match else "unknown time"
+    agent     = agent_name or "unknown agent"
+
+    if error_text.strip():
+        detail = error_text.strip()[:200]
+        diag   = f"{agent} failed: {detail} at {timestamp}"
+    else:
+        diag   = f"{agent} failed — no error detail captured. Add try/except logging to {agent}."
+
     return {
         "matched_pattern": None,
-        "diagnosis": f"Unknown error in {agent_name or 'unknown agent'}",
-        "fix": f"Check the full error in the agent's log file at memory/logs/{agent_name}/. Share the error with Opus for diagnosis.",
+        "diagnosis": diag,
+        "fix": f"Check memory/logs/{agent_name}/ for the full trace.",
         "severity": "warning",
         "location": f"memory/logs/{agent_name}/",
     }
@@ -293,17 +304,40 @@ def check_recent_errors() -> list:
                 continue
 
             with open(log_path, "r") as f:
-                for line_num, line in enumerate(f, 1):
-                    if "ERROR" in line or "❌" in line or "Failed" in line:
-                        error_text = line.strip()
-                        diagnosis = diagnose_error(error_text, agent_folder)
-                        diagnosed_errors.append({
-                            "agent": agent_folder,
-                            "error": error_text[:300],
-                            "log_file": log_path,
-                            "line": line_num,
-                            **diagnosis,
-                        })
+                lines = f.readlines()
+
+            for line_num, line in enumerate(lines, 1):
+                if "ERROR" in line or "❌" in line or "Failed" in line:
+                    error_text = line.strip()
+
+                    # Try to extract slug from the 20 preceding log lines
+                    context_lines = lines[max(0, line_num - 21):line_num - 1]
+                    slug = None
+                    for ctx in reversed(context_lines):
+                        m = re.search(
+                            r'(?:###\s*|REWRITE:\s*|NEW:\s*writing\s*|slug[:\s]+)'
+                            r'([a-z0-9][a-z0-9\-]{2,})',
+                            ctx, re.IGNORECASE,
+                        )
+                        if m:
+                            slug = m.group(1)
+                            break
+
+                    # Build richer error text including slug if found
+                    if slug:
+                        enriched = f"{error_text} [slug: {slug}]"
+                    else:
+                        enriched = error_text
+
+                    diagnosis = diagnose_error(enriched, agent_folder)
+                    diagnosed_errors.append({
+                        "agent":    agent_folder,
+                        "slug":     slug or "unknown",
+                        "error":    error_text[:300],
+                        "log_file": log_path,
+                        "line":     line_num,
+                        **diagnosis,
+                    })
 
     return diagnosed_errors
 

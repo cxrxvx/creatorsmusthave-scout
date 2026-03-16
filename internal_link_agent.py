@@ -123,7 +123,7 @@ def build_published_index(handoffs, slug_to_keywords):
     for slug, article in handoffs.items():
         if not isinstance(article, dict):
             continue
-        if article.get("status") not in ("published", "draft_live"):
+        if article.get("status") not in ("published", "pending_approval"):
             continue
         if not article.get("wp_post_url"):
             continue
@@ -690,7 +690,7 @@ def get_articles_needing_links(handoffs):
     for slug, article in handoffs.items():
         if not isinstance(article, dict):
             continue
-        if article.get("status") not in ("published", "draft_live"):
+        if article.get("status") not in ("published", "pending_approval"):
             continue
         if not article.get("wp_post_id"):
             continue
