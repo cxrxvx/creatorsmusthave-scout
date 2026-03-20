@@ -14,6 +14,8 @@ TOPICS_USED_FILE = "memory/topics_used.json"
 LEARNINGS_FILE = "memory/learnings.json"
 STYLE_TRACKER_FILE = "memory/.style_tracker.json"
 AFFILIATE_LINKS_FILE = "memory/affiliate_links.json"
+BRAND_VOICE_FILE     = "memory/brand_voice.md"
+ANTI_AI_FILTER_FILE  = "memory/anti_ai_filter.md"
 
 # Max articles per run — each costs ~$0.066
 # Write-ahead cap in run() prevents overproduction
@@ -180,8 +182,8 @@ def enforce_tool_url(html: str, tool_url: str, tool_name: str) -> str:
 
 def enforce_disclosure_position(html: str, article_type: str) -> str:
     """
-    Ensure the affiliate disclosure appears AFTER the opening hook.
-    authority_article type: no disclosure needed — remove if present.
+    Ensure disclosure appears AFTER opening paragraph, BEFORE Key Takeaways.
+    authority_article type: remove if present.
     """
     disclosure_pattern = re.compile(
         r'<div class="affiliate-disclosure">.*?</div>',
@@ -194,34 +196,43 @@ def enforce_disclosure_position(html: str, article_type: str) -> str:
             print(f"   🔧 Removed disclosure from authority_article")
         return html
 
-    disclosure_match = disclosure_pattern.search(html)
-    if not disclosure_match:
-        disclosure_html = (
-            '\n<div class="affiliate-disclosure">\n'
-            '<p><strong>Disclosure:</strong> This article contains affiliate links. '
-            'If you purchase through our links, we may earn a commission at no extra '
-            'cost to you. We only recommend tools we\'ve genuinely evaluated.</p>\n'
-            '</div>\n'
-        )
-        first_p = html.find('</p>')
-        if first_p != -1:
-            html = html[:first_p + 4] + disclosure_html + html[first_p + 4:]
-            print(f"   🔧 Added missing disclosure after first paragraph")
-        return html
+    disclosure_html_default = (
+        '\n<div class="affiliate-disclosure">\n'
+        '<p><strong>Disclosure:</strong> This article contains affiliate links. '
+        'If you purchase through our links, we may earn a commission at no extra '
+        'cost to you. We only recommend tools we\'ve genuinely evaluated.</p>\n'
+        '</div>\n'
+    )
 
-    disclosure_html = disclosure_match.group(0)
     first_p_end = html.find('</p>')
-    disclosure_pos = disclosure_match.start()
-
     if first_p_end == -1:
         return html
 
-    if disclosure_pos < first_p_end:
+    kt_pos = html.find('<div class="key-takeaways"')
+    target_pos = first_p_end + 4
+
+    disclosure_match = disclosure_pattern.search(html)
+    if not disclosure_match:
+        html = html[:target_pos] + disclosure_html_default + html[target_pos:]
+        print(f"   🔧 Added missing disclosure after opening paragraph")
+        return html
+
+    disclosure_html = disclosure_match.group(0)
+    d_start = disclosure_match.start()
+
+    already_correct = (
+        d_start >= first_p_end
+        and (kt_pos == -1 or d_start < kt_pos)
+    )
+
+    if not already_correct:
         html = disclosure_pattern.sub('', html, count=1)
         first_p_end = html.find('</p>')
-        if first_p_end != -1:
-            html = html[:first_p_end + 4] + '\n' + disclosure_html + html[first_p_end + 4:]
-            print(f"   🔧 Moved disclosure to after opening hook")
+        if first_p_end == -1:
+            return html
+        target_pos = first_p_end + 4
+        html = html[:target_pos] + '\n' + disclosure_html + html[target_pos:]
+        print(f"   🔧 Moved disclosure to after opening paragraph, before Key Takeaways")
 
     return html
 
@@ -358,6 +369,40 @@ def get_editor_feedback() -> str:
         )
     except (FileNotFoundError, json.JSONDecodeError):
         return ""
+    except Exception:
+        return ""
+
+
+def load_brand_voice() -> str:
+    """Load Voice Rules section from memory/brand_voice.md for injection into prompts."""
+    try:
+        with open(BRAND_VOICE_FILE, "r") as f:
+            content = f.read()
+        match = re.search(r'## 1\. Voice Rules.*?(?=\n## 2\.)', content, re.DOTALL)
+        rules = match.group(0).strip() if match else content.strip()
+        return (
+            "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "BRAND VOICE — how Alex Builds sounds. Follow every rule.\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            + rules + "\n"
+        )
+    except Exception:
+        return ""
+
+
+def load_anti_ai_filter() -> str:
+    """Extract Banned Words + Banned Phrases sections from memory/anti_ai_filter.md."""
+    try:
+        with open(ANTI_AI_FILTER_FILE, "r") as f:
+            content = f.read()
+        match = re.search(r'## Banned Words.*?(?=\n## Warning Phrases)', content, re.DOTALL)
+        banned = match.group(0).strip() if match else content.strip()
+        return (
+            "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "ANTI-AI WRITING FILTER — never use any of these words or phrases\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            + banned + "\n"
+        )
     except Exception:
         return ""
 
@@ -701,7 +746,7 @@ ARTICLE STRUCTURE — follow this exactly:
 
 2. OPENING HOOK (no heading) — follow hook strategy above
 
-3. AFFILIATE DISCLOSURE — after the hook
+3. AFFILIATE DISCLOSURE — place AFTER the opening paragraph (step 2), BEFORE the Key Takeaways box (step 4). Never as the first element.
    <div class="affiliate-disclosure">
    <p><strong>Disclosure:</strong> This article contains affiliate links.
    If you purchase through our links, we may earn a commission at no extra
@@ -981,6 +1026,8 @@ def build_single_tool_prompt(tool_data, published_slugs=None):
     editor_feedback_context = get_editor_feedback()
     internal_link_context = _build_internal_link_context(published_slugs)
     source_url_context = get_tool_source_url(tool_name)
+    brand_voice_context = load_brand_voice()
+    anti_ai_context = load_anti_ai_filter()
 
     return f"""You are a world-class SEO article writer for affiliate content about creator tools.
 
@@ -1003,6 +1050,8 @@ OPENING HOOK
 {hook_instruction}
 
 {get_eeat_aeo_block()}
+{brand_voice_context}
+{anti_ai_context}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 TOOL DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1040,7 +1089,7 @@ FORBIDDEN: [TOOL_URL], [AFFILIATE_LINK], https://example.com, href=""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 DISCLOSURE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{"NO disclosure — authority article." if article_type == "authority_article" else "REQUIRED — place AFTER opening hook, not before H1."}
+{"NO disclosure — authority article." if article_type == "authority_article" else "REQUIRED — place AFTER the opening paragraph, BEFORE the Key Takeaways box. Never as the first element."}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 RULES
@@ -1055,7 +1104,7 @@ RULES
 - No fake statistics or invented testimonials
 - Unknown pricing: "verify at {tool_url}"
 - Max 3 CTAs. Specific text only: "Try [Tool] →" — never "Click here"
-- Pros/cons h3 tags: plain text only, no emojis
+- Never use emojis anywhere in the article. Not in headings, not in bullet points, not anywhere. Plain text only throughout.
 
 INTERNAL LINKS:
 {internal_link_context}
@@ -1107,6 +1156,8 @@ def build_roundup_prompt(tool_data, published_slugs=None):
     learnings_context = get_learnings()
     editor_feedback_context = get_editor_feedback()
     internal_link_context = _build_internal_link_context(published_slugs)
+    brand_voice_context = load_brand_voice()
+    anti_ai_context = load_anti_ai_filter()
 
     return f"""You are a world-class SEO writer creating a "Best X for Y" roundup — the highest-converting affiliate format. Each tool gets its own CTA = 5-8 affiliate links per article.
 
@@ -1121,6 +1172,8 @@ HOOK: {hook_instruction}
 CRITICAL: Name your #1 pick in the opening — captures featured snippets.
 
 {get_eeat_aeo_block()}
+{brand_voice_context}
+{anti_ai_context}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ARTICLE DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1181,6 +1234,8 @@ def build_comparison_prompt(tool_data, published_slugs=None):
     internal_link_context = _build_internal_link_context(published_slugs)
     source_url_a = get_tool_source_url(tool_a)
     source_url_b = get_tool_source_url(tool_b) if tool_b else ""
+    brand_voice_context = load_brand_voice()
+    anti_ai_context = load_anti_ai_filter()
 
     return f"""You are a world-class SEO writer creating an "X vs Y" comparison — ranks for BOTH tool names, doubling traffic.
 
@@ -1195,6 +1250,8 @@ HOOK: {hook_instruction}
 CRITICAL: Declare the winner upfront — captures featured snippets.
 
 {get_eeat_aeo_block()}
+{brand_voice_context}
+{anti_ai_context}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 COMPARISON DETAILS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1244,9 +1301,21 @@ Write the complete article. Return ONLY HTML.
 # WRITE THE ARTICLE
 # ─────────────────────────────────────────
 
-def write_article(tool_data, published_slugs=None):
+def write_article(tool_data, published_slugs=None, is_rewrite=False):
     """Send to Claude and get back a full HTML article."""
     prompt = build_prompt(tool_data, published_slugs)
+    if is_rewrite:
+        rewrite_header = (
+            "⚠️  REWRITE TASK\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "This is a REWRITE. Do NOT copy or paraphrase the existing article.\n"
+            "Write a completely new version from scratch. New opening sentence,\n"
+            "new examples, new structure, new phrasing throughout.\n"
+            "The only things that stay the same: the tool name, the target keyword,\n"
+            "and the factual accuracy of pricing and features.\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        )
+        prompt = rewrite_header + prompt
     tool_name = tool_data.get("tool_name", "")
     tool_url = get_tool_url(tool_name)
     article_type = tool_data.get("article_type", "review")
@@ -1402,7 +1471,7 @@ def run():
             tool_data["tool_url"] = get_tool_url(tool_name)
 
             try:
-                article_html, word_count = write_article(tool_data, published_slugs)
+                article_html, word_count = write_article(tool_data, published_slugs, is_rewrite=True)
 
                 style_tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
                 last_style = (style_tracker.get("last_styles") or ["unknown"])[-1]

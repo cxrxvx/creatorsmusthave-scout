@@ -33,8 +33,9 @@ except ImportError:
 
 client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
-MEMORY_DIR   = "memory"
-LOGS_DIR     = os.path.join(MEMORY_DIR, "logs", "editor_agent")
+MEMORY_DIR           = "memory"
+LOGS_DIR             = os.path.join(MEMORY_DIR, "logs", "editor_agent")
+EDITOR_CRITERIA_FILE = os.path.join(MEMORY_DIR, "prompts", "editor_criteria.md")
 
 # ⚡ Phase 2.5 tuned: 82 was too harsh (14% approval), 75 was rubber stamp
 # 78 targets 70-80% approval — strict enough to catch real problems,
@@ -59,6 +60,35 @@ def load_json(path, default):
 def save_json(path, data):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
+
+
+def load_editor_criteria() -> str:
+    """
+    Load scoring dimensions + usefulness test from memory/prompts/editor_criteria.md.
+    Returns the extracted sections as a string for injection into the scoring prompt.
+    Falls back to empty string if file is missing — prompt section will be empty.
+    """
+    try:
+        with open(EDITOR_CRITERIA_FILE, "r") as f:
+            content = f.read()
+        # Extract "Scoring Dimensions" section (stops before Article-Type-Specific Checks)
+        dims_match = re.search(
+            r'## Scoring Dimensions.*?(?=\n## Article-Type-Specific)',
+            content, re.DOTALL
+        )
+        # Extract "Usefulness Test" section
+        useful_match = re.search(
+            r'## Usefulness Test.*?(?=\n## Response Format|\n---|\Z)',
+            content, re.DOTALL
+        )
+        parts = []
+        if dims_match:
+            parts.append(dims_match.group(0).strip())
+        if useful_match:
+            parts.append(useful_match.group(0).strip())
+        return "\n\n".join(parts) if parts else ""
+    except Exception:
+        return ""
 
 
 def log(msg):
@@ -397,6 +427,9 @@ Each issue above should cost 2-4 points from the relevant dimension.
     # Get type-specific criteria
     type_criteria = get_type_criteria(article_type)
 
+    # Load scoring criteria from memory/prompts/editor_criteria.md
+    scoring_criteria = load_editor_criteria()
+
     plain_text = strip_html_tags(html)
     plain_text = plain_text[:30000]
 
@@ -463,49 +496,10 @@ ARTICLE CONTENT (plain text, first 30,000 chars):
 
 ---
 
-Score on THREE dimensions. Look for real problems, not nitpicks.
-
-## 1. SEO SCORE (0-100, weight: 35%)
-Check:
-- Does "{keyword}" appear in the first 150 words? (-5 if not)
-- Does a keyword variation appear in at least one H2? (-3 if not)
-- Are there 6+ related keywords used naturally? (-3 if fewer)
-- Is there a proper FAQ with 4+ questions? (-5 if missing entirely)
-- Do H2 headings use keyword variations, not just generic labels? (-3 if all generic)
-- Is the content useful and informative for the target reader? (-8 if thin/superficial)
-
-## 2. READABILITY SCORE (0-100, weight: 30%)
-Check:
-- Does the intro hook the reader in the first 2-3 sentences? (-5 if generic opener)
-- Are paragraphs generally 3 sentences or fewer? (-3 per obvious wall-of-text)
-- Is the language direct and specific? (-5 if heavy corporate-speak throughout)
-- Does it avoid banned phrases? (-3 per banned phrase found)
-- Would a real person find this useful to read? (-5 if it reads like a template)
-
-## 3. COMPLETENESS SCORE (0-100, weight: 35%)
-Check:
-- Does it include pricing information? (-8 if no pricing at all, -3 if approximate)
-- At least 3 SPECIFIC cons? "Learning curve" alone doesn't count. (-5 if generic)
-- Is there a "Who it's for / not for" section? (-5 if completely missing)
-- Affiliate disclosure present? (-3 if missing)
-- Clear verdict with recommendation? (-5 if wishy-washy)
-- Are CTAs present and specific? (-3 if generic "Click here" style)
+{scoring_criteria}
 {type_criteria}
 
 ---
-
-USEFULNESS TEST — answer both questions about this article:
-1. Would this article still be useful if search engines didn't exist?
-2. If someone bookmarked this page and came back in 6 months, would it still provide value?
-
-If the answer to EITHER question is No, reduce the overall_score by 10 points and
-include your answers in editor_summary. Always include both answers in the response
-even when the article passes.
-
----
-
-Start at 100 for each dimension and subtract for problems found.
-Do not penalize the same issue twice across dimensions.
 
 RESPOND IN THIS EXACT JSON FORMAT — nothing else:
 

@@ -90,7 +90,7 @@ def get_daily_publish_cap() -> int:
     """
     days_active = (date.today() - SITE_LAUNCH_DATE).days
 
-    if days_active <= 28:     return 1    # Weeks 1-4: slow and steady
+    if days_active <= 28:     return 3    # Weeks 1-4: 3/day
     elif days_active <= 90:   return 2    # Months 2-3: building trust
     elif days_active <= 150:  return 3    # Months 4-5: ramping up
     elif days_active <= 180:  return 5    # Month 6: Google trusts domain

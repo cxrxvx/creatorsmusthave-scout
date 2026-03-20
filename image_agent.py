@@ -805,7 +805,7 @@ def process_tool_images(slug: str, article: dict, handoffs: dict) -> dict:
     log(f"Processing: {tool_name} | hero: {'✅' if has_hero else '❌'} | screenshot: {'✅' if has_shot else '❌'} | logo: {'✅' if has_logo else '❌'}")
 
     queries     = get_image_search_query(tool_name, title, keyword)
-    images_data = existing.copy()
+    images_data = existing.copy() if existing else {}
 
     # ── PRIMARY: Screenshot the tool homepage ─────────────────────────────
     if not has_shot:

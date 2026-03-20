@@ -257,6 +257,33 @@ def sort_articles(articles: list, affiliate_links: dict,
     return sorted(articles, key=lambda x: -x["_priority_score"])
 
 
+def verify_before_publish(article: dict, affiliate_links: dict) -> list:
+    """
+    Pre-publish quality gate. Returns a list of warning strings.
+    If non-empty, the article should be skipped and a Telegram warning sent.
+    """
+    warnings = []
+
+    # 1. Affiliate link exists but was not injected
+    aff_url = _resolve_affiliate_entry(affiliate_links, article.get("tool_name", ""))
+    if aff_url and not article.get("affiliate_injected"):
+        warnings.append(
+            f"Affiliate link exists for {article.get('tool_name', '?')} but was not injected"
+        )
+
+    # 2. Word count too low
+    word_count = len(article.get("content", article.get("article_html", "")).split())
+    if word_count < 1500:
+        warnings.append(f"Word count too low: {word_count} (minimum 1500)")
+
+    # 3. Unreplaced placeholders in content
+    content = article.get("content", article.get("article_html", ""))
+    if "[PLACEHOLDER]" in content or "[AFFILIATE_LINK]" in content:
+        warnings.append("Unreplaced placeholder found in content")
+
+    return warnings
+
+
 def get_recent_published_types(n: int = 3) -> list:
     """Return article_type values of the last N published articles (newest first)."""
     published = db_helpers.get_published()
@@ -707,6 +734,30 @@ def run():
             log(f"   🔧 Safety net caught {placeholder_count} placeholder(s) — replaced with {tool_url}")
 
         article["article_html"] = html
+
+        # ── Pre-publish verification gate ────────────────────────────────────
+        article["affiliate_injected"] = affiliate_injected
+        verify_warnings = verify_before_publish(article, affiliate_links)
+        if verify_warnings:
+            warning_text = "\n".join(f"  • {w}" for w in verify_warnings)
+            log(f"   ⚠️  Pre-publish check failed for {tool_name}:\n{warning_text}")
+            if TELEGRAM_ENABLED:
+                try:
+                    requests.post(
+                        f"{TELEGRAM_API}/sendMessage",
+                        json={
+                            "chat_id": TELEGRAM_CHAT_ID,
+                            "text": (
+                                f"⚠️ PUBLISH SKIPPED: {tool_name}\n"
+                                f"Reason(s):\n{warning_text}\n"
+                                f"Slug: {slug}"
+                            ),
+                        },
+                        timeout=15,
+                    )
+                except Exception as e:
+                    log(f"   ⚠️  Telegram warning failed: {e}")
+            continue
 
         # ── Push to WordPress (always as draft first when Telegram is enabled) ──
         push_status = "draft" if TELEGRAM_ENABLED else PUBLISH_MODE
