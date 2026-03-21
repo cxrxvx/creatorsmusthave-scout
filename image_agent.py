@@ -929,12 +929,12 @@ def process_roundup_images(slug: str, article: dict) -> dict:
     keyword    = article.get("primary_keyword", "")
 
     existing   = article.get("image_data", {})
-    images_data = existing.copy() if existing is not None else {}
+    images_data = existing.copy() if existing else {}
 
     log(f"Processing roundup: {title}")
 
     # Get the primary hero image first (same as single tool)
-    if not existing.get("hero_media_id"):
+    if not images_data.get("hero_media_id"):
         queries = get_image_search_query(tool_name, title, keyword)
         hero_bytes, source = get_stock_hero(queries)
         if hero_bytes:
