@@ -9,9 +9,15 @@ Phase 2.5 Opus Upgrade:
   ✅ Pipeline summary with article type breakdown
   ✅ All existing features preserved (decoupled agents, per-agent locks, cost breaker)
 
+Phase 2.7J:
+  ✅ Daily affiliate digest — Telegram alert for tools in queue without affiliate links
+  ✅ Affiliate swap agent — runs daily, swaps homepage URLs when affiliate links are added
+
 Agents run on their own independent timers. Work gets processed as fast as it arrives.
 
 Schedule:
+  Affiliate Digest:   06:00                                  (1x/day — before pipeline)
+  Affiliate Swap:     06:00                                  (1x/day — check for new links)
   Tool Scout:         06:00 09:00 12:00 15:00 18:00 21:00  (6x/day)
   Keyword Agent:      06:00 09:00 12:00 15:00 18:00 21:00  (6x/day)
   Article Writer:     06:00 09:00 12:00 15:00 18:00 21:00  (6x/day — write-ahead capped)
@@ -75,6 +81,20 @@ WRITE_AHEAD_CAP = 21
 
 # ── Google-safe publish ramp ──────────────────────────────────────────────────
 SITE_LAUNCH_DATE = date(2026, 3, 5)
+
+# ── Affiliate digest paths ────────────────────────────────────────────────────
+AFFILIATE_FILE = MEMORY_DIR / "affiliate_links.json"
+KEYWORD_FILE   = MEMORY_DIR / "keyword_data.json"
+
+# ── Telegram config ───────────────────────────────────────────────────────────
+try:
+    sys.path.insert(0, str(BASE_DIR))
+    from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+    TELEGRAM_ENABLED = bool(TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)
+    TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}" if TELEGRAM_BOT_TOKEN else ""
+except ImportError:
+    TELEGRAM_ENABLED = False
+    TELEGRAM_API = ""
 
 
 def get_daily_publish_cap() -> int:
@@ -157,7 +177,106 @@ def get_pipeline_summary() -> str:
         return "Could not read pipeline state"
 
 
-# ── helpers ───────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════
+#  DAILY AFFILIATE DIGEST — Phase 2.7J
+# ══════════════════════════════════════════════════════════════════════════
+
+def send_affiliate_digest():
+    """
+    Check which tools are in the pipeline queue without affiliate links.
+    Sends one Telegram message per day listing tools Alex should apply for.
+    
+    Checks both:
+    1. keyword_data.json — tools with status=pending_article (not yet written)
+    2. handoffs table — tools with status=pending_edit or pending_publish (written but not published)
+    
+    This gives Alex maximum lead time to apply for affiliate programs
+    before articles go live.
+    """
+    if not TELEGRAM_ENABLED:
+        return
+
+    try:
+        import requests
+
+        # Load affiliate links
+        affiliate_links = {}
+        if AFFILIATE_FILE.exists():
+            try:
+                affiliate_links = json.loads(AFFILIATE_FILE.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+
+        affiliate_names = {k.lower().strip() for k in affiliate_links.keys()}
+
+        missing_tools = []
+
+        # Check keyword_data.json — tools waiting to be written
+        if KEYWORD_FILE.exists():
+            try:
+                keyword_data = json.loads(KEYWORD_FILE.read_text(encoding="utf-8"))
+                for key, data in keyword_data.items():
+                    if data.get("status") != "pending_article":
+                        continue
+                    tool_name = data.get("tool_name", "")
+                    if not tool_name:
+                        continue
+                    if tool_name.lower().strip() not in affiliate_names:
+                        missing_tools.append({
+                            "name": tool_name,
+                            "stage": "queued for writing",
+                        })
+            except Exception:
+                pass
+
+        # Check handoffs — tools written but not yet published
+        try:
+            for status in ["pending_edit", "pending_publish"]:
+                articles = db_helpers.get_handoffs_by_status(status)
+                for article in articles:
+                    tool_name = article.get("tool_name", "")
+                    article_type = article.get("article_type", "review")
+                    if not tool_name:
+                        continue
+                    # Skip roundups and comparisons — they cover multiple tools
+                    if article_type in ("roundup", "comparison"):
+                        continue
+                    if tool_name.lower().strip() not in affiliate_names:
+                        # Avoid duplicates (same tool might be in keyword_data AND handoffs)
+                        if not any(t["name"].lower() == tool_name.lower() for t in missing_tools):
+                            missing_tools.append({
+                                "name": tool_name,
+                                "stage": status.replace("_", " "),
+                            })
+        except Exception:
+            pass
+
+        if not missing_tools:
+            log("📋 Affiliate digest: all tools in queue have affiliate links (or queue is empty)")
+            return
+
+        # Build Telegram message
+        lines = [f"📋 AFFILIATE DIGEST — {len(missing_tools)} tool(s) without affiliate links:\n"]
+        for tool in missing_tools[:20]:  # Cap at 20 to avoid huge messages
+            lines.append(f"  • {tool['name']} ({tool['stage']})")
+
+        lines.append("\nApply now — articles publish in days.")
+
+        text = "\n".join(lines)
+        requests.post(
+            f"{TELEGRAM_API}/sendMessage",
+            json={"chat_id": TELEGRAM_CHAT_ID, "text": text},
+            timeout=15,
+        )
+        log(f"📋 Affiliate digest sent — {len(missing_tools)} tool(s) without links")
+
+    except Exception as e:
+        log(f"⚠️  Affiliate digest error: {e}")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  HELPERS
+# ══════════════════════════════════════════════════════════════════════════
 
 def log(msg: str):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -327,11 +446,29 @@ def job_publisher():
         daemon=True
     ).start()
 
+def job_affiliate_digest():
+    """Daily affiliate digest — no lock needed, just a DB read + Telegram message."""
+    threading.Thread(target=send_affiliate_digest, daemon=True).start()
+
+def job_affiliate_swap():
+    """Daily affiliate swap — check for newly available links and update WordPress."""
+    threading.Thread(
+        target=run_with_lock,
+        args=("affiliate_swap", "affiliate_swap_agent.py"),
+        daemon=True
+    ).start()
+
 
 # ── schedule setup ─────────────────────────────────────────────────────────────
 
 def setup_schedule():
     log("📅 Setting up decoupled agent schedule...")
+
+    # Affiliate Digest — 1x/day before pipeline starts
+    schedule.every().day.at("06:00").do(job_affiliate_digest)
+
+    # Affiliate Swap — 1x/day, check for newly available links
+    schedule.every().day.at("06:00").do(job_affiliate_swap)
 
     # Tool Scout — 6x/day
     for t in ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]:
@@ -371,6 +508,7 @@ def setup_schedule():
     days = (date.today() - SITE_LAUNCH_DATE).days
 
     log("✅ Schedule configured:")
+    log("   Affiliate Digest + Swap:    06:00")
     log("   Scout + Keyword + Article:  06:00 09:00 12:00 15:00 18:00 21:00")
     log("   Editor:                     06:30 09:30 12:30 15:30 18:30 21:30")
     log("   Image + SEO:                07:00 10:00 13:00 16:00 19:00 22:00")
@@ -388,12 +526,20 @@ def run_pipeline_once():
     """
     Runs the full pipeline once in sequence — useful for testing.
     Includes write-ahead cap check and watchdog at the end.
+    Phase 2.7J: Runs affiliate digest and swap agent before the main pipeline.
     """
     log("🔁 Running full pipeline once (--now mode)...")
     cap = get_daily_publish_cap()
     days = (date.today() - SITE_LAUNCH_DATE).days
     log(f"   Publish cap: {cap}/day (day {days}) | Write-ahead cap: {WRITE_AHEAD_CAP}")
     log(f"   {get_pipeline_summary()}")
+
+    # Phase 2.7J: Run affiliate digest and swap before main pipeline
+    log("")
+    log("📋 Pre-pipeline: affiliate digest + swap check...")
+    send_affiliate_digest()
+    run_agent("affiliate_swap_agent.py")
+    log("")
 
     steps = [
         ("scout",     "tool_scout.py",         None,             True),
@@ -442,7 +588,7 @@ def run_pipeline_once():
 if __name__ == "__main__":
     log("=" * 60)
     log("🚀 Creators Must Have — Decoupled Pipeline Scheduler")
-    log(f"   Phase 2.5 — Google-safe ramp + write-ahead cap")
+    log(f"   Phase 2.5 + 2.7J — Google-safe ramp + affiliate tracking")
     log("=" * 60)
 
     start_approval_bot()
