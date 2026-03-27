@@ -775,6 +775,24 @@ def run():
         if placeholder_count:
             log(f"   🔧 Safety net caught {placeholder_count} placeholder(s) — replaced with {tool_url}")
 
+        # Phase 2.7J: Strip [INTERNAL_LINK:] placeholders that internal_link_agent missed
+        # Articles in pending_publish haven't been to WordPress yet, so internal_link_agent
+        # never processed them. Better to publish without internal links than not publish at all.
+        import re as _re
+        internal_link_leftovers = _re.findall(r"\[INTERNAL_LINK:[^\]]+\]", html)
+        if internal_link_leftovers:
+            html = _re.sub(r"\[INTERNAL_LINK:[^\]]+\]", "", html)
+            log(f"   🧹 Stripped {len(internal_link_leftovers)} [INTERNAL_LINK:] placeholder(s) — will add links after publish")
+
+        # Phase 2.7J: Strip [INTERNAL_LINK:] placeholders that internal_link_agent missed
+        # Articles in pending_publish haven't been to WordPress yet, so internal_link_agent
+        # never processed them. Better to publish without internal links than not publish at all.
+        import re as _re
+        internal_link_leftovers = _re.findall(r"\[INTERNAL_LINK:[^\]]+\]", html)
+        if internal_link_leftovers:
+            html = _re.sub(r"\[INTERNAL_LINK:[^\]]+\]", "", html)
+            log(f"   🧹 Stripped {len(internal_link_leftovers)} [INTERNAL_LINK:] placeholder(s) — will add links after publish")
+
         article["article_html"] = html
 
         # ── Phase 2.7J: Determine affiliate_pending status ───────────
