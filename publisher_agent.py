@@ -12,6 +12,12 @@ Phase 2.5 Opus Upgrade:
   ✅ Broader affiliate link injection — uses tool_url from article data
   ✅ All existing features preserved (priority scoring, freshness, queue preview, emoji strip)
 
+Phase 2.7J:
+  ✅ Resolve empty tool_url at runtime — never publish with "#" links
+  ✅ verify_before_publish: blocks href="#", [INTERNAL_LINK: placeholders
+  ✅ affiliate_pending tracking — flags articles published without affiliate links
+  ✅ Telegram message shows affiliate status
+
 Drop this file into your cxrxvx-ai-empire/ folder to replace the old publisher_agent.py.
 """
 
@@ -24,6 +30,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import requests
+
+# Phase 2.7J: Import get_tool_url to resolve empty tool_url at publish time
+from article_agent import get_tool_url
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 BASE_DIR   = Path(__file__).parent
@@ -261,6 +270,10 @@ def verify_before_publish(article: dict, affiliate_links: dict) -> list:
     """
     Pre-publish quality gate. Returns a list of warning strings.
     If non-empty, the article should be skipped and a Telegram warning sent.
+    
+    Phase 2.7J: Added checks for href="#", [INTERNAL_LINK: placeholders.
+    Removed hard block on missing affiliate links — articles publish with
+    homepage URLs and get tracked via affiliate_pending instead.
     """
     warnings = []
 
@@ -280,6 +293,14 @@ def verify_before_publish(article: dict, affiliate_links: dict) -> list:
     content = article.get("content", article.get("article_html", ""))
     if "[PLACEHOLDER]" in content or "[AFFILIATE_LINK]" in content:
         warnings.append("Unreplaced placeholder found in content")
+
+    # 4. Phase 2.7J: Raw internal link placeholders visible to readers
+    if "[INTERNAL_LINK:" in content or "[INTERNAL_LINK " in content:
+        warnings.append("Raw [INTERNAL_LINK:] placeholder found — internal_link_agent did not run or missed this")
+
+    # 5. Phase 2.7J: Hash links — always a bug, never intentional
+    if 'href="#"' in content:
+        warnings.append("Broken href=\"#\" link found — tool_url was empty during processing")
 
     return warnings
 
@@ -537,8 +558,11 @@ def get_tools_covered(article: dict) -> str:
         return article.get("tool_name", "")
 
 
-def send_telegram_approval_request(article: dict, wp_post_id: int, slug: str):
-    """Send Telegram message with Accept/Decline inline keyboard."""
+def send_telegram_approval_request(article: dict, wp_post_id: int, slug: str,
+                                    affiliate_injected: bool = False,
+                                    affiliate_pending: bool = False):
+    """Send Telegram message with Accept/Decline inline keyboard.
+    Phase 2.7J: Now includes affiliate status so Alex knows to apply for programs."""
     if not TELEGRAM_ENABLED:
         return
 
@@ -550,6 +574,14 @@ def send_telegram_approval_request(article: dict, wp_post_id: int, slug: str):
     editor_notes = article.get("editor_feedback", "No editor notes")
     draft_url    = f"{WP_URL}/?p={wp_post_id}&preview=true"
 
+    # Phase 2.7J: Affiliate status line
+    if affiliate_injected:
+        affiliate_line = "Affiliate link: YES — injected"
+    elif affiliate_pending:
+        affiliate_line = "Affiliate link: NO — published with homepage URL. Apply for their program."
+    else:
+        affiliate_line = "Affiliate link: N/A"
+
     text = (
         f"📝 ARTICLE READY TO REVIEW\n"
         f"Title: {title}\n"
@@ -557,6 +589,7 @@ def send_telegram_approval_request(article: dict, wp_post_id: int, slug: str):
         f"Word count: {word_count}\n"
         f"Editor score: {editor_score}/100\n"
         f"Keyword: {keyword}\n"
+        f"{affiliate_line}\n"
         f"Editor notes:\n{editor_notes}\n"
         f"Draft preview: {draft_url}"
     )
@@ -693,7 +726,15 @@ def run():
         article_type = article.get("article_type", "review")
         priority     = article.get("_priority_score", 0)
         freshness    = article.get("_freshness_tag", "")
-        tool_url     = article.get("tool_url", "")
+
+        # ── Phase 2.7J: Resolve tool_url if empty ────────────────────
+        tool_url = article.get("tool_url") or ""
+        if not tool_url:
+            log(f"   🔧 tool_url empty for {tool_name} — resolving at publish time...")
+            tool_url = get_tool_url(tool_name)
+            # Save it back to the database so we don't have to resolve again
+            db_helpers.update_handoff(slug, {"tool_url": tool_url})
+            log(f"   🔧 Resolved: {tool_url}")
 
         log(f"   🚀 Publishing: {tool_name} ({article_type}) "
             f"priority:{priority} {freshness}")
@@ -720,6 +761,7 @@ def run():
                 log(f"   💰 Affiliate link injected for {tool_name}")
 
         # ── Safety net: catch ANY remaining placeholders ──────────────
+        # Phase 2.7J: NEVER use "#" — always use the resolved tool_url
         placeholders = [
             "[AFFILIATE_LINK]", "[TOOL_URL]", "[tool_url]", "[affiliate_link]",
             "REPLACE_WITH_TOOL_URL", "[INSERT_AFFILIATE_LINK]", "[INSERT_TOOL_URL]",
@@ -728,12 +770,16 @@ def run():
         placeholder_count = 0
         for p in placeholders:
             if p in html:
-                html = html.replace(p, tool_url if tool_url else "#")
+                html = html.replace(p, tool_url)
                 placeholder_count += 1
         if placeholder_count:
             log(f"   🔧 Safety net caught {placeholder_count} placeholder(s) — replaced with {tool_url}")
 
         article["article_html"] = html
+
+        # ── Phase 2.7J: Determine affiliate_pending status ───────────
+        # True when article publishes with homepage URL (no affiliate link injected)
+        is_affiliate_pending = not affiliate_injected
 
         # ── Pre-publish verification gate ────────────────────────────────────
         article["affiliate_injected"] = affiliate_injected
@@ -769,26 +815,35 @@ def run():
 
             # ⚡ Save all fields downstream agents need
             handoff_updates = {
-                "wp_post_id":        wp_id,
-                "wp_post_url":       wp_url,  # internal_link_agent needs this
-                "wp_url":            wp_url,  # backward compat
-                "priority_score":    priority,
+                "wp_post_id":         wp_id,
+                "wp_post_url":        wp_url,  # internal_link_agent needs this
+                "wp_url":             wp_url,  # backward compat
+                "priority_score":     priority,
                 "affiliate_injected": affiliate_injected,
-                "publish_category":  get_category_for_article(article),
+                "affiliate_pending":  1 if is_affiliate_pending else 0,
+                "publish_category":   get_category_for_article(article),
             }
 
             if TELEGRAM_ENABLED:
                 # Send for approval — article lives as draft until Alex accepts
-                send_telegram_approval_request(article, wp_id, slug)
+                send_telegram_approval_request(
+                    article, wp_id, slug,
+                    affiliate_injected=affiliate_injected,
+                    affiliate_pending=is_affiliate_pending,
+                )
                 handoff_updates["status"]           = "pending_approval"
                 handoff_updates["draft_pushed_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
                 log(f"   📋 Draft pushed (post {wp_id}) — waiting for Telegram approval")
+                if is_affiliate_pending:
+                    log(f"   📋 No affiliate link — published with homepage URL ({tool_url})")
             else:
                 # No Telegram — publish directly as before
                 handoff_updates["status"]         = "published"
                 handoff_updates["published_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
                 log(f"   ✅ Published! Post ID: {wp_id}")
                 log(f"      🔗 {wp_url}")
+                if is_affiliate_pending:
+                    log(f"   📋 No affiliate link — published with homepage URL ({tool_url})")
                 # Update keyword_data status
                 if slug in keyword_data:
                     keyword_data[slug]["status"] = "published"

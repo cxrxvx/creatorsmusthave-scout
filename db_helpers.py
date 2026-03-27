@@ -49,6 +49,25 @@ def run_migrations(db_path: str = DB_PATH):
             conn.commit()
         except Exception:
             pass  # Column already exists or tools table not yet created — ignore
+
+        # Phase 2.7J: Ensure tool_url column exists (safety net for older DBs)
+        try:
+            conn.execute(
+                "ALTER TABLE handoffs ADD COLUMN tool_url TEXT DEFAULT ''"
+            )
+            conn.commit()
+        except Exception:
+            pass  # Column already exists — ignore
+
+        # Phase 2.7J: Track articles published without affiliate links
+        try:
+            conn.execute(
+                "ALTER TABLE handoffs ADD COLUMN affiliate_pending INTEGER DEFAULT 0"
+            )
+            conn.commit()
+        except Exception:
+            pass  # Column already exists — ignore
+
     finally:
         conn.close()
 
@@ -245,9 +264,9 @@ def insert_handoff(article: dict, db_path: str = DB_PATH):
              editor_score, editor_feedback, editor_rewrite_instructions, editor_deductions,
              editor_scores, editor_reviewed, images_added, image_data, images_date,
              seo_done, internal_links_done, wp_post_id, priority_score,
-             affiliate_injected, roundup_tools, comparison_tools,
+             affiliate_injected, affiliate_pending, roundup_tools, comparison_tools,
              prompt_version, created_at, updated_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (
             slug,
             article.get("tool_name"),
@@ -279,6 +298,7 @@ def insert_handoff(article: dict, db_path: str = DB_PATH):
             article.get("wp_post_id"),
             article.get("priority_score", 0),
             1 if article.get("affiliate_injected") else 0,
+            1 if article.get("affiliate_pending") else 0,
             json.dumps(roundup_tools),
             json.dumps(comparison_tools),
             article.get("prompt_version", "v1"),
