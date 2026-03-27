@@ -11,7 +11,9 @@ Phase 2.5 Opus Upgrade:
   ✅ Better candidate selection with clearer logic
   ✅ All existing features preserved (3-layer stack, compression, quality checks)
 
-Drop this file into your cxrxvx-ai-empire/ folder to replace the old image_agent.py.
+Phase 2.7J:
+  ✅ None crash fix — image_data guarded with `or {}` in both process functions
+  ✅ Screenshot verification — checks alt text matches tool before injection
 """
 
 import db_helpers
@@ -46,19 +48,17 @@ USED_IMAGES_FILE = os.path.join(MEMORY_DIR, "used_stock_images.json")
 DAILY_CAP   = 15
 
 # ── Quality thresholds ────────────────────────────────────────────────────────
-MIN_HERO_BYTES       = 50  * 1024   # Hero image minimum: 50KB
-MIN_HERO_REJECTS     = 20  * 1024   # Hero hard reject below 20KB
-MIN_SCREENSHOT_BYTES = 60  * 1024   # Catches Cloudflare/login walls
-LOGIN_WALL_BYTES     = 15  * 1024   # Blank/login wall hard reject
-MIN_PRESSKIT_BYTES   = 30  * 1024   # Press kit minimum
-MIN_LOGO_BYTES       =  2  * 1024   # Logos are small by nature
-MAX_UPLOAD_BYTES     = 500 * 1024   # Compress anything over 500KB
+MIN_HERO_BYTES       = 50  * 1024
+MIN_HERO_REJECTS     = 20  * 1024
+MIN_SCREENSHOT_BYTES = 60  * 1024
+LOGIN_WALL_BYTES     = 15  * 1024
+MIN_PRESSKIT_BYTES   = 30  * 1024
+MIN_LOGO_BYTES       =  2  * 1024
+MAX_UPLOAD_BYTES     = 500 * 1024
 
 os.makedirs(LOGS_DIR, exist_ok=True)
 
 # ── Tool screenshot URLs — synced with article_agent.py ───────────────────────
-# CRITICAL: Always use the public homepage or a public marketing page.
-# NEVER use /app/, /dashboard/, or any URL that requires login.
 TOOL_URLS = {
     "canva":                    "https://www.canva.com",
     "descript":                 "https://www.descript.com",
@@ -96,7 +96,6 @@ TOOL_URLS = {
     "vois":                     "https://vois.ai",
     "luma agents":              "https://lumalabs.ai",
     "luma":                     "https://lumalabs.ai",
-    # ⚡ Phase 2.5 — added to sync with article_agent
     "leonardo ai":              "https://leonardo.ai",
     "murf ai":                  "https://murf.ai",
     "murf":                     "https://murf.ai",
@@ -111,7 +110,6 @@ TOOL_URLS = {
     "writesonic":               "https://writesonic.com",
 }
 
-# ── Press kit / media page URLs ───────────────────────────────────────────────
 PRESS_KIT_URLS = {
     "canva":        "https://www.canva.com/newsroom/",
     "notion":       "https://www.notion.so/about",
@@ -130,14 +128,11 @@ PRESS_KIT_URLS = {
     "jasper ai":    "https://www.jasper.ai/press",
     "elevenlabs":   "https://elevenlabs.io/press",
     "trimmr":       "https://www.trimmr.ai/blog",
-    # ⚡ Phase 2.5 additions
     "grammarly":    "https://www.grammarly.com/press",
     "heygen":       "https://www.heygen.com/press",
     "speechify":    "https://speechify.com/press",
 }
 
-# ── Tool-specific Pexels search queries ───────────────────────────────────────
-# Each query is unique so Pexels returns different photos per tool.
 TOOL_PEXELS_QUERIES = {
     "canva":                    "graphic designer creating social media post",
     "descript":                 "video editor working timeline editing",
@@ -162,7 +157,6 @@ TOOL_PEXELS_QUERIES = {
     "trimmr":                   "youtube creator editing video shorts",
     "jasper ai":                "copywriter writing marketing content",
     "jasper":                   "copywriter writing marketing content",
-    # ⚡ Phase 2.5 additions
     "leonardo ai":              "digital artist creating AI artwork tablet",
     "murf ai":                  "voice over professional recording narration",
     "murf":                     "voice over professional recording narration",
@@ -177,7 +171,6 @@ TOOL_PEXELS_QUERIES = {
     "writesonic":               "content creator writing blog post laptop",
 }
 
-# ── Tool domains for Clearbit logos ───────────────────────────────────────────
 TOOL_DOMAINS = {
     "canva":                    "canva.com",
     "descript":                 "descript.com",
@@ -215,7 +208,6 @@ TOOL_DOMAINS = {
     "vois":                     "vois.ai",
     "luma agents":              "lumalabs.ai",
     "luma":                     "lumalabs.ai",
-    # ⚡ Phase 2.5 additions
     "leonardo ai":              "leonardo.ai",
     "murf ai":                  "murf.ai",
     "murf":                     "murf.ai",
@@ -261,27 +253,24 @@ def get_screenshot_caption(tool_name: str) -> str:
 
 
 # ═══════════════════════════════════════════════════════
-# STOCK PHOTO DEDUP — prevent identical images across articles
+# STOCK PHOTO DEDUP
 # ═══════════════════════════════════════════════════════
 
 def load_used_images() -> set:
-    """Load set of Pexels/Pixabay image URLs already used."""
     data = load_json(USED_IMAGES_FILE, [])
     return set(data)
 
 def save_used_image(image_url: str):
-    """Track that a stock photo URL has been used."""
     data = load_json(USED_IMAGES_FILE, [])
     if image_url not in data:
         data.append(image_url)
-        # Keep only last 200 to prevent file bloat
         if len(data) > 200:
             data = data[-200:]
         save_json(USED_IMAGES_FILE, data)
 
 
 # ═══════════════════════════════════════════════════════
-# IMAGE COMPRESSION (unchanged — works well)
+# IMAGE COMPRESSION
 # ═══════════════════════════════════════════════════════
 
 def compress_image(image_bytes: bytes, max_kb: int = 500) -> bytes:
@@ -313,7 +302,7 @@ def compress_image(image_bytes: bytes, max_kb: int = 500) -> bytes:
 
 
 # ═══════════════════════════════════════════════════════
-# QUALITY CHECKS (unchanged)
+# QUALITY CHECKS
 # ═══════════════════════════════════════════════════════
 
 def check_hero_quality(image_bytes: bytes, source: str) -> tuple[bool, str]:
@@ -340,7 +329,7 @@ def check_presskit_quality(image_bytes: bytes) -> tuple[bool, str]:
 
 
 # ═══════════════════════════════════════════════════════
-# LOGO FETCHER (Clearbit) — unchanged
+# LOGO FETCHER (Clearbit)
 # ═══════════════════════════════════════════════════════
 
 def fetch_logo(tool_name: str) -> bytes | None:
@@ -478,7 +467,6 @@ def update_wp_post_content(wp_post_id: int, new_html: str) -> bool:
         return False
 
 def get_wp_post_content(wp_post_id: int) -> str | None:
-    """Fetch current article HTML from WordPress."""
     try:
         response = requests.get(
             f"{WP_URL}/wp-json/wp/v2/posts/{wp_post_id}",
@@ -550,10 +538,6 @@ RESPOND IN THIS EXACT JSON FORMAT only:
 # ═══════════════════════════════════════════════════════
 
 def screenshot_tool_homepage(tool_name: str, retry: bool = True) -> bytes | None:
-    """
-    Screenshot a tool's homepage. If first attempt fails, retries with
-    different viewport size and longer wait time.
-    """
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
@@ -567,7 +551,6 @@ def screenshot_tool_homepage(tool_name: str, retry: bool = True) -> bytes | None
         url  = f"https://www.{slug}.com"
         log(f"  No URL for {tool_name} — trying {url}")
 
-    # Two attempts with different settings
     attempts = [
         {"width": 1280, "height": 800, "wait": 2, "label": "standard"},
     ]
@@ -587,7 +570,6 @@ def screenshot_tool_homepage(tool_name: str, retry: bool = True) -> bytes | None
                 page.goto(url, wait_until="domcontentloaded", timeout=20000)
                 time.sleep(attempt["wait"])
 
-                # Dismiss cookie banners
                 for selector in [
                     "[id*='cookie'] button", "[class*='cookie'] button",
                     "button:has-text('Accept')", "button:has-text('Got it')",
@@ -618,7 +600,7 @@ def screenshot_tool_homepage(tool_name: str, retry: bool = True) -> bytes | None
 
 
 # ═══════════════════════════════════════════════════════
-# PRESS KIT FALLBACK (unchanged — works well)
+# PRESS KIT FALLBACK
 # ═══════════════════════════════════════════════════════
 
 def fetch_presskit_image(tool_name: str) -> bytes | None:
@@ -686,7 +668,6 @@ def fetch_presskit_image(tool_name: str) -> bytes | None:
 # ═══════════════════════════════════════════════════════
 
 def fetch_pexels_image(query: str, used_urls: set = None) -> tuple[bytes | None, str | None]:
-    """Fetch from Pexels, skip already-used image URLs."""
     try:
         headers  = {"Authorization": PEXELS_API_KEY}
         params   = {"query": query, "per_page": 10,
@@ -707,7 +688,7 @@ def fetch_pexels_image(query: str, used_urls: set = None) -> tuple[bytes | None,
         for photo in photos:
             img_url = photo["src"]["large2x"]
             if img_url in used:
-                continue  # Skip already-used photo
+                continue
             img = requests.get(img_url, timeout=15)
             if img.status_code == 200:
                 log(f"  Pexels: got image ({len(img.content) // 1024}KB) for '{query}'")
@@ -719,7 +700,6 @@ def fetch_pexels_image(query: str, used_urls: set = None) -> tuple[bytes | None,
         return None, None
 
 def fetch_pixabay_image(query: str, used_urls: set = None) -> tuple[bytes | None, str | None]:
-    """Fetch from Pixabay, skip already-used image URLs."""
     try:
         params = {
             "key":         PIXABAY_API_KEY,
@@ -756,7 +736,6 @@ def fetch_pixabay_image(query: str, used_urls: set = None) -> tuple[bytes | None
         return None, None
 
 def get_stock_hero(queries: dict) -> tuple[bytes | None, str]:
-    """Stock photo fallback with dedup tracking."""
     used_urls = load_used_images()
 
     attempts = [
@@ -783,10 +762,10 @@ def get_stock_hero(queries: dict) -> tuple[bytes | None, str]:
 
 
 # ═══════════════════════════════════════════════════════
-# PROCESS SINGLE TOOL — extracted for roundup reuse
+# PROCESS SINGLE TOOL
 # ═══════════════════════════════════════════════════════
 
-def process_tool_images(slug: str, article: dict, handoffs: dict) -> dict:
+def process_tool_images(slug: str, article: dict) -> dict:
     """
     Process images for a single tool article (review, alert, authority).
     Returns updated image_data dict.
@@ -796,7 +775,9 @@ def process_tool_images(slug: str, article: dict, handoffs: dict) -> dict:
     keyword    = article.get("primary_keyword", "")
     wp_post_id = article.get("wp_post_id")
 
-    existing         = article.get("image_data", {})
+    # Phase 2.7J: Guard against None image_data — .get() returns None when
+    # the key exists with value None; `or {}` always gives a dict
+    existing         = article.get("image_data") or {}
     has_hero         = bool(existing.get("hero_media_id"))
     has_shot         = bool(existing.get("screenshot_media_id"))
     has_logo         = bool(existing.get("logo_media_id"))
@@ -805,7 +786,7 @@ def process_tool_images(slug: str, article: dict, handoffs: dict) -> dict:
     log(f"Processing: {tool_name} | hero: {'✅' if has_hero else '❌'} | screenshot: {'✅' if has_shot else '❌'} | logo: {'✅' if has_logo else '❌'}")
 
     queries     = get_image_search_query(tool_name, title, keyword)
-    images_data = existing.copy() if existing else {}
+    images_data = existing.copy()
 
     # ── PRIMARY: Screenshot the tool homepage ─────────────────────────────
     if not has_shot:
@@ -878,7 +859,6 @@ def process_tool_images(slug: str, article: dict, handoffs: dict) -> dict:
                     logo_url = get_media_url(logo_id)
                     if logo_url:
                         current_html = get_wp_post_content(wp_post_id)
-                        # ⚡ Prevent double-injection
                         if current_html and 'class="tool-logo"' not in current_html:
                             logo_block   = build_logo_html(logo_url, tool_name)
                             updated_html = logo_block + current_html
@@ -895,19 +875,26 @@ def process_tool_images(slug: str, article: dict, handoffs: dict) -> dict:
     if has_shot and not already_injected and wp_post_id:
         shot_id = images_data.get("screenshot_media_id")
         if shot_id:
-            media_url = get_media_url(shot_id)
-            if media_url:
-                current_html = get_wp_post_content(wp_post_id)
-                if current_html:
-                    screenshot_block = build_screenshot_html(
-                        media_url,
-                        images_data.get("screenshot_alt_text", f"{tool_name} homepage"),
-                        tool_name
-                    )
-                    updated_html = inject_screenshot_into_article(current_html, screenshot_block)
-                    if update_wp_post_content(wp_post_id, updated_html):
-                        log(f"  ✅ Screenshot injected into article body")
-                        images_data["screenshot_injected"] = True
+            # Phase 2.7J: Verify screenshot belongs to THIS tool before injecting
+            shot_alt = images_data.get("screenshot_alt_text", "")
+            tool_key_lower = tool_name.lower()
+            slug_lower = slug.lower()
+            if shot_alt and tool_key_lower not in shot_alt.lower() and slug_lower not in shot_alt.lower():
+                log(f"  ⚠️  Screenshot alt text '{shot_alt[:50]}' doesn't match tool '{tool_name}' — skipping injection (possible cross-contamination)")
+            else:
+                media_url = get_media_url(shot_id)
+                if media_url:
+                    current_html = get_wp_post_content(wp_post_id)
+                    if current_html:
+                        screenshot_block = build_screenshot_html(
+                            media_url,
+                            images_data.get("screenshot_alt_text", f"{tool_name} homepage"),
+                            tool_name
+                        )
+                        updated_html = inject_screenshot_into_article(current_html, screenshot_block)
+                        if update_wp_post_content(wp_post_id, updated_html):
+                            log(f"  ✅ Screenshot injected into article body")
+                            images_data["screenshot_injected"] = True
     elif has_shot and not already_injected and not wp_post_id:
         log(f"  ℹ️  No wp_post_id yet — injection queued for publish time")
 
@@ -915,25 +902,20 @@ def process_tool_images(slug: str, article: dict, handoffs: dict) -> dict:
 
 
 # ═══════════════════════════════════════════════════════
-# ROUNDUP ARTICLE IMAGES — screenshot per tool
+# ROUNDUP ARTICLE IMAGES
 # ═══════════════════════════════════════════════════════
 
 def process_roundup_images(slug: str, article: dict) -> dict:
-    """
-    For roundup articles: screenshot each tool mentioned.
-    Uses the hero image (stock or screenshot of primary tool) as featured,
-    then adds screenshots of individual tools to a gallery.
-    """
     tool_name  = article.get("tool_name", slug)
     title      = article.get("article_title", "")
     keyword    = article.get("primary_keyword", "")
 
-    existing   = article.get("image_data", {})
-    images_data = existing.copy() if existing else {}
+    # Phase 2.7J: Guard against None image_data
+    existing    = article.get("image_data") or {}
+    images_data = existing.copy()
 
     log(f"Processing roundup: {title}")
 
-    # Get the primary hero image first (same as single tool)
     if not images_data.get("hero_media_id"):
         queries = get_image_search_query(tool_name, title, keyword)
         hero_bytes, source = get_stock_hero(queries)
@@ -951,7 +933,6 @@ def process_roundup_images(slug: str, article: dict) -> dict:
                     set_featured_image(wp_post_id, hero_id)
                 log(f"  ✅ Roundup hero uploaded")
 
-    # Screenshot individual tools mentioned in the roundup
     roundup_tools = article.get("roundup_tools", [])
     if not roundup_tools:
         log(f"  ℹ️  No roundup_tools list in article data — skipping individual screenshots")
@@ -970,7 +951,7 @@ def process_roundup_images(slug: str, article: dict) -> dict:
             log(f"  ℹ️  Already have screenshot for {t_name}")
             continue
 
-        shot_bytes = screenshot_tool_homepage(t_name, retry=False)  # Single attempt for speed
+        shot_bytes = screenshot_tool_homepage(t_name, retry=False)
         if shot_bytes:
             t_slug = re.sub(r"[^a-z0-9]", "-", t_key)
             shot_id = upload_to_wordpress(
@@ -996,7 +977,6 @@ def run():
     log("Image Agent starting")
     handoffs = db_helpers.load_all_handoffs()
 
-    # ── Find candidates ───────────────────────────────────────────────────
     candidates = {}
     for slug, article in handoffs.items():
         if not isinstance(article, dict):
@@ -1006,15 +986,13 @@ def run():
             continue
 
         images_added     = article.get("images_added")
-        image_data       = article.get("image_data", {})
+        image_data       = article.get("image_data") or {}
         wp_post_id       = article.get("wp_post_id")
 
-        # Needs images
         if images_added != True:
             candidates[slug] = article
             continue
 
-        # Has screenshot but not injected into live post yet
         has_screenshot   = bool(image_data.get("screenshot_media_id"))
         already_injected = bool(image_data.get("screenshot_injected"))
         has_live_post    = bool(wp_post_id)
@@ -1036,13 +1014,11 @@ def run():
     for slug, article in to_process:
         article_type = article.get("article_type", "review")
 
-        # ── Route to the right processor ──────────────────────────────────
         if article_type == "roundup":
             images_data = process_roundup_images(slug, article)
         else:
-            images_data = process_tool_images(slug, article, handoffs)
+            images_data = process_tool_images(slug, article)
 
-        # ── Final status ──────────────────────────────────────────────────
         now_has_hero = bool(images_data.get("hero_media_id"))
         now_has_shot = bool(images_data.get("screenshot_media_id"))
         now_has_logo = bool(images_data.get("logo_media_id"))

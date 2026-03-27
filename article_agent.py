@@ -309,17 +309,6 @@ def write_log(entry):
 def normalize_tool_data(tool_data: dict) -> dict:
     """
     Map keyword_agent field names to article_agent field names.
-    
-    keyword_agent saves:
-      - roundup_tools: list of {name, slug} for roundup articles
-      - comparison_tools: {tool_a, tool_b} for comparison articles
-    
-    article_agent reads:
-      - tools_to_cover: list of tools for roundup articles
-      - tool_a / tool_b: top-level fields for comparison articles
-    
-    This bridges the gap so both naming conventions work.
-    Runs once per article before any processing starts.
     """
 
     # Roundup: keyword_agent saves "roundup_tools", article_agent reads "tools_to_cover"
@@ -408,7 +397,7 @@ def load_anti_ai_filter() -> str:
 
 
 # ─────────────────────────────────────────
-# REWRITE HELPERS (Phase 2.7G)
+# REWRITE HELPERS (Phase 2.7G + 2.7J)
 # ─────────────────────────────────────────
 
 def _handoff_to_tool_data(handoff: dict) -> dict:
@@ -432,6 +421,10 @@ def _handoff_to_tool_data(handoff: dict) -> dict:
         "tools_to_cover":        handoff.get("roundup_tools", []),
         "tool_a":                comparison_tools.get("tool_a", "") if isinstance(comparison_tools, dict) else "",
         "tool_b":                comparison_tools.get("tool_b", "") if isinstance(comparison_tools, dict) else "",
+        # Phase 2.7J: Pass editor feedback + previous style for better rewrites
+        "editor_feedback":       handoff.get("editor_feedback", ""),
+        "editor_rewrite_instructions": handoff.get("editor_rewrite_instructions", ""),
+        "previous_writing_style": handoff.get("writing_angle", ""),
     }
 
 
@@ -508,17 +501,6 @@ def get_learnings() -> str:
     """
     Read learnings.json if it exists and return formatted insights
     for the writing prompt. This is how the system gets smarter over time.
-    
-    Phase 4 will auto-populate this from Google Analytics + Search Console.
-    For now, Alex can add learnings manually or weekly_digest can seed it.
-    
-    Expected format:
-    {
-        "seo_insights": ["longer articles rank better in AI tools niche"],
-        "avoid_patterns": ["long intros lose readers"],
-        "winning_hooks": ["problem-first openings get lowest bounce rate"],
-        "audience_preferences": ["podcasters engage most with tool comparisons"]
-    }
     """
     learnings = load_json(LEARNINGS_FILE, {})
     if not learnings:
@@ -924,15 +906,9 @@ def get_structure(article_type: str) -> str:
 
 # ─────────────────────────────────────────
 # E-E-A-T + AEO BLOCK — injected into every prompt
-# Phase 2.7A — improves every article going forward
 # ─────────────────────────────────────────
 
 def get_eeat_aeo_block() -> str:
-    """
-    Returns the E-E-A-T and AEO instruction block injected into all prompts.
-    E-E-A-T = Experience, Expertise, Authoritativeness, Trustworthiness.
-    AEO = Answer Engine Optimization (structured for AI assistants + featured snippets).
-    """
     return """━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 E-E-A-T SIGNALS — required in every article
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1305,6 +1281,22 @@ def write_article(tool_data, published_slugs=None, is_rewrite=False):
     """Send to Claude and get back a full HTML article."""
     prompt = build_prompt(tool_data, published_slugs)
     if is_rewrite:
+        # Phase 2.7J: Include editor feedback so rewrite addresses specific issues
+        editor_fb = tool_data.get("editor_feedback", "")
+        editor_instructions = tool_data.get("editor_rewrite_instructions", "")
+        
+        feedback_block = ""
+        if editor_fb or editor_instructions:
+            feedback_block = (
+                "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "EDITOR FEEDBACK FROM PREVIOUS VERSION — address ALL of these:\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            )
+            if editor_fb:
+                feedback_block += f"{editor_fb}\n"
+            if editor_instructions:
+                feedback_block += f"\nSpecific instructions: {editor_instructions}\n"
+        
         rewrite_header = (
             "⚠️  REWRITE TASK\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -1313,7 +1305,8 @@ def write_article(tool_data, published_slugs=None, is_rewrite=False):
             "new examples, new structure, new phrasing throughout.\n"
             "The only things that stay the same: the tool name, the target keyword,\n"
             "and the factual accuracy of pricing and features.\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            + feedback_block + "\n"
         )
         prompt = rewrite_header + prompt
     tool_name = tool_data.get("tool_name", "")
@@ -1469,6 +1462,17 @@ def run():
 
             tool_data = _handoff_to_tool_data(handoff)
             tool_data["tool_url"] = get_tool_url(tool_name)
+
+            # Phase 2.7J: Force different writing style for rewrites
+            previous_style = tool_data.get("previous_writing_style", "")
+            if previous_style:
+                tracker = load_json(STYLE_TRACKER_FILE, {"last_styles": [], "last_hooks": []})
+                # Push previous style to end of recent list so get_next_style avoids it
+                recent = tracker.get("last_styles", [])
+                if not recent or recent[-1] != previous_style:
+                    recent.append(previous_style)
+                    tracker["last_styles"] = recent[-10:]
+                    save_json(STYLE_TRACKER_FILE, tracker)
 
             try:
                 article_html, word_count = write_article(tool_data, published_slugs, is_rewrite=True)

@@ -863,6 +863,12 @@ def run():
             # Step 8: Apply replacements
             updated_content, replacements = apply_replacements(live_content, matches)
 
+            # Phase 2.7J: Clean up any placeholders Claude didn't include in its response
+            leftover = re.findall(r'\[INTERNAL_LINK:[^\]]+\]', updated_content)
+            if leftover:
+                log(f"    🧹 Cleaning {len(leftover)} leftover placeholder(s) Claude missed")
+                updated_content = re.sub(r'\[INTERNAL_LINK:[^\]]+\]', '', updated_content)
+
             links_added    = sum(1 for r in replacements if r["action"] == "linked")
             links_removed  = sum(1 for r in replacements if r["action"] == "removed")
             topical_links  = sum(1 for r in replacements if r.get("topical_match") and r["action"] == "linked")
