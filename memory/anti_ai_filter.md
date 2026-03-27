@@ -89,11 +89,59 @@ These words and phrases are the clearest signals of AI-generated content. They a
 
 ---
 
+## Keyword Insertion Rules
+
+The primary keyword belongs in these places ONLY:
+- H1 title (exact match)
+- URL slug (exact match)
+- Meta title and meta description (handled by SEO agent)
+- Once naturally in the first 100 words (partial match is fine — the topic being clear is enough)
+- H2 headings (partial match or synonym — never forced)
+
+The primary keyword must NEVER appear as:
+- A forced phrase mid-sentence: "this stan store review for content creators 2026 breaks down..."
+- An unnatural modifier: "the riverside.fm vs zencastr for remote interviews comparison"
+- A bolted-on clause: "the question of is riverside.fm worth it for podcast recording depends..."
+- A mid-paragraph keyword dump: "Most stan store honest review articles skip this part"
+
+**RULE:** If you have to restructure a sentence to fit the keyword, the keyword does not belong in that sentence. Write the sentence naturally first. If the keyword fits, keep it. If it doesn't, leave it out. Google understands synonyms and context — it does not need the exact phrase repeated.
+
+**Banned keyword patterns:**
+- "[tool] review for [audience] [year]" in body text (belongs only in title and URL)
+- "this [keyword] will show you..."
+- "the [keyword] comparison reveals..."
+- "understanding [keyword] helps determine..."
+- "most [keyword] articles skip this part..."
+- Any sentence where removing the keyword phrase makes the sentence read better
+
+**Test before including a keyword in body text:** Read the sentence out loud. If it sounds like something a person would say in conversation, keep it. If it sounds like something a robot would say to a search engine, cut the keyword and rephrase.
+
+---
+
+## Fabricated Testing Rules
+
+These phrases signal fake hands-on experience. Never use them unless the claim is literally true:
+
+- "In our testing..." followed by specific metrics
+- "After X weeks/months of testing..."
+- "We tested X platforms across Y blogs/channels/sites"
+- "When we tested this on our [channel/blog/site]..."
+- "Our testing showed..." followed by invented numbers
+- "Processing time averaged X minutes" (unless actually timed)
+- "The article jumped to position X within Y days" (unless tracked in GSC)
+- "Clips scoring above X all exceeded Y views" (unless measured)
+- "Saved approximately X hours per article/video" (unless tracked)
+- "X% of the time" with a suspiciously precise number (87%, 93%, 97%)
+
+**Use instead:** Attribute claims to verifiable sources. See brand_voice.md section 2b for the full research-based review framework.
+
+---
+
 ## Warning Phrases (use with extreme caution)
 
 These are not always wrong but become AI slop when overused. Use at most once per article, only where genuinely apt:
 
-- "In short..." (fine as a summary signal, but varies per para)
+- "In short..." (fine as a summary signal, but vary per paragraph)
 - "Ultimately..." (fine at verdict, not mid-article)
 - "In other words..." (only if the clarification is genuinely needed)
 - "For example..." (fine but vary with "For instance", "Specifically", "Take X:")
@@ -105,8 +153,12 @@ These are not always wrong but become AI slop when overused. Use at most once pe
 
 Instead of describing features with adjectives, describe what the feature **does**:
 - WRONG: "ElevenLabs offers robust, seamless voice cloning."
-- RIGHT: "ElevenLabs clones a voice from a 30-second sample. The output is indistinguishable from the original in back-to-back listening tests."
+- RIGHT: "ElevenLabs clones a voice from a 30-second sample. The output is indistinguishable from the original in back-to-back listening tests, according to users on Reddit's r/podcasting."
 
 Instead of framing an article with a landscape observation, start with the reader's problem:
 - WRONG: "In today's fast-paced content creation landscape, creators need tools that streamline their workflow."
 - RIGHT: "Recording a podcast and having it ready to publish in under an hour used to require a full editing team. Now one tool handles it."
+
+Instead of fake testing claims, use honest research synthesis:
+- WRONG: "In our testing over 90 days, Surfer SEO improved rankings by an average of 12 positions."
+- RIGHT: "Surfer SEO's case studies and G2 reviews consistently show ranking improvements after content optimization, though results vary by niche competitiveness and existing domain authority."

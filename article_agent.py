@@ -184,6 +184,7 @@ def enforce_disclosure_position(html: str, article_type: str) -> str:
     """
     Ensure disclosure appears AFTER opening paragraph, BEFORE Key Takeaways.
     authority_article type: remove if present.
+    Phase 2.7J: Also removes duplicate disclosures and loose disclosure paragraphs.
     """
     disclosure_pattern = re.compile(
         r'<div class="affiliate-disclosure">.*?</div>',
@@ -195,6 +196,29 @@ def enforce_disclosure_position(html: str, article_type: str) -> str:
             html = disclosure_pattern.sub('', html)
             print(f"   🔧 Removed disclosure from authority_article")
         return html
+
+    # Phase 2.7J: Remove duplicate div-wrapped disclosures — keep only the first one
+    all_disclosures = disclosure_pattern.findall(html)
+    if len(all_disclosures) > 1:
+        first_found = False
+        def remove_extras(match):
+            nonlocal first_found
+            if not first_found:
+                first_found = True
+                return match.group(0)
+            return ''
+        html = disclosure_pattern.sub(remove_extras, html)
+        print(f"   🔧 Removed {len(all_disclosures) - 1} duplicate disclosure(s)")
+
+    # Phase 2.7J: Remove loose disclosure paragraphs (not wrapped in div)
+    loose_pattern = re.compile(
+        r'<p>.*?This article contains affiliate links.*?</p>',
+        re.DOTALL | re.IGNORECASE
+    )
+    if loose_pattern.search(html) and disclosure_pattern.search(html):
+        # We have both a div-wrapped disclosure AND a loose one — remove the loose one
+        html = loose_pattern.sub('', html, count=1)
+        print(f"   🔧 Removed loose duplicate disclosure paragraph")
 
     disclosure_html_default = (
         '\n<div class="affiliate-disclosure">\n'
@@ -363,12 +387,29 @@ def get_editor_feedback() -> str:
 
 
 def load_brand_voice() -> str:
-    """Load Voice Rules section from memory/brand_voice.md for injection into prompts."""
+    """Load Voice Rules + Research Framework + Variation Rules from memory/brand_voice.md."""
     try:
         with open(BRAND_VOICE_FILE, "r") as f:
             content = f.read()
-        match = re.search(r'## 1\. Voice Rules.*?(?=\n## 2\.)', content, re.DOTALL)
-        rules = match.group(0).strip() if match else content.strip()
+        # Load section 1 (Voice Rules) + sections 2b-2d (Research, Variation, Maturity)
+        parts = []
+        # Section 1: Voice Rules
+        match1 = re.search(r'## 1\. Voice Rules.*?(?=\n## 2\. Product Facts)', content, re.DOTALL)
+        if match1:
+            parts.append(match1.group(0).strip())
+        # Section 2b: Research-Based Review Framework
+        match2b = re.search(r'## 2b\. Research-Based Review Framework.*?(?=\n## 2c\.)', content, re.DOTALL)
+        if match2b:
+            parts.append(match2b.group(0).strip())
+        # Section 2c: Article Variation Rules
+        match2c = re.search(r'## 2c\. Article Variation Rules.*?(?=\n## 2d\.)', content, re.DOTALL)
+        if match2c:
+            parts.append(match2c.group(0).strip())
+        # Section 2d: Tool Maturity
+        match2d = re.search(r'## 2d\. Tool Maturity.*?(?=\n## 2e\.)', content, re.DOTALL)
+        if match2d:
+            parts.append(match2d.group(0).strip())
+        rules = "\n\n".join(parts) if parts else content.strip()
         return (
             "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "BRAND VOICE — how Alex Builds sounds. Follow every rule.\n"
@@ -380,17 +421,26 @@ def load_brand_voice() -> str:
 
 
 def load_anti_ai_filter() -> str:
-    """Extract Banned Words + Banned Phrases sections from memory/anti_ai_filter.md."""
+    """Load Banned Words, Banned Phrases, Keyword Rules, and Fabrication Rules from anti_ai_filter.md."""
     try:
         with open(ANTI_AI_FILTER_FILE, "r") as f:
             content = f.read()
+        # Load everything from Banned Words through Fabricated Testing Rules
         match = re.search(r'## Banned Words.*?(?=\n## Warning Phrases)', content, re.DOTALL)
-        banned = match.group(0).strip() if match else content.strip()
+        banned = match.group(0).strip() if match else ""
+        # Also load Keyword Insertion Rules
+        kw_match = re.search(r'## Keyword Insertion Rules.*?(?=\n## Fabricated Testing)', content, re.DOTALL)
+        keyword_rules = kw_match.group(0).strip() if kw_match else ""
+        # Also load Fabricated Testing Rules
+        fab_match = re.search(r'## Fabricated Testing Rules.*?(?=\n## Warning Phrases)', content, re.DOTALL)
+        fab_rules = fab_match.group(0).strip() if fab_match else ""
+        parts = [p for p in [banned, keyword_rules, fab_rules] if p]
+        combined = "\n\n".join(parts) if parts else content.strip()
         return (
             "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            "ANTI-AI WRITING FILTER — never use any of these words or phrases\n"
+            "ANTI-AI WRITING FILTER — never use any of these words, phrases, or patterns\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            + banned + "\n"
+            + combined + "\n"
         )
     except Exception:
         return ""
@@ -912,28 +962,34 @@ def get_eeat_aeo_block() -> str:
     return """━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 E-E-A-T SIGNALS — required in every article
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EXPERIENCE (most critical for affiliate sites):
-→ Use first-person testing language: "In our testing," "We found," "When we evaluated"
-→ Name specific moments: "The export took 4 minutes — faster than we expected"
-→ Acknowledge what you couldn't access: "We couldn't test enterprise pricing — verify at [URL]"
-→ Mention what surprised you (good or bad) — only real testers get surprised
-→ One credibility signal in the opening: who evaluated this and by what standard
+EXPERIENCE — honest research, not fabricated testing:
+→ We are a RESEARCH SYNTHESIS site. Our value is saving readers hours of research.
+→ Be honest about what we did: "We evaluated based on pricing, features, and user reviews on G2 and Reddit"
+→ NEVER write "In our testing" followed by invented metrics — this is fabrication
+→ NEVER invent timelines: "after 90 days of testing" or "jumped to position 8 within 19 days"
+→ NEVER invent processing times, view counts, or percentage improvements
+→ Attribute performance claims to their source: "According to [Tool]'s case studies..." or "Users on G2 report..."
+→ Acknowledge what we couldn't verify: "We couldn't access enterprise pricing — verify directly with [Tool]"
+→ When free tier was explored, say so: "Based on our exploration of the free tier..."
+→ When relying on documentation: "According to [Tool]'s documentation..."
+→ Include real community feedback: "Common praise on G2 includes... Common complaints include..."
 
 EXPERTISE:
-→ Frame comparisons with criteria: "We evaluated on ease of use, output quality, and pricing"
-→ Name the specific feature or plan you tested when relevant
+→ Frame comparisons with criteria: "We evaluated on pricing, feature depth, and what creators report after using them"
+→ Reference the specific plan or tier being discussed
 → Use category context: "Compared to other tools in this space..."
 
 AUTHORITATIVENESS:
 → Comparison tables must declare a winner per row — never leave the winner column blank
 → "Who this is NOT for" section is mandatory in reviews — it signals honest evaluation
-→ Roundups: "How We Chose These Tools" section (already in structure — make it substantive)
+→ Roundups: "How We Chose These Tools" section must honestly describe evaluation methodology
 
 TRUSTWORTHINESS:
 → Affiliate disclosure always present and prominent (except authority_article)
 → 3+ specific, non-generic cons — "Limited export formats on the free plan" not "learning curve"
 → Always include exact pricing or flag: "verify current pricing at [URL]"
 → No CTAs with fake urgency. No "limited time offer," "act now," "don't miss out."
+→ Every factual claim must be attributable: tool's website, user reviews, or documentation
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 AEO FORMATTING — structured for AI assistants + featured snippets
@@ -950,9 +1006,9 @@ FEATURED SNIPPET TARGETS:
 → Decision tree in roundups: "If you need X → choose Tool A" (entity-extraction ready)
 
 STATISTICS:
-→ Use specific numbers with attribution: "according to [source]" or "based on our testing"
+→ Only use numbers with clear attribution: "according to [Tool]'s website" or "based on G2 reviews"
 → Never invent a statistic. No data = "we couldn't find published data on this"
-→ Exact numbers beat round estimates: "3.4 seconds" over "about 3 seconds"
+→ Tool's own claims should be flagged as such: "[Tool] claims X% improvement"
 
 QUESTION-PATTERN H2s (use where natural — matches People Also Ask and AI queries):
 → "Is [Tool] worth it for [audience]?"
